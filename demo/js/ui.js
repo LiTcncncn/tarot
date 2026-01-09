@@ -64,9 +64,11 @@ function initEmotionSlider() {
     function updateSlider(value) {
         const emotion = EMOTION_MAP[value];
         if (thumb) {
-            const emojiEl = thumb.querySelector('.current-emoji');
-            if (emojiEl) {
-                emojiEl.textContent = emotion.emoji;
+            const weatherIconEl = thumb.querySelector('.current-weather-icon');
+            if (weatherIconEl) {
+                // 根据value更新天气图标：0->1.png, 1->2.png, 2->3.png, 3->4.png, 4->5.png
+                const weatherFile = `${parseInt(value) + 1}.png`;
+                weatherIconEl.src = `weather/${weatherFile}`;
             }
         }
         
