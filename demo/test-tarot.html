@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塔罗抽牌测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .test-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .card-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .card-item h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        .card-info {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .intensity-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .intensity-I0 { background: #d4edda; color: #155724; }
+        .intensity-I1 { background: #d1ecf1; color: #0c5460; }
+        .intensity-I2 { background: #fff3cd; color: #856404; }
+        .intensity-I3 { background: #f8d7da; color: #721c24; }
+        
+        .reversed-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .reversed-true { background: #f8d7da; color: #721c24; }
+        .reversed-false { background: #d4edda; color: #155724; }
+        
+        .emotion-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            background: #e7f3ff;
+            color: #0066cc;
+            margin-right: 5px;
+        }
+        
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .stats h3 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .stat-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .generation-results {
+            margin-top: 20px;
+        }
+        
+        .generation-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .generation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .generation-content {
+            line-height: 1.8;
+            color: #495057;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 16px;
+        }
+        
+        .select-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .select-item {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .select-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 塔罗抽牌测试页面</h1>
+        
+        <!-- 测试功能1：抽牌几率测试 -->
+        <div class="test-section">
+            <h2>功能1：抽牌几率测试</h2>
+            <div class="button-group">
+                <button onclick="testCardDrawing()">开始测试（抽取20张牌）</button>
+                <button onclick="clearTest1()">清空结果</button>
+            </div>
+            <div id="test1-results"></div>
+        </div>
+        
+        <!-- 测试功能2：生成重复度测试 -->
+        <div class="test-section">
+            <h2>功能2：生成重复度测试</h2>
+            <div class="select-group">
+                <div class="select-item">
+                    <label>选择塔罗牌：</label>
+                    <select id="test-card-select"></select>
+                </div>
+                <div class="select-item">
+                    <label>正逆位：</label>
+                    <select id="test-reversed-select">
+                        <option value="false">正位</option>
+                        <option value="true">逆位</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="testGeneration()">一键生成5次内容</button>
+                <button onclick="clearTest2()">清空结果</button>
+            </div>
+            <div id="test2-results"></div>
+        </div>
+    </div>
+    
+    <script src="js/card-intensity.js"></script>
+    <script src="js/tarot-cards.js"></script>
+    <script src="js/moon-phase.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/test-tarot.js"></script>
+</body>
+</html>
+
