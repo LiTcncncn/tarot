@@ -103,18 +103,71 @@ function getAllTarotCards() {
     return allCards;
 }
 
-// 抽取一张塔罗牌（完全随机，包含正逆位）
-function drawTarotCard() {
+// 获取最近5天内抽取的牌ID列表
+function getRecentCardIds(days = 5) {
+    const today = new Date();
+    const recentCardIds = [];
+    const allReadings = getAllReadings();
+    
+    Object.values(allReadings).forEach(reading => {
+        if (reading.card && reading.date) {
+            const readingDate = new Date(reading.date);
+            const diffDays = Math.floor((today - readingDate) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < days && diffDays >= 0) {
+                recentCardIds.push(reading.card.id);
+            }
+        }
+    });
+    
+    return recentCardIds;
+}
+
+// 抽取一张塔罗牌（优化后的三阶段抽牌算法）
+function drawTarotCard(userEmotion = '平静') {
     const allCards = getAllTarotCards();
     
-    // 完全随机抽取一张牌
-    const random = Math.random();
-    const index = Math.floor(random * allCards.length);
-    const card = { ...allCards[index] };
+    // 第一阶段：根据用户状态确定逆位出现几率
+    const reversedProbability = getReversedProbability(userEmotion);
+    const isReversed = Math.random() < reversedProbability;
     
-    // 50% 概率抽到逆位（完全随机）
-    card.reversed = Math.random() < 0.5;
-    card.orientation = card.reversed ? '逆位' : '正位';
+    // 第二阶段：根据用户状态和强度分布筛选候选牌
+    const intensityDistribution = getIntensityDistribution(userEmotion);
+    const selectedIntensity = selectIntensityByDistribution(intensityDistribution);
+    
+    // 第三阶段：排除5日内已抽取的牌
+    const recentCardIds = getRecentCardIds(5);
+    
+    // 筛选候选牌：符合强度等级且不在5日内已抽取的牌
+    let candidateCards = allCards.filter(card => {
+        const cardIntensity = getCardIntensity(card.name);
+        return cardIntensity === selectedIntensity && !recentCardIds.includes(card.id);
+    });
+    
+    // 如果候选牌池为空（理论上不会发生，除非5日内已抽取所有该强度的牌）
+    // 则放宽限制，只排除5日内已抽取的牌
+    if (candidateCards.length === 0) {
+        candidateCards = allCards.filter(card => !recentCardIds.includes(card.id));
+    }
+    
+    // 如果还是为空（理论上不会发生，除非5日内已抽取所有78张牌）
+    // 则从所有牌中选择
+    if (candidateCards.length === 0) {
+        candidateCards = allCards;
+    }
+    
+    // 从候选牌中随机抽取
+    const random = Math.random();
+    const index = Math.floor(random * candidateCards.length);
+    const card = { ...candidateCards[index] };
+    
+    // 设置实际正逆位（用于解读生成）
+    card.actualReversed = isReversed;
+    // 显示时统一为正位（不显示逆位）
+    card.reversed = false;  // 统一显示为正位
+    card.orientation = '正位';  // 统一显示为正位
+    // 获取强度等级
+    card.intensity = getCardIntensity(card.name);
     
     return card;
 }

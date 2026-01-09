@@ -107,25 +107,16 @@ function bindEvents() {
                     // 设置图片源
                     loadingCardImg.src = `Cards-png/${window.drawnCard.file}`;
                     
-                    // 设置逆位倒置（必须在设置src后立即设置，并在图片加载完成后再次确认）
-                    const setRotation = () => {
-                        if (window.drawnCard.reversed) {
-                            loadingCardImg.style.transform = 'rotate(180deg)';
-                        } else {
-                            loadingCardImg.style.transform = 'rotate(0deg)';
-                        }
-                    };
+                    // 统一显示为正位，不旋转图片
+                    loadingCardImg.style.transform = 'rotate(0deg)';
                     
-                    // 立即设置旋转
-                    setRotation();
-                    
-                    // 图片加载完成后再次确认旋转（防止图片加载时重置样式）
+                    // 图片加载完成后再次确认不旋转（防止图片加载时重置样式）
                     loadingCardImg.onload = () => {
-                        setRotation();
+                        loadingCardImg.style.transform = 'rotate(0deg)';
                     };
                     
-                    // 设置卡片名称
-                    const orientationText = window.drawnCard.reversed ? '逆位' : '正位';
+                    // 设置卡片名称（统一显示为正位）
+                    const orientationText = '正位';  // 统一显示为正位
                     loadingCardName.textContent = `${window.drawnCard.nameCn} - ${orientationText}`;
                     
                     // 显示卡片容器
@@ -148,14 +139,16 @@ function bindEvents() {
                 moonPhase
             );
             
-            // 保存数据
+            // 保存数据（包含实际正逆位和强度等级）
             const fullData = {
                 emotion: selectedEmotion,
                 card: {
                     id: card.id,
                     name: card.name,
                     nameCn: card.nameCn,
-                    file: card.file
+                    file: card.file,
+                    actualReversed: card.actualReversed !== undefined ? card.actualReversed : false,  // 实际正逆位（用于解读）
+                    intensity: card.intensity || getCardIntensity(card.name)  // 强度等级
                 },
                 moonPhase: moonPhase,
                 reading: readingData,

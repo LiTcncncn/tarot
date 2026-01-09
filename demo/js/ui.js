@@ -227,21 +227,22 @@ function initCardDraw(onCardDrawn) {
         const currentDrawnCardImg = document.getElementById('drawn-card-img');
         const currentCardName = document.getElementById('card-name');
         
-        // 抽取塔罗牌（完全随机）
-        const card = drawTarotCard();
-        console.log('Drawn card:', card.nameCn, card.reversed ? '逆位' : '正位'); // 调试日志
+        // 获取当前选择的情绪状态
+        const emotionValue = parseInt(document.getElementById('emotion-input')?.value || 3);
+        const selectedEmotion = EMOTION_MAP[emotionValue]?.value || '平静';
+        
+        // 抽取塔罗牌（优化后的三阶段抽牌算法）
+        const card = drawTarotCard(selectedEmotion);
+        console.log('Drawn card:', card.nameCn, '实际:', card.actualReversed ? '逆位' : '正位', '显示: 正位', '强度:', card.intensity); // 调试日志
         
         // 显示抽到的牌（在牌堆位置）
+        // 统一显示为正位，不显示逆位信息
         currentDrawnCardImg.src = `Cards-png/${card.file}`;
-        const orientationText = card.reversed ? '逆位' : '正位';
+        const orientationText = '正位';  // 统一显示为正位
         currentCardName.textContent = `${card.nameCn} (${card.name}) - ${orientationText}`;
         
-        // 如果是逆位，旋转图片180度
-        if (card.reversed) {
-            currentDrawnCardImg.style.transform = 'rotate(180deg)';
-        } else {
-            currentDrawnCardImg.style.transform = 'rotate(0deg)';
-        }
+        // 统一显示为正位，不旋转图片
+        currentDrawnCardImg.style.transform = 'rotate(0deg)';
         
         // 隐藏牌堆提示，在牌堆位置显示抽到的牌
         const drawHint = currentCardPile?.querySelector('.draw-hint');
@@ -355,16 +356,13 @@ function renderMainPage(readingData, card, moonPhase) {
     const todayCardName = document.getElementById('today-card-name');
     
     todayCardImg.src = `Cards-png/${card.file}`;
-    const orientationText = card.reversed ? '逆位' : '正位';
+    // 统一显示为正位，不显示逆位信息
+    const orientationText = '正位';
     todayCardName.textContent = `${card.nameCn} - ${orientationText}`;
     todayCardContainer.style.display = 'block';
     
-    // 如果是逆位，旋转图片
-    if (card.reversed) {
-        todayCardImg.style.transform = 'rotate(180deg)';
-    } else {
-        todayCardImg.style.transform = 'rotate(0deg)';
-    }
+    // 统一显示为正位，不旋转图片
+    todayCardImg.style.transform = 'rotate(0deg)';
     
     // 综合指引
     document.getElementById('guidance-one-line').textContent = readingData.guidance_one_line;
@@ -798,7 +796,7 @@ function showDateDetailModal(dateKey) {
             ${reading.card ? `
             <div class="detail-section">
                 <div class="detail-label">塔罗牌</div>
-                <div class="detail-value">${reading.card.nameCn} ${reading.card.reversed ? '(逆位)' : '(正位)'}</div>
+                <div class="detail-value">${reading.card.nameCn} (正位)</div>
             </div>
             ` : ''}
             ${reading.reading.guidance_one_line ? `

@@ -36,6 +36,15 @@ function saveTodayReading(readingData) {
         timestamp: new Date().toISOString()
     };
     
+    // 确保保存实际正逆位和强度等级（如果存在）
+    if (readingData.card) {
+        readings[todayKey].card = {
+            ...readingData.card,
+            actualReversed: readingData.card.actualReversed !== undefined ? readingData.card.actualReversed : false,
+            intensity: readingData.card.intensity || getCardIntensity(readingData.card.name)
+        };
+    }
+    
     localStorage.setItem(STORAGE_KEYS.DAILY_READINGS, JSON.stringify(readings));
 }
 

@@ -38,6 +38,18 @@ const EMOTION_DESCRIPTIONS = {
 function buildPrompt(userEmotion, tarotCard, moonPhase) {
     const emotionDescription = EMOTION_DESCRIPTIONS[userEmotion] || userEmotion;
     
+    // 获取实际正逆位和强度等级
+    const actualReversed = tarotCard.actualReversed !== undefined ? tarotCard.actualReversed : false;
+    const intensity = tarotCard.intensity || getCardIntensity(tarotCard.name);
+    
+    // 强度等级描述
+    const intensityDescriptions = {
+        'I0': '安抚/稳定/修复 - 温和、治愈、稳定能量',
+        'I1': '中性推进/资源可用 - 中性、推进、资源导向',
+        'I2': '轻挑战/提醒/需要调整 - 提醒、需要调整、轻微挑战',
+        'I3': '强转折/冲击 - 强烈变化、冲击、转折'
+    };
+    
     return `Please provide a comprehensive daily tarot reading based on the following information:
 
 【User's Emotional State】
@@ -45,8 +57,9 @@ ${userEmotion}
 
 【Today's Tarot Card】
 Card Name: ${tarotCard.name} (${tarotCard.nameCn})
-Orientation: ${tarotCard.orientation || '正位'}
-Card Meaning: ${tarotCard.nameCn} ${tarotCard.reversed ? '逆位' : '正位'} represents ${tarotCard.name}${tarotCard.reversed ? ' in reversed position' : ''}
+Actual Orientation: ${actualReversed ? '逆位' : '正位'} (用于解读参考，用户界面统一显示为正位)
+Card Intensity: ${intensity} - ${intensityDescriptions[intensity] || '中性推进/资源可用'}
+Card Meaning: ${tarotCard.nameCn} ${actualReversed ? '逆位' : '正位'} represents ${tarotCard.name}${actualReversed ? ' in reversed position' : ''}
 
 【Today's Moon Phase】
 Moon Phase: ${moonPhase.nameCn} (${moonPhase.name})
@@ -120,11 +133,24 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
    - Provide comfort and reassurance that addresses their emotional needs
    - Offer gentle suggestions to help them navigate their current state
    - Make them feel understood and supported
+   - **特别关照**：
+     * **疲惫状态**：要更加温柔、保护性强，强调休息、恢复、自我关怀
+     * **焦虑状态**：要特别安抚，降低刺激，强调稳定、安全、支持
+     * **迷茫状态**：提供清晰的指引，但避免恐吓，以"提示"和"方向"为主
+     * **愉悦/平静状态**：保持愉悦，不打断，但别过甜，提供中肯的洞察
 
-2. **Content Tone**:
+2. **Card Intensity Adjustment** (强度等级调整):
+   - **I0 (安抚/稳定/修复)**：强调稳定、治愈、修复的能量，提供安抚性的指引
+   - **I1 (中性推进/资源可用)**：中性、推进性的解读，强调资源可用和行动方向
+   - **I2 (轻挑战/提醒/需要调整)**：以"提醒"和"成长机会"的角度，温和地指出需要调整的地方
+   - **I3 (强转折/冲击)**：以"转变"和"新开始"的角度，强调这是成长和转变的契机
+   - **逆位牌处理**：即使抽到逆位牌，也要以正面的角度进行解读，强调疗愈和修复的能量，提供温柔的指引和建议，避免恐吓或负面暗示
+
+3. **Content Tone**:
    - Be warm, gentle, and encouraging
    - Validate their emotions while offering hope
    - Use language that feels like a caring friend, not a distant oracle
+   - **用户状态不佳时（疲惫/焦虑），要更加温柔以待，指引更具有疗愈性**
 
 3. **Combination Logic**:
    - Naturally weave together tarot meaning + moon phase energy + emotional state
