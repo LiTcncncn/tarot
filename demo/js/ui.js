@@ -238,10 +238,9 @@ function initCardDraw(onCardDrawn) {
         console.log('Drawn card:', card.nameCn, '实际:', card.actualReversed ? '逆位' : '正位', '显示: 正位', '强度:', card.intensity); // 调试日志
         
         // 显示抽到的牌（在牌堆位置）
-        // 统一显示为正位，不显示逆位信息
+        // 统一显示为正位，不显示逆位信息，也不显示"正位"文字
         currentDrawnCardImg.src = `Cards-png/${card.file}`;
-        const orientationText = '正位';  // 统一显示为正位
-        currentCardName.textContent = `${card.nameCn} (${card.name}) - ${orientationText}`;
+        currentCardName.textContent = `${card.nameCn} (${card.name})`;
         
         // 统一显示为正位，不旋转图片
         currentDrawnCardImg.style.transform = 'rotate(0deg)';
@@ -358,9 +357,8 @@ function renderMainPage(readingData, card, moonPhase) {
     const todayCardName = document.getElementById('today-card-name');
     
     todayCardImg.src = `Cards-png/${card.file}`;
-    // 统一显示为正位，不显示逆位信息
-    const orientationText = '正位';
-    todayCardName.textContent = `${card.nameCn} - ${orientationText}`;
+    // 统一显示为正位，不显示逆位信息，也不显示"正位"文字
+    todayCardName.textContent = `${card.nameCn}`;
     todayCardContainer.style.display = 'block';
     
     // 统一显示为正位，不旋转图片
@@ -798,7 +796,7 @@ function showDateDetailModal(dateKey) {
             ${reading.card ? `
             <div class="detail-section">
                 <div class="detail-label">塔罗牌</div>
-                <div class="detail-value">${reading.card.nameCn} (正位)</div>
+                <div class="detail-value">${reading.card.nameCn}</div>
             </div>
             ` : ''}
             ${reading.reading.guidance_one_line ? `

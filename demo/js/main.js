@@ -115,9 +115,8 @@ function bindEvents() {
                         loadingCardImg.style.transform = 'rotate(0deg)';
                     };
                     
-                    // 设置卡片名称（统一显示为正位）
-                    const orientationText = '正位';  // 统一显示为正位
-                    loadingCardName.textContent = `${window.drawnCard.nameCn} - ${orientationText}`;
+                    // 设置卡片名称（不显示"正位"文字）
+                    loadingCardName.textContent = `${window.drawnCard.nameCn}`;
                     
                     // 显示卡片容器
                     const loadingCardContainer = document.getElementById('loading-card-container');
