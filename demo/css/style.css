@@ -1,0 +1,1645 @@
+/* 基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* 基色：#6D5C5C (109, 92, 92) */
+    --base-color: #6D5C5C;
+    --base-light: #B5A8A8;
+    --base-lighter: #E5E0E0;
+    --base-lightest: #F5F3F3;
+    --base-dark: #4D4040;
+    --base-darker: #2D2525;
+    --base-darkest: #1A1515;
+    
+    /* 主色调基于基色 */
+    --primary-color: #6D5C5C;
+    --primary-light: #B5A8A8;
+    --primary-dark: #4D4040;
+    --bg-color: #F5F3F3;
+    --card-bg: #F5F3F3;
+    --text-primary: #2D2525;
+    --text-secondary: #6D5C5C;
+    --border-color: #E5E0E0;
+    --shadow: 0 4px 12px rgba(109, 92, 92, 0.15);
+    --shadow-hover: 0 8px 20px rgba(109, 92, 92, 0.25);
+}
+
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #F5F3F3; /* 最底层背景使用基色系的浅色 */
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    min-height: 100vh;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    background-attachment: fixed;
+    background-color: #F5F3F3; /* 确保有纯色背景作为fallback */
+    color: var(--text-primary);
+    line-height: 1.6;
+    position: relative;
+    transition: background 10s ease-in-out !important;
+    -webkit-transition: background 10s ease-in-out !important;
+    -moz-transition: background 10s ease-in-out !important;
+    -o-transition: background 10s ease-in-out !important;
+}
+
+/* 页面容器 - 强制分离 */
+.page {
+    display: none !important;
+    min-height: 100vh;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 主界面/日历界面为导航栏预留空间（占卜页、loading页不需要） */
+#main-page,
+#calendar-page {
+    padding-bottom: 90px !important;
+}
+
+.page.active {
+    display: block !important;
+}
+
+
+/* 重置按钮 */
+.reset-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--base-dark);
+    color: var(--base-dark);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1000;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(109, 92, 92, 0.2);
+}
+
+.reset-btn:hover {
+    background: var(--base-dark);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    transform: translateY(-2px);
+}
+
+.reset-btn .btn-icon {
+    font-size: 16px;
+}
+
+/* 页面1: 每日占卜页面 */
+#daily-reading-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.daily-reading-content {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* 情绪滑动条 */
+.emotion-slider-container {
+    margin: 20px 0;
+}
+
+.emotion-track {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    margin-bottom: 20px;
+}
+
+.emotion-markers {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.emotion-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+    padding: 16px 12px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    min-height: 60px;
+}
+
+.emotion-marker:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(155, 126, 216, 0.2);
+}
+
+.emotion-marker.active {
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-color: var(--primary-color);
+    border-width: 3px;
+    box-shadow: 0 4px 16px rgba(155, 126, 216, 0.4);
+    transform: translateY(-2px);
+}
+
+.emotion-marker.active .emoji {
+    transform: scale(1.3);
+    filter: drop-shadow(0 4px 8px rgba(155, 126, 216, 0.4));
+}
+
+.emotion-marker .emoji {
+    display: none; /* 去掉emoji */
+}
+
+.emotion-marker .label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.3s;
+}
+
+.emotion-marker.active .label {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.slider-input {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    position: relative;
+    z-index: 2;
+    display: none; /* 隐藏滑动条，使用按钮选择 */
+}
+
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.slider-input::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: var(--shadow);
+}
+
+.slider-thumb {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 44px;
+    height: 44px;
+    background: white;
+    border-radius: 50%;
+    display: none; /* 隐藏紫色白圈的圆 */
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transform: translateX(-50%);
+    transition: left 0.3s ease;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.slider-thumb .current-emoji {
+    display: none; /* 去掉emoji */
+}
+
+.slider-thumb::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 24px;
+    background: var(--primary-color);
+    border-radius: 50%;
+}
+
+/* 按钮 */
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+/* 抽牌区域 */
+.card-draw-container {
+    margin: 20px 0;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.card-pile {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card-pile:hover {
+    transform: scale(1.05);
+}
+
+.card-pile .card-back {
+    width: 160px;
+    height: auto;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+}
+
+.draw-hint {
+    margin-top: 12px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.drawn-card-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.card-flip {
+    perspective: 1000px;
+}
+
+.drawn-card {
+    width: 160px;
+    height: auto;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.3));
+    animation: cardFlip 0.8s ease;
+    transition: transform 0.3s;
+}
+
+@keyframes cardFlip {
+    0% {
+        transform: rotateY(180deg);
+        opacity: 0;
+    }
+    100% {
+        transform: rotateY(0deg);
+        opacity: 1;
+    }
+}
+
+.card-name {
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 加载指示器 */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+}
+
+/* 页面2: Loading 界面 */
+#loading-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    overflow: hidden;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    max-height: 100vh;
+    width: 100%;
+}
+
+/* Loading界面的卡片 */
+.loading-card-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.loading-card-flip {
+    perspective: 1000px;
+}
+
+.loading-card {
+    width: 160px;
+    height: auto;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.3));
+    animation: cardPulse 2s ease-in-out infinite;
+    transition: transform 0.3s;
+}
+
+@keyframes cardPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.loading-card-name {
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+/* 生成中状态区域 */
+.loading-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+/* 加载动画 - 三个点 */
+.loading-animation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.loading-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    animation: loadingDot 1.4s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.loading-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes loadingDot {
+    0%, 60%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    30% {
+        transform: scale(1.3);
+        opacity: 1;
+    }
+}
+
+
+.loading-text {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: center;
+}
+
+.loading-subtext {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* 每日占卜步骤样式 */
+.section-subtitle {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.emotion-section {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.card-section {
+    width: 100%;
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-indicator p {
+    margin-top: 16px;
+    color: var(--text-secondary);
+}
+
+/* 主界面 */
+#main-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.start-daily-btn {
+    display: none;
+    width: 100%;
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 16px 32px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+}
+
+.start-daily-btn:hover {
+    background: var(--primary-dark);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.start-daily-btn .btn-icon {
+    margin-right: 8px;
+    font-size: 24px;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+/* 卡片样式 */
+section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+/* 月相和塔罗牌区域（居中并排显示） */
+.moon-phase-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.moon-emoji {
+    font-size: 48px;
+}
+
+.moon-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.today-date-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    margin-bottom: 8px;
+}
+
+.today-date {
+    font-size: 28px;
+    font-weight: 900;
+    color: #000;
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+.today-year {
+    font-size: 28px;
+    font-weight: 900;
+    color: #000;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+.moon-info h2 {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.moon-energy {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* 塔罗牌区域（合并到月相section中） */
+.today-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.today-card-img {
+    width: 120px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    transition: transform 0.3s;
+}
+
+.today-card-name {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 指引区域 */
+.guidance-one-line {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.6;
+    color: #2D2525;
+    text-align: left;
+    padding: 16px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+}
+
+/* 今日分析 */
+.today-analysis-section {
+    margin-bottom: 24px;
+}
+
+.today-analysis-content {
+    padding: 20px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(109, 92, 92, 0.3);
+}
+
+.analysis-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    text-align: left;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* 疗愈任务 */
+.healing-task-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+}
+
+.task-text {
+    font-size: 18px;
+    color: var(--text-primary);
+    flex: 1;
+    margin: 0;
+}
+
+.btn-complete {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-complete:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.task-completed {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--base-dark);
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.task-completed .checkmark {
+    font-size: 20px;
+}
+
+/* 情绪记录模块 */
+.emotion-record-section {
+    grid-column: 1 / -1;
+}
+
+.emotion-record-card {
+    padding: 20px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.emotion-record-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 16px;
+    border: 1px solid rgba(109, 92, 92, 0.3);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+.emotion-record-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.emotion-record-textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.btn-save-record {
+    align-self: flex-end;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.btn-save-record:hover {
+    background: var(--base-dark);
+    transform: translateY(-1px);
+}
+
+.record-saved {
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--base-dark);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.record-saved .checkmark {
+    font-size: 16px;
+}
+
+/* 具体占卜结果（综述） */
+
+/* 分类按钮 */
+.category-buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    width: 100%;
+    min-width: 0; /* 防止溢出 */
+}
+
+.category-btn {
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap; /* 防止文字换行 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0; /* 允许缩小 */
+}
+
+.category-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.category-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.category-content {
+    min-height: 100px;
+}
+
+.category-detail {
+    padding: 20px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-detail-content h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+}
+
+.category-detail-content p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+}
+
+/* 幸运元素 */
+.lucky-elements-section {
+    grid-column: 1 / -1; /* 确保占整行 */
+    width: 100%;
+}
+
+.lucky-elements {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+.lucky-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+}
+
+.lucky-icon {
+    font-size: 32px;
+}
+
+.lucky-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.lucky-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 响应式设计 - 大屏版（宽度 >= 1330px）*/
+@media (min-width: 1330px) {
+    /* 确保重置按钮在大屏版显示 */
+    .reset-btn {
+        display: flex !important;
+        visibility: visible !important;
+    }
+    
+    .main-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* 月相和塔罗牌合并显示在一行 */
+    .moon-phase-section {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    
+    /* 合并月相和塔罗牌为一个section */
+    .moon-tarot-combined {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .guidance-section,
+    .today-analysis-section,
+    .emotion-record-section,
+    .healing-task-section,
+    .category-section,
+    .lucky-elements-section {
+        grid-column: 1 / -1;
+    }
+    
+    .category-buttons {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    
+    .lucky-elements {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* 移动端适配（宽度 < 1330px）*/
+@media (max-width: 1329px) {
+    /* 确保重置按钮在移动端显示 */
+    .reset-btn {
+        display: flex !important;
+        visibility: visible !important;
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .guidance-section,
+    .today-analysis-section,
+    .emotion-record-section,
+    .healing-task-section,
+    .category-section,
+    .lucky-elements-section {
+        grid-column: 1 / -1;
+    }
+    
+    .lucky-elements {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .category-buttons {
+        grid-template-columns: repeat(5, 1fr); /* 确保5个按钮在一行 */
+        gap: 6px; /* 减小间距 */
+        width: 100%;
+    }
+    
+    .category-btn {
+        padding: 8px 6px; /* 减小内边距 */
+        font-size: 12px; /* 减小字体 */
+        min-width: 0; /* 允许按钮缩小 */
+        flex-shrink: 1; /* 允许收缩 */
+    }
+    
+    /* 移动端：增大情绪记录输入框 */
+    .emotion-record-card {
+        padding: 16px;
+    }
+    
+    .emotion-record-textarea {
+        min-height: 160px;
+        padding: 18px;
+        font-size: 18px;
+        line-height: 1.7;
+    }
+    
+    .btn-save-record {
+        padding: 14px 28px;
+        font-size: 16px;
+    }
+    
+    .record-saved {
+        font-size: 15px;
+    }
+    
+    /* 移动端：增大补签界面的情绪记录输入框 */
+    .makeup-emotion-record-input {
+        min-height: 140px;
+        padding: 16px;
+        font-size: 17px;
+        line-height: 1.7;
+    }
+}
+
+/* 底部导航栏 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    display: none; /* 默认隐藏（由 body.show-nav 控制） */
+    justify-content: space-around;
+    align-items: center;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 8px 0;
+    z-index: 1000;
+    box-shadow: 0 -2px 8px rgba(109, 92, 92, 0.1);
+    /* 为移动端安全区域预留空间 */
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+/* 只在“主页面”显示导航栏（今日/日历等） */
+body.show-nav .bottom-nav {
+    display: flex;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--text-secondary);
+    min-width: 0;
+}
+
+.nav-item:hover {
+    color: var(--primary-color);
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+}
+
+.nav-icon {
+    font-size: 24px;
+    line-height: 1;
+    transition: transform 0.3s;
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.1);
+}
+
+.nav-label {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* 大屏版导航栏样式 */
+@media (min-width: 1330px) {
+    .bottom-nav {
+        max-width: 1330px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 20px 20px 0 0;
+        border-left: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+    }
+    
+    #main-page,
+    #calendar-page {
+        padding-bottom: 100px; /* 大屏版稍高一些 */
+    }
+}
+
+/* ===== 日历页面 ===== */
+.calendar-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.calendar-nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.calendar-header-center {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+}
+
+.calendar-month-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+}
+
+.calendar-streak {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.weekday {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-cell {
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    border: 1px dashed rgba(109, 92, 92, 0.3);
+    background: rgba(245, 243, 243, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+    cursor: pointer;
+    user-select: none;
+    min-width: 0;
+    transition: all 0.3s;
+}
+
+/* 未签到状态（默认）：浅底色 + 虚线边框 */
+.calendar-cell:not(.completed):not(.empty) {
+    background: rgba(245, 243, 243, 0.5);
+    border: 1px dashed rgba(109, 92, 92, 0.3);
+}
+
+/* 已签到状态：深底色 + 实线边框 */
+.calendar-cell.completed {
+    background: var(--card-bg);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(109, 92, 92, 0.15);
+}
+
+/* 空白格（非本月） */
+.calendar-cell.empty {
+    background: transparent;
+    border: 1px dashed rgba(109, 92, 92, 0.1);
+    cursor: default;
+}
+
+/* 今天高亮 */
+.calendar-cell.today {
+    border: 2px solid var(--base-dark);
+    box-shadow: 0 0 0 2px rgba(109, 92, 92, 0.2);
+}
+
+/* 今天 + 已签到 */
+.calendar-cell.today.completed {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(109, 92, 92, 0.3);
+}
+
+.calendar-day-num {
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* 未签到的日期数字颜色更浅，增强视觉差异 */
+.calendar-cell:not(.completed):not(.empty) .calendar-day-num {
+    color: rgba(109, 92, 92, 0.4) !important; /* 使用更浅的颜色，增强与已签到的视觉差异 */
+}
+
+/* 移动端：确保未签到日期数字颜色更浅 */
+@media (max-width: 1329px) {
+    .calendar-cell:not(.completed):not(.empty) .calendar-day-num {
+        color: rgba(109, 92, 92, 0.4) !important; /* 移动端也使用浅色 */
+    }
+}
+
+.calendar-moon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* ===== 日历详情弹层（底部抽屉） ===== */
+.calendar-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+}
+
+.calendar-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(45, 37, 37, 0.35);
+}
+
+.calendar-modal-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--card-bg);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 -10px 30px rgba(45, 37, 37, 0.18);
+    padding: 10px 16px 18px;
+    max-height: 78vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.calendar-modal-handle {
+    width: 48px;
+    height: 5px;
+    border-radius: 3px;
+    margin: 6px auto 10px;
+    background: rgba(109, 92, 92, 0.22);
+}
+
+.calendar-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.calendar-modal-title {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--text-primary);
+}
+
+.calendar-modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.calendar-modal-content {
+    display: grid;
+    gap: 12px;
+}
+
+.detail-section,
+.calendar-detail-card {
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 14px;
+    border: 1px solid rgba(109, 92, 92, 0.2);
+    padding: 14px;
+}
+
+.detail-label,
+.calendar-detail-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.detail-value,
+.calendar-detail-value {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    font-weight: 600;
+    white-space: pre-wrap;
+}
+
+/* 日历详情中的情绪记录显示 */
+.emotion-record-display {
+    white-space: pre-wrap;
+    line-height: 1.8;
+    padding: 12px;
+    background: rgba(245, 243, 243, 0.6);
+    border-radius: 8px;
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+/* 日历详情中的情绪记录编辑区域 */
+.emotion-record-edit-section {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.emotion-record-edit-section .detail-label {
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.detail-emotion-record-input {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.3s;
+    margin-bottom: 10px;
+}
+
+.detail-emotion-record-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.detail-emotion-record-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.btn-save-detail-record {
+    align-self: flex-end;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.btn-save-detail-record:hover {
+    background: var(--base-dark);
+    transform: translateY(-1px);
+}
+
+.detail-record-saved {
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--base-dark);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.detail-record-saved .checkmark {
+    font-size: 14px;
+}
+
+/* 补签界面的情绪记录输入框 */
+.makeup-record-section {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-top: 12px;
+}
+
+.makeup-record-section .detail-label {
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.makeup-emotion-record-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+.makeup-emotion-record-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.makeup-emotion-record-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* 补签情绪选择按钮 */
+.makeup-section {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.makeup-section .detail-label {
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.makeup-emotion-btns {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.makeup-btn {
+    padding: 12px 6px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    min-width: 0;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.makeup-btn:hover,
+.makeup-btn:active {
+    border-color: var(--primary-color);
+    background: var(--base-light);
+    color: var(--primary-color);
+}
+
+.calendar-backfill-actions {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.calendar-emotion-btn {
+    padding: 10px 6px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.calendar-emotion-btn.active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.calendar-backfill-confirm {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* ===== 今日签到完成弹板 ===== */
+.checkin-toast {
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(45, 37, 37, 0.28);
+}
+
+.checkin-toast-card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 24px 20px 20px;
+    box-shadow: 0 12px 30px rgba(45, 37, 37, 0.18);
+    text-align: center;
+}
+
+.checkin-toast-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.checkin-toast-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.checkin-toast-subtitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.checkin-toast-streak {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--primary-color);
+    padding: 10px 16px;
+    background: rgba(109, 92, 92, 0.1);
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.checkin-toast-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.checkin-toast-btn:hover {
+    background: var(--base-dark);
+    transform: translateY(-1px);
+}
+

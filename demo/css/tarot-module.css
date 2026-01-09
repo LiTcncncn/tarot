@@ -1,0 +1,775 @@
+/* 塔罗模块样式 */
+
+#tarot-page {
+    padding: 20px;
+    padding-bottom: 100px;
+    overflow-y: auto;
+}
+
+.tarot-module-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 每日限制提示 */
+.tarot-limit-notice {
+    padding: 16px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    text-align: center;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* 问题输入区 */
+.tarot-question-section {
+    margin-bottom: 24px;
+}
+
+.section-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.tarot-question-input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+.tarot-question-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.tarot-question-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 牌阵切换区 */
+.tarot-spread-selector {
+    margin-bottom: 24px;
+}
+
+.spread-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.spread-type-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.spread-type-btn:hover {
+    border-color: var(--primary-color);
+}
+
+.spread-type-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* 牌阵展示区 */
+.tarot-spread-container {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 20px;
+    justify-content: center;
+    width: 100%;
+}
+
+.spread-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    /* 3张牌阵：让每张牌显示完整，参考4张牌阵的牌尺寸 */
+    /* 4张牌阵每张牌宽度约为192px，3张牌阵需要更大的容器来显示完整牌面 */
+    /* 计算：如果每张牌要显示完整（和4张一样大），则容器宽度 = 192 * 3 + 24(gap) = 600px */
+    /* 但为了让3张牌更完整显示，增加容器宽度到800px */
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.spread-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    /* 4张牌阵：2列，保持固定牌宽 */
+    /* 每张牌宽度约192px，容器宽度 = 192 * 2 + 12 = 396px */
+    max-width: 396px;
+    margin: 0 auto;
+}
+
+.spread-grid-6 {
+    grid-template-columns: repeat(2, 1fr);
+    /* 6张牌阵也是2列，保持和3张牌阵相同的牌宽 */
+    max-width: 396px;
+    margin: 0 auto;
+}
+
+.tarot-card-slot {
+    /* 移除3:4比例限制，让高度足够以完整显示牌面 */
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 10px;
+    border: 2px dashed var(--border-color);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    /* 高度基于宽度计算，让牌面完整显示 */
+    /* 使用aspect-ratio设置更大的高度比例，约1:1.6，确保完整显示牌面 */
+    aspect-ratio: 5 / 8; /* 约1:1.6，比3:4(1:1.33)更高 */
+}
+
+.tarot-card-slot.has-card {
+    border: 2px solid var(--primary-color);
+    background: var(--card-bg);
+}
+
+.empty-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.card-image-wrapper {
+    width: 100%;
+    height: calc(100% - 28px); /* 增加一点空间给牌名区域 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 改为contain，完整显示牌面，不裁剪 */
+    border-radius: 6px;
+}
+
+.card-image.reversed {
+    transform: rotate(180deg);
+}
+
+.card-name-orientation {
+    width: 100%;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 0 4px;
+}
+
+.card-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    line-height: 1.2;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-orientation {
+    font-size: 9px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* 抽牌区 */
+.tarot-draw-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    min-height: 120px;
+}
+
+.tarot-card-pile {
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.tarot-card-pile:hover {
+    transform: scale(1.05);
+}
+
+.tarot-card-pile:active {
+    transform: scale(0.95);
+}
+
+.pile-image {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.pile-hint {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.tarot-reading-btn {
+    padding: 16px 32px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tarot-reading-btn:hover {
+    background: var(--base-dark);
+    transform: translateY(-2px);
+}
+
+/* 占卜结果 */
+.tarot-result-area {
+    margin-bottom: 24px;
+}
+
+.reading-loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading-text {
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+.reading-result {
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.result-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.result-content {
+    margin-bottom: 20px;
+}
+
+.result-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.card-readings-detail {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(109, 92, 92, 0.2);
+}
+
+.detail-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.card-reading-item {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(245, 243, 243, 0.6);
+    border-radius: 8px;
+}
+
+.card-reading-position {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+}
+
+.card-reading-card {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.card-reading-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+/* 聊天区 */
+.tarot-chat-area {
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.chat-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chat-rounds-display {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.chat-limit-notice {
+    padding: 12px;
+    background: rgba(109, 92, 92, 0.1);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.chat-messages {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--card-bg);
+    border-radius: 8px;
+}
+
+.chat-message {
+    margin-bottom: 16px;
+}
+
+.message-bubble {
+    display: flex;
+    gap: 8px;
+    max-width: 80%;
+}
+
+.message-bubble.user-bubble {
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.message-bubble.user-bubble .message-content {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 16px 16px 4px 16px;
+}
+
+.message-bubble.assistant-bubble {
+    margin-right: auto;
+}
+
+.message-bubble.assistant-bubble .message-content {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: 16px 16px 16px 4px;
+}
+
+.assistant-avatar {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.message-content {
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: 0s; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { opacity: 0.3; }
+    30% { opacity: 1; }
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.chat-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.chat-send-btn {
+    padding: 12px 24px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+    background: var(--base-dark);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 历史占卜 */
+.tarot-history-container {
+    margin-top: 40px;
+}
+
+.history-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.no-history {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.history-item {
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.15);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.history-question {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.history-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.history-spread {
+    font-size: 12px;
+    padding: 4px 8px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.history-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.history-content {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(109, 92, 92, 0.2);
+}
+
+.history-reading {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.history-chat-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: rgba(245, 243, 243, 0.6);
+    border-radius: 8px;
+}
+
+.chat-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.toggle-chat-btn {
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.history-chat {
+    padding: 12px;
+    background: rgba(245, 243, 243, 0.6);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.continue-chat-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.continue-chat-btn:hover {
+    background: var(--base-dark);
+}
+
+/* 移动端适配 */
+@media (max-width: 1329px) {
+    #tarot-page {
+        padding: 16px;
+        padding-bottom: 90px;
+    }
+    
+    .tarot-module-container {
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 90px);
+    }
+    
+    .tarot-question-section,
+    .tarot-spread-selector {
+        margin-bottom: 16px;
+    }
+    
+    .tarot-spread-container {
+        margin-bottom: 16px;
+        flex-shrink: 0;
+    }
+    
+    .tarot-draw-area {
+        margin-bottom: 16px;
+        flex-shrink: 0;
+    }
+    
+    .tarot-spread-container {
+        gap: 8px;
+        margin-bottom: 16px;
+        max-width: 100%;
+    }
+    
+    .spread-grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+    }
+    
+    .spread-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 100%;
+    }
+    
+    .spread-grid-6 {
+        /* 6张牌阵：改为两行三列布局 */
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+    }
+    
+    /* 移动端：所有牌阵使用相同的牌尺寸，让高度足够显示完整牌面 */
+    /* 4张和6张牌阵保持和3张相同的大小，不放大 */
+    
+    .spread-grid-3,
+    .spread-grid-4,
+    .spread-grid-6 {
+        justify-items: center;
+    }
+    
+    /* 所有牌阵的牌：宽度自适应，高度足够显示完整牌面 */
+    .tarot-card-slot {
+        padding: 3px;
+        width: 100%;
+        /* 使用更大的aspect-ratio确保完整显示牌面 */
+        aspect-ratio: 5 / 8; /* 约1:1.6，比3:4更高 */
+    }
+    
+    /* 3张牌阵：每张牌宽度 = (100vw - 32px - 8px*2) / 3 = (100vw - 48px) / 3 */
+    /* 4张和6张牌阵的牌保持和3张相同的大小 */
+    .spread-grid-4 .tarot-card-slot,
+    .spread-grid-6 .tarot-card-slot {
+        /* 限制最大宽度为3张牌阵时的宽度，防止放大 */
+        max-width: calc((100vw - 48px) / 3);
+    }
+    
+    .card-image-wrapper {
+        height: calc(100% - 22px);
+    }
+    
+    .card-name-orientation {
+        height: 22px;
+        margin-top: 2px;
+        gap: 4px;
+    }
+    
+    .card-name {
+        font-size: 9px;
+    }
+    
+    .card-orientation {
+        font-size: 8px;
+    }
+    
+    .placeholder-text {
+        font-size: 10px;
+    }
+    
+    .pile-image {
+        width: 100px;
+    }
+    
+    .message-bubble {
+        max-width: 85%;
+    }
+    
+    .tarot-result-area,
+    .tarot-chat-area {
+        flex: 1;
+        overflow-y: auto;
+    }
+}
+

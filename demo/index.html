@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarot Mirror - 每日塔罗</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tarot-module.css">
+</head>
+<body>
+    <!-- 页面1: 每日占卜页面（情绪选择 + 抽牌） -->
+    <div id="daily-reading-page" class="page active">
+        <div class="daily-reading-content">
+            <h1 class="page-title">开始今日占卜</h1>
+            
+            <!-- 选择情绪状态 -->
+            <div class="emotion-section">
+                <h2 class="section-subtitle">选择你今日的内在状态</h2>
+                <div class="emotion-slider-container">
+                    <div class="emotion-slider" id="emotion-slider">
+                        <div class="emotion-track">
+                            <div class="emotion-markers">
+                                <div class="emotion-marker" data-value="0">
+                                    <span class="emoji">😊</span>
+                                    <span class="label">愉悦</span>
+                                </div>
+                                <div class="emotion-marker" data-value="1">
+                                    <span class="emoji">😌</span>
+                                    <span class="label">平静</span>
+                                </div>
+                                <div class="emotion-marker" data-value="2">
+                                    <span class="emoji">😴</span>
+                                    <span class="label">疲惫</span>
+                                </div>
+                                <div class="emotion-marker" data-value="3">
+                                    <span class="emoji">🤔</span>
+                                    <span class="label">迷茫</span>
+                                </div>
+                                <div class="emotion-marker" data-value="4">
+                                    <span class="emoji">😰</span>
+                                    <span class="label">焦虑</span>
+                                </div>
+                            </div>
+                            <input type="range" id="emotion-input" min="0" max="4" value="1" step="1" class="slider-input">
+                            <div class="slider-thumb" id="slider-thumb">
+                                <span class="current-emoji">😌</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 抽牌区域 -->
+            <div class="card-section">
+                <h2 class="section-subtitle">抽取你的今日塔罗</h2>
+                <div class="card-draw-container">
+                    <div class="card-pile" id="card-pile">
+                        <img src="Cards-png/CardBacks.png" alt="塔罗牌堆" class="card-back">
+                        <div class="draw-hint">
+                            <p>长按或点击牌堆抽牌</p>
+                        </div>
+                    </div>
+                    <div class="drawn-card-container" id="drawn-card-container" style="display: none;">
+                        <div class="card-flip">
+                            <img id="drawn-card-img" src="" alt="今日塔罗" class="drawn-card">
+                        </div>
+                        <div class="card-name" id="card-name"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面2: Loading 界面 -->
+    <div id="loading-page" class="page" style="display: none;">
+        <div class="loading-container">
+            <!-- 显示抽到的塔罗牌 -->
+            <div class="loading-card-container" id="loading-card-container">
+                <div class="loading-card-flip">
+                    <img id="loading-card-img" src="" alt="今日塔罗" class="loading-card">
+                </div>
+                <div class="loading-card-name" id="loading-card-name"></div>
+            </div>
+            
+            <!-- 生成中动画和文字 -->
+            <div class="loading-status">
+                <div class="loading-animation">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+                <p class="loading-text">正在生成你的今日指引...</p>
+                <p class="loading-subtext">结合塔罗与月相，为你定制专属指引</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面3: 日历界面（回顾/签到） -->
+    <div id="calendar-page" class="page" style="display: none;">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" id="cal-prev-btn" aria-label="Previous month">‹</button>
+                <div class="calendar-header-center">
+                    <div class="calendar-month-title" id="cal-month-title">January 2026</div>
+                    <div class="calendar-streak" id="cal-streak">Streak: 0</div>
+                </div>
+                <button class="calendar-nav-btn" id="cal-next-btn" aria-label="Next month">›</button>
+            </div>
+
+            <div class="calendar-weekdays">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+    </div>
+
+    <!-- 页面3: 塔罗专项占卜 -->
+    <div id="tarot-page" class="page" style="display: none;">
+        <div class="tarot-module-container">
+            <!-- 每日限制提示 -->
+            <div id="tarot-daily-limit-notice" class="tarot-limit-notice" style="display: none;"></div>
+            
+            <!-- 问题输入区 -->
+            <div class="tarot-question-section">
+                <label class="section-label">你的问题</label>
+                <textarea 
+                    id="tarot-question-input" 
+                    class="tarot-question-input" 
+                    placeholder="请输入你想要占卜的问题...（例如：我该不该换工作？我们的关系会如何发展？）"
+                    rows="3"
+                    maxlength="200"
+                ></textarea>
+            </div>
+            
+            <!-- 牌阵切换区 -->
+            <div class="tarot-spread-selector">
+                <label class="section-label">选择牌阵</label>
+                <div class="spread-buttons">
+                    <button class="spread-type-btn active" data-spread="3张">3张</button>
+                    <button class="spread-type-btn" data-spread="4张">4张</button>
+                    <button class="spread-type-btn" data-spread="6张">6张</button>
+                </div>
+            </div>
+            
+            <!-- 牌阵展示区 -->
+            <div id="tarot-spread-container" class="tarot-spread-container spread-grid-3"></div>
+            
+            <!-- 抽牌区 -->
+            <div class="tarot-draw-area">
+                <div id="tarot-card-pile" class="tarot-card-pile" style="display: block;">
+                    <img src="Cards-png/CardBacks.png" alt="牌堆" class="pile-image">
+                    <div class="pile-hint">点击抽牌</div>
+                </div>
+                <button id="tarot-reading-btn" class="tarot-reading-btn" style="display: none;">
+                    🔮 开始占卜
+                </button>
+            </div>
+            
+            <!-- 占卜结果显示区 -->
+            <div id="tarot-result-area" class="tarot-result-area" style="display: none;"></div>
+            
+            <!-- 补充聊天区 -->
+            <div id="tarot-chat-area" class="tarot-chat-area" style="display: none;">
+                <div class="chat-header">
+                    <div class="chat-title">与 Luna 对话</div>
+                    <div id="tarot-chat-rounds-display" class="chat-rounds-display"></div>
+                </div>
+                <div id="tarot-chat-limit-notice" class="chat-limit-notice" style="display: none;"></div>
+                <div id="tarot-chat-messages" class="chat-messages"></div>
+                <div class="chat-input-area">
+                    <textarea 
+                        id="tarot-chat-input" 
+                        class="chat-input" 
+                        placeholder="想深入了解哪个方面？或有其他疑问？"
+                        rows="2"
+                    ></textarea>
+                    <button id="tarot-chat-send" class="chat-send-btn">发送</button>
+                </div>
+            </div>
+            
+            <!-- 历史占卜结果 -->
+            <div id="tarot-history-container" class="tarot-history-container"></div>
+        </div>
+    </div>
+
+    <!-- 页面4: 主界面（结果展示） -->
+    <div id="main-page" class="page" style="display: none;">
+        <!-- 重置按钮（用于测试） -->
+        <button id="reset-btn" class="reset-btn">
+            <span class="btn-icon">🔄</span>
+            <span>重新占卜</span>
+        </button>
+        
+        <!-- 今日占卜按钮（如果未完成） -->
+        <button id="start-daily-btn" class="start-daily-btn" style="display: none;">
+            <span class="btn-icon">🔮</span>
+            <span>开始今日占卜</span>
+        </button>
+
+        <div class="main-content">
+            <!-- 1. 今日月相和塔罗牌（一行显示） -->
+            <section class="moon-phase-section">
+                <div class="moon-emoji" id="moon-emoji">🌕</div>
+                <div class="moon-info">
+                    <div class="today-date-wrapper">
+                        <div class="today-date" id="today-date"></div>
+                        <div class="today-year" id="today-year"></div>
+                    </div>
+                    <h2 id="moon-phase-name">满月</h2>
+                    <p id="moon-phase-energy" class="moon-energy">能量充沛</p>
+                </div>
+                <div class="today-card" id="today-card-container" style="display: none;">
+                    <img id="today-card-img" src="" alt="今日塔罗" class="today-card-img">
+                    <div class="today-card-name" id="today-card-name"></div>
+                </div>
+            </section>
+
+            <!-- 3. 今日综合指引 -->
+            <section class="guidance-section">
+                <h3 class="section-title">今日指引</h3>
+                <p class="guidance-one-line" id="guidance-one-line"></p>
+            </section>
+
+            <!-- 3.5. 今日分析 -->
+            <section class="today-analysis-section">
+                <h3 class="section-title">今日分析</h3>
+                <div class="today-analysis-content" id="today-analysis-content"></div>
+            </section>
+
+            <!-- 3.6. 情绪记录 -->
+            <section class="emotion-record-section">
+                <h3 class="section-title">情绪记录</h3>
+                <div class="emotion-record-card">
+                    <textarea 
+                        id="emotion-record-input" 
+                        class="emotion-record-textarea" 
+                        placeholder="记录今日的心境、事件或想法...（选填）"
+                        rows="4"
+                    ></textarea>
+                    <button id="save-emotion-record-btn" class="btn-save-record" style="display: none;">
+                        <span>💾 保存</span>
+                    </button>
+                    <div class="record-saved" id="record-saved" style="display: none;">
+                        <span class="checkmark">✓</span>
+                        <span>已保存</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. 疗愈任务 -->
+            <section class="healing-task-section">
+                <h3 class="section-title">今日疗愈任务</h3>
+                <div class="healing-task-card" id="healing-task-card">
+                    <p class="task-text" id="healing-task-text"></p>
+                    <button id="complete-task-btn" class="btn-complete" style="display: none;">
+                        <span>✓ 完成</span>
+                    </button>
+                    <div class="task-completed" id="task-completed" style="display: none;">
+                        <span class="checkmark">✓</span>
+                        <span>已完成</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. 查看各领域指引 -->
+            <section class="category-section">
+                <h3 class="section-title">查看各领域指引</h3>
+                <div class="category-buttons">
+                    <button class="category-btn" data-category="情感">情感</button>
+                    <button class="category-btn" data-category="工作">工作</button>
+                    <button class="category-btn" data-category="学习">学习</button>
+                    <button class="category-btn" data-category="生活">生活</button>
+                    <button class="category-btn" data-category="家庭">家庭</button>
+                </div>
+                <div class="category-content" id="category-content"></div>
+            </section>
+
+            <!-- 7. 今日幸运元素 -->
+            <section class="lucky-elements-section">
+                <h3 class="section-title">今日幸运元素</h3>
+                <div class="lucky-elements">
+                    <div class="lucky-item">
+                        <span class="lucky-icon">🎨</span>
+                        <div>
+                            <div class="lucky-label">幸运色</div>
+                            <div class="lucky-value" id="lucky-color"></div>
+                        </div>
+                    </div>
+                    <div class="lucky-item">
+                        <span class="lucky-icon">💎</span>
+                        <div>
+                            <div class="lucky-label">今日饰品</div>
+                            <div class="lucky-value" id="lucky-accessory"></div>
+                        </div>
+                    </div>
+                    <div class="lucky-item">
+                        <span class="lucky-icon">🔢</span>
+                        <div>
+                            <div class="lucky-label">幸运数字</div>
+                            <div class="lucky-value" id="lucky-number"></div>
+                        </div>
+                    </div>
+                    <div class="lucky-item">
+                        <span class="lucky-icon">🏺</span>
+                        <div>
+                            <div class="lucky-label">今日摆件</div>
+                            <div class="lucky-value" id="lucky-decoration"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 日历日期详情弹层 -->
+    <div class="calendar-modal" id="calendar-day-modal" style="display: none;">
+        <div class="calendar-modal-backdrop" id="calendar-modal-backdrop"></div>
+        <div class="calendar-modal-sheet" role="dialog" aria-modal="true">
+            <div class="calendar-modal-handle"></div>
+            <div class="calendar-modal-header">
+                <div class="calendar-modal-title" id="calendar-modal-title">January 7, 2026</div>
+                <button class="calendar-modal-close" id="calendar-modal-close" aria-label="Close">✕</button>
+            </div>
+            <div class="calendar-modal-content" id="calendar-modal-content"></div>
+        </div>
+    </div>
+
+    <!-- 今日签到完成弹板 -->
+    <div class="checkin-toast" id="checkin-toast" style="display: none;">
+        <div class="checkin-toast-card">
+            <div class="checkin-toast-icon">🎉</div>
+            <div class="checkin-toast-title">今日签到完成</div>
+            <div class="checkin-toast-subtitle">你完成了今日占卜与疗愈任务</div>
+            <div class="checkin-toast-streak" id="checkin-toast-streak"></div>
+            <button class="checkin-toast-btn" id="checkin-toast-btn">太棒了！</button>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <nav class="bottom-nav">
+        <div class="nav-item" data-nav="calendar">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">日历</span>
+        </div>
+        <div class="nav-item" data-nav="tarot">
+            <span class="nav-icon">🔮</span>
+            <span class="nav-label">塔罗</span>
+        </div>
+        <div class="nav-item active" data-nav="today">
+            <span class="nav-icon">✨</span>
+            <span class="nav-label">今日</span>
+        </div>
+        <div class="nav-item" data-nav="healing">
+            <span class="nav-icon">💚</span>
+            <span class="nav-label">疗愈</span>
+        </div>
+        <div class="nav-item" data-nav="profile">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">个人</span>
+        </div>
+    </nav>
+
+    <script src="js/tarot-cards.js"></script>
+    <script src="js/moon-phase.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/tarot-storage.js"></script>
+    <script src="js/tarot-spread.js"></script>
+    <script src="js/tarot-chat.js"></script>
+    <script src="js/tarot-module.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
