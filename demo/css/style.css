@@ -1248,6 +1248,55 @@ body.show-nav .bottom-nav {
     color: var(--text-secondary);
 }
 
+/* 日历模式切换按钮组 */
+.calendar-mode-switcher {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+.calendar-mode-btn {
+    flex: 1;
+    max-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(109, 92, 92, 0.1);
+}
+
+.calendar-mode-btn:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.2);
+}
+
+.calendar-mode-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.3);
+}
+
+.calendar-mode-btn .btn-icon {
+    font-size: 18px;
+}
+
+.calendar-mode-btn .btn-text {
+    font-weight: 600;
+}
+
 .calendar-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -1391,11 +1440,16 @@ body.show-nav .bottom-nav {
         font-size: 24px !important; /* 移动端增大月相图标 */
     }
     
-    .mood-calendar-btn {
-        padding: 12px 24px !important;
-        font-size: 16px !important;
+    .calendar-mode-btn {
+        padding: 10px 16px !important;
+        font-size: 14px !important;
         min-height: 44px; /* 确保点击区域足够大 */
         touch-action: manipulation; /* 优化触摸响应 */
+    }
+    
+    .calendar-mode-switch {
+        gap: 8px;
+        margin-bottom: 16px;
     }
     
     .calendar-cell {
@@ -1404,50 +1458,54 @@ body.show-nav .bottom-nav {
     }
 }
 
-/* 日历底部按钮区域 */
-.calendar-footer {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-color);
+/* 日历模式切换按钮区域 */
+.calendar-mode-switcher {
     display: flex;
+    gap: 12px;
     justify-content: center;
     align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
 }
 
-.mood-calendar-btn {
+.calendar-mode-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 24px;
+    gap: 6px;
+    padding: 10px 20px;
     background: var(--card-bg);
-    border: 2px solid var(--primary-color);
+    border: 2px solid var(--border-color);
     border-radius: 20px;
-    color: var(--primary-color);
-    font-size: 16px;
+    color: var(--text-primary);
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
-    box-shadow: 0 2px 8px rgba(109, 92, 92, 0.15);
+    box-shadow: 0 2px 6px rgba(109, 92, 92, 0.1);
+    flex: 1;
+    max-width: 150px;
 }
 
-.mood-calendar-btn:hover {
+.calendar-mode-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(109, 92, 92, 0.2);
+}
+
+.calendar-mode-btn.active {
     background: var(--primary-color);
+    border-color: var(--primary-color);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.3);
+    box-shadow: 0 3px 12px rgba(109, 92, 92, 0.3);
 }
 
-.mood-calendar-btn.active {
-    background: var(--primary-color);
-    color: white;
+.calendar-mode-btn .btn-icon {
+    font-size: 16px;
 }
 
-.mood-calendar-btn .btn-icon {
-    font-size: 18px;
-}
-
-.mood-calendar-btn .btn-text {
+.calendar-mode-btn .btn-text {
     font-weight: 600;
 }
 

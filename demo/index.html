@@ -106,6 +106,18 @@
                 </div>
                 <button class="calendar-nav-btn" id="cal-next-btn" aria-label="Next month">›</button>
             </div>
+            
+            <!-- 日历模式切换按钮 -->
+            <div class="calendar-mode-switcher">
+                <button class="calendar-mode-btn active" id="moon-calendar-btn" data-mode="moon">
+                    <span class="btn-icon">🌙</span>
+                    <span class="btn-text">月相日历</span>
+                </button>
+                <button class="calendar-mode-btn" id="mood-calendar-btn" data-mode="mood">
+                    <span class="btn-icon">😊</span>
+                    <span class="btn-text">心情日历</span>
+                </button>
+            </div>
 
             <div class="calendar-weekdays">
                 <div class="weekday">Sun</div>
@@ -118,14 +130,6 @@
             </div>
 
             <div class="calendar-grid" id="calendar-grid"></div>
-            
-            <!-- 心情日历切换按钮 -->
-            <div class="calendar-footer">
-                <button id="mood-calendar-btn" class="mood-calendar-btn">
-                    <span class="btn-icon">😊</span>
-                    <span class="btn-text">心情日历</span>
-                </button>
-            </div>
         </div>
     </div>
 
