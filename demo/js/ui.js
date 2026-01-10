@@ -1157,6 +1157,9 @@ function makeUpCheckIn(dateKey, emotion, emotionRecord = '') {
     // 刷新日历
     renderCalendar(currentCalendarYear, currentCalendarMonth);
     
+    // 刷新周历（补签后立即更新显示状态）
+    renderWeeklyCalendar();
+    
     // 显示补签成功提示
     showMakeupSuccessToast(emotion);
 }
@@ -1361,17 +1364,16 @@ function renderWeeklyCalendar() {
     
     containers.forEach(container => {
         const grid = container.querySelector('.weekly-calendar-grid');
-        const monthAbbr = container.querySelector('.month-abbr');
         
-        if (grid && monthAbbr) {
-            renderWeeklyCalendarForContainer(grid, monthAbbr);
+        if (grid) {
+            renderWeeklyCalendarForContainer(grid);
         }
     });
 }
 
 // 为单个容器渲染周历
-function renderWeeklyCalendarForContainer(grid, monthAbbr) {
-    if (!grid || !monthAbbr) return;
+function renderWeeklyCalendarForContainer(grid) {
+    if (!grid) return;
     
     // 获取本周的开始日期（周日）
     const today = new Date();
@@ -1379,10 +1381,6 @@ function renderWeeklyCalendarForContainer(grid, monthAbbr) {
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
-    
-    // 设置月份简称
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    monthAbbr.textContent = monthNames[today.getMonth()];
     
     // 星期标题
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

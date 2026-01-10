@@ -608,7 +608,7 @@ body {
     display: grid;
     grid-template-columns: 1fr;
     gap: 24px;
-    padding: 0 16px; /* 添加左右padding，确保周历有空间 */
+    padding: 0 8px; /* 减少左右padding，让周历日期区域更大 */
     box-sizing: border-box;
 }
 
@@ -1329,41 +1329,19 @@ body.show-nav .bottom-nav {
 .weekly-calendar-container {
     width: 100%;
     margin-bottom: 24px;
-    padding: 0;
+    padding: 0 4px; /* 减少左右边距，让日期区域更大 */
     display: block !important; /* 确保容器可见 */
     box-sizing: border-box;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-.weekly-calendar-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.weekly-calendar-month {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.calendar-icon {
-    font-size: 16px;
-}
-
-.month-abbr {
-    font-size: 14px;
-    font-weight: 600;
-}
+/* 移除月份显示相关样式（不再使用） */
 
 .weekly-calendar-grid {
     display: grid !important;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 6px; /* 减少间距，让日期按钮更大 */
     width: 100%;
     box-sizing: border-box;
     visibility: visible !important;
