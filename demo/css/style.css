@@ -1327,29 +1327,27 @@ body.show-nav .bottom-nav {
 
 /* ===== 周历样式 ===== */
 .weekly-calendar-container {
-    width: 100%;
+    width: 100% !important;
     margin-bottom: 24px;
-    padding: 0 8px; /* 适中的左右边距 */
+    padding: 0 4px; /* 减少左右边距，让日期区域更大 */
     display: block !important; /* 确保容器可见 */
     box-sizing: border-box;
     visibility: visible !important;
     opacity: 1 !important;
-    min-height: 80px; /* 确保容器有足够高度 */
+    min-height: 80px; /* 确保有最小高度，保证可见 */
 }
 
 /* 移除月份显示相关样式（不再使用） */
 
 .weekly-calendar-grid {
     display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
+    grid-template-columns: repeat(7, 1fr);
     gap: 6px; /* 减少间距，让日期按钮更大 */
-    width: 100% !important;
+    width: 100%;
     box-sizing: border-box;
     visibility: visible !important;
     opacity: 1 !important;
-    min-height: 70px !important; /* 确保有最小高度 */
-    margin: 0 !important;
-    padding: 0 !important;
+    min-height: 60px; /* 确保有最小高度 */
 }
 
 .weekly-day-button {

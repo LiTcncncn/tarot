@@ -1470,6 +1470,16 @@ function renderWeeklyCalendarForContainer(grid) {
         buttonsCreated++;
     }
     
-    console.log(`周历渲染完成，创建了 ${buttonsCreated} 个日期按钮，网格子元素数量:`, grid.children.length);
+    console.log(`周历渲染完成: 创建了 ${buttonsCreated} 个按钮，网格子元素数量: ${grid.children.length}，网格显示: ${window.getComputedStyle(grid).display}`);
+    
+    // 强制刷新样式，确保渲染生效
+    void grid.offsetHeight;
+    
+    // 再次确保网格可见
+    if (grid.children.length === 0) {
+        console.error('警告：周历渲染后没有子元素！');
+    } else {
+        console.log('周历渲染成功，第一个按钮:', grid.children[0]);
+    }
 }
 
