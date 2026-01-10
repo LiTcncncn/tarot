@@ -588,6 +588,30 @@ function showCalendarPage() {
     // 更新导航栏激活状态
     updateNavActive('calendar');
     
+    // 确保心情日历按钮事件已绑定（每次显示日历时重新绑定）
+    const calendarPage = document.getElementById('calendar-page');
+    if (calendarPage) {
+        // 移除旧的监听器（如果存在）
+        if (calendarPageClickHandler) {
+            calendarPage.removeEventListener('click', calendarPageClickHandler);
+        }
+        
+        // 创建新的事件处理器
+        calendarPageClickHandler = function(e) {
+            const btn = e.target.closest('#mood-calendar-btn');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('点击心情日历按钮，当前模式:', calendarMode); // 调试日志
+                toggleCalendarMode(e);
+            }
+        };
+        
+        // 添加新的监听器
+        calendarPage.addEventListener('click', calendarPageClickHandler);
+        console.log('心情日历按钮事件已绑定'); // 调试日志
+    }
+    
     // 渲染日历（默认显示当前月）
     const today = new Date();
     renderCalendar(today.getFullYear(), today.getMonth());
@@ -634,6 +658,7 @@ function updateNavActive(activeNav) {
 let currentCalendarYear = new Date().getFullYear();
 let currentCalendarMonth = new Date().getMonth();
 let calendarMode = 'moon'; // 'moon' 或 'mood' - 日历显示模式
+let calendarPageClickHandler = null; // 保存事件处理器引用，用于移除
 
 // 情绪状态对应的天气图标映射
 const EMOTION_WEATHER_MAP = {
@@ -718,8 +743,8 @@ function renderCalendar(year, month) {
                 const weatherInfo = EMOTION_WEATHER_MAP[reading.emotion];
                 iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="calendar-mood-icon" title="${reading.emotion}">`;
             } else {
-                // 如果没有情绪数据，显示默认图标或留空
-                iconHtml = '<div class="calendar-mood-icon-empty"></div>';
+                // 如果没有情绪数据，不显示图标（留空，但保持布局）
+                iconHtml = '<div class="calendar-mood-icon-empty" title="未记录"></div>';
             }
         } else {
             // 月相日历模式：显示月相
@@ -731,6 +756,11 @@ function renderCalendar(year, month) {
                 moonPhaseCache[dateKey] = moonPhase;
             }
             iconHtml = `<div class="calendar-moon">${moonPhase.emoji}</div>`;
+        }
+        
+        // 调试日志
+        if (day === 1) {
+            console.log('渲染日历，模式:', calendarMode, '日期:', dateKey, '图标HTML:', iconHtml.substring(0, 50));
         }
         
         const dayCell = document.createElement('div');
@@ -1192,25 +1222,40 @@ function showCheckInCompleteModal() {
 }
 
 // 切换日历模式（月相/心情）
-function toggleCalendarMode() {
-    calendarMode = calendarMode === 'moon' ? 'mood' : 'moon';
-    const btn = document.getElementById('mood-calendar-btn');
-    const btnIcon = btn?.querySelector('.btn-icon');
-    const btnText = btn?.querySelector('.btn-text');
+function toggleCalendarMode(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
     
-    if (btn && btnIcon && btnText) {
+    console.log('toggleCalendarMode 被调用，当前模式:', calendarMode); // 调试日志
+    
+    // 切换模式
+    calendarMode = calendarMode === 'moon' ? 'mood' : 'moon';
+    
+    console.log('切换到模式:', calendarMode); // 调试日志
+    
+    // 更新按钮状态
+    const btn = document.getElementById('mood-calendar-btn');
+    if (btn) {
+        const btnIcon = btn.querySelector('.btn-icon');
+        const btnText = btn.querySelector('.btn-text');
+        
         if (calendarMode === 'mood') {
             btn.classList.add('active');
-            btnIcon.textContent = '🌙';
-            btnText.textContent = '月相日历';
+            if (btnIcon) btnIcon.textContent = '🌙';
+            if (btnText) btnText.textContent = '月相日历';
         } else {
             btn.classList.remove('active');
-            btnIcon.textContent = '😊';
-            btnText.textContent = '心情日历';
+            if (btnIcon) btnIcon.textContent = '😊';
+            if (btnText) btnText.textContent = '心情日历';
         }
+    } else {
+        console.error('未找到心情日历按钮'); // 调试日志
     }
     
     // 重新渲染日历
+    console.log('重新渲染日历，模式:', calendarMode); // 调试日志
     renderCalendar(currentCalendarYear, currentCalendarMonth);
 }
 
@@ -1254,10 +1299,7 @@ function initCalendarPage() {
         });
     }
     
-    // 绑定心情日历切换按钮
-    const moodCalendarBtn = document.getElementById('mood-calendar-btn');
-    if (moodCalendarBtn) {
-        moodCalendarBtn.addEventListener('click', toggleCalendarMode);
-    }
+    // 心情日历按钮事件在showCalendarPage中绑定（使用事件委托）
+    // 这里不绑定，避免重复绑定问题
 }
 
