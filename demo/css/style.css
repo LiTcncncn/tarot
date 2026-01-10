@@ -1205,6 +1205,8 @@ body.show-nav .bottom-nav {
 .calendar-container {
     max-width: 900px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .calendar-header {
@@ -1253,6 +1255,7 @@ body.show-nav .bottom-nav {
     display: flex;
     gap: 12px;
     justify-content: center;
+    align-items: center;
     margin-bottom: 20px;
     padding: 0 10px;
 }
@@ -1445,22 +1448,39 @@ body.show-nav .bottom-nav {
         padding: 10px 6px; /* 减少padding，给图标更多空间 */
     }
     
-    /* 移动端：日历模式切换按钮调整 */
+    /* 移动端：日历模式切换按钮调整 - 显示在最顶部，并列居中 */
     .calendar-mode-switcher {
+        order: -1; /* 在移动端将按钮移到最前面 */
+        width: 100%;
         gap: 8px;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
+        margin-top: 0;
+        padding: 0 16px;
+        justify-content: center;
+        align-items: center;
     }
     
     .calendar-mode-btn {
-        padding: 10px 16px !important;
+        flex: 0 1 auto; /* 允许按钮根据内容自适应，但可以收缩 */
+        padding: 10px 20px !important;
         font-size: 14px !important;
         min-height: 44px; /* 确保点击区域足够大 */
         touch-action: manipulation; /* 优化触摸响应 */
-        max-width: 140px;
+        max-width: calc(50% - 4px); /* 两个按钮各占一半，减去gap的一半 */
+        min-width: 120px;
     }
     
     .calendar-mode-btn .btn-icon {
         font-size: 16px;
+    }
+    
+    .calendar-mode-btn .btn-text {
+        white-space: nowrap; /* 防止文字换行 */
+    }
+    
+    /* 移动端：日历头部调整，确保按钮在最顶部 */
+    .calendar-header {
+        order: 0; /* 按钮后显示日历头部 */
     }
 }
 

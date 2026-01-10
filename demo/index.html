@@ -98,16 +98,7 @@
     <!-- 页面3: 日历界面（回顾/签到） -->
     <div id="calendar-page" class="page" style="display: none;">
         <div class="calendar-container">
-            <div class="calendar-header">
-                <button class="calendar-nav-btn" id="cal-prev-btn" aria-label="Previous month">‹</button>
-                <div class="calendar-header-center">
-                    <div class="calendar-month-title" id="cal-month-title">January 2026</div>
-                    <div class="calendar-streak" id="cal-streak">Streak: 0</div>
-                </div>
-                <button class="calendar-nav-btn" id="cal-next-btn" aria-label="Next month">›</button>
-            </div>
-            
-            <!-- 日历模式切换按钮 -->
+            <!-- 日历模式切换按钮 - 移动端显示在最顶部 -->
             <div class="calendar-mode-switcher">
                 <button class="calendar-mode-btn active" id="moon-calendar-btn" data-mode="moon">
                     <span class="btn-icon">🌙</span>
@@ -117,6 +108,15 @@
                     <span class="btn-icon">😊</span>
                     <span class="btn-text">心情日历</span>
                 </button>
+            </div>
+            
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" id="cal-prev-btn" aria-label="Previous month">‹</button>
+                <div class="calendar-header-center">
+                    <div class="calendar-month-title" id="cal-month-title">January 2026</div>
+                    <div class="calendar-streak" id="cal-streak">Streak: 0</div>
+                </div>
+                <button class="calendar-nav-btn" id="cal-next-btn" aria-label="Next month">›</button>
             </div>
 
             <div class="calendar-weekdays">
