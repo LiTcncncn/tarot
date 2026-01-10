@@ -1326,6 +1326,8 @@ body.show-nav .bottom-nav {
     width: 100%;
     margin-bottom: 24px;
     padding: 0 10px;
+    display: block; /* 确保容器可见 */
+    box-sizing: border-box;
 }
 
 .weekly-calendar-header {
