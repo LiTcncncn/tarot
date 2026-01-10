@@ -1440,73 +1440,28 @@ body.show-nav .bottom-nav {
         font-size: 24px !important; /* 移动端增大月相图标 */
     }
     
+    .calendar-cell {
+        min-height: 60px; /* 移动端增大单元格高度 */
+        padding: 10px 6px; /* 减少padding，给图标更多空间 */
+    }
+    
+    /* 移动端：日历模式切换按钮调整 */
+    .calendar-mode-switcher {
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
     .calendar-mode-btn {
         padding: 10px 16px !important;
         font-size: 14px !important;
         min-height: 44px; /* 确保点击区域足够大 */
         touch-action: manipulation; /* 优化触摸响应 */
+        max-width: 140px;
     }
     
-    .calendar-mode-switch {
-        gap: 8px;
-        margin-bottom: 16px;
+    .calendar-mode-btn .btn-icon {
+        font-size: 16px;
     }
-    
-    .calendar-cell {
-        min-height: 60px; /* 移动端增大单元格高度 */
-        padding: 10px 6px; /* 减少padding，给图标更多空间 */
-    }
-}
-
-/* 日历模式切换按钮区域 */
-.calendar-mode-switcher {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 0 10px;
-}
-
-.calendar-mode-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 10px 20px;
-    background: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 20px;
-    color: var(--text-primary);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 2px 6px rgba(109, 92, 92, 0.1);
-    flex: 1;
-    max-width: 150px;
-}
-
-.calendar-mode-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(109, 92, 92, 0.2);
-}
-
-.calendar-mode-btn.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 3px 12px rgba(109, 92, 92, 0.3);
-}
-
-.calendar-mode-btn .btn-icon {
-    font-size: 16px;
-}
-
-.calendar-mode-btn .btn-text {
-    font-weight: 600;
 }
 
 /* ===== 日历详情弹层（底部抽屉） ===== */
