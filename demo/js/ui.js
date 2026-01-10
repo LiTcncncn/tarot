@@ -589,33 +589,39 @@ function showCalendarPage() {
     updateNavActive('calendar');
     
     // 确保心情日历按钮事件已绑定（每次显示日历时重新绑定）
-    const calendarPage = document.getElementById('calendar-page');
-    if (calendarPage) {
-        // 移除旧的监听器（如果存在）
-        if (calendarPageClickHandler) {
-            calendarPage.removeEventListener('click', calendarPageClickHandler);
-        }
-        
-        // 创建新的事件处理器（使用事件委托）
-        calendarPageClickHandler = function(e) {
-            // 检查点击的是按钮或其内部元素
-            const btn = e.target.closest('#mood-calendar-btn') || 
-                       (e.target.id === 'mood-calendar-btn' ? e.target : null) ||
-                       (e.target.parentElement && e.target.parentElement.id === 'mood-calendar-btn' ? e.target.parentElement : null);
+    setTimeout(() => {
+        const moodCalendarBtn = document.getElementById('mood-calendar-btn');
+        if (moodCalendarBtn) {
+            // 移除旧的事件监听器（通过克隆节点）
+            const newBtn = moodCalendarBtn.cloneNode(true);
+            moodCalendarBtn.parentNode.replaceChild(newBtn, moodCalendarBtn);
             
-            if (btn) {
+            // 直接绑定事件到按钮
+            newBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('点击心情日历按钮，当前模式:', calendarMode); // 调试日志
+                console.log('点击心情日历按钮，当前模式:', calendarMode);
                 toggleCalendarMode(e);
-                return false;
-            }
-        };
-        
-        // 添加新的监听器
-        calendarPage.addEventListener('click', calendarPageClickHandler);
-        console.log('心情日历按钮事件已绑定'); // 调试日志
-    }
+            });
+            
+            console.log('心情日历按钮事件已绑定，按钮:', newBtn);
+        } else {
+            console.warn('心情日历按钮未找到，延迟重试...');
+            // 如果按钮还没加载，再延迟一点重试
+            setTimeout(() => {
+                const retryBtn = document.getElementById('mood-calendar-btn');
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('点击心情日历按钮（重试绑定），当前模式:', calendarMode);
+                        toggleCalendarMode(e);
+                    });
+                    console.log('心情日历按钮事件已绑定（重试成功）');
+                }
+            }, 200);
+        }
+    }, 50);
     
     // 渲染日历（默认显示当前月）
     const today = new Date();
