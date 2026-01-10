@@ -158,8 +158,10 @@ function showDailyReadingPage() {
         }
     }
     
-    // 渲染周历
-    renderWeeklyCalendar();
+    // 渲染周历（延迟执行，确保DOM已渲染）
+    setTimeout(() => {
+        renderWeeklyCalendar();
+    }, 100);
 }
 
 // 显示页面2: Loading 界面
@@ -202,8 +204,10 @@ function showMainPage() {
     // 更新导航栏激活状态
     updateNavActive('today');
     
-    // 更新周历（如果存在）
-    renderWeeklyCalendar();
+    // 更新周历（延迟执行，确保DOM已渲染）
+    setTimeout(() => {
+        renderWeeklyCalendar();
+    }, 100);
 }
 
 // 初始化抽牌交互
@@ -1157,8 +1161,10 @@ function makeUpCheckIn(dateKey, emotion, emotionRecord = '') {
     // 刷新日历
     renderCalendar(currentCalendarYear, currentCalendarMonth);
     
-    // 刷新周历（补签后立即更新显示状态）
-    renderWeeklyCalendar();
+    // 刷新周历（补签后立即更新显示状态，延迟确保DOM更新）
+    setTimeout(() => {
+        renderWeeklyCalendar();
+    }, 50);
     
     // 显示补签成功提示
     showMakeupSuccessToast(emotion);
@@ -1359,26 +1365,21 @@ function initCalendarPage() {
 
 // 渲染周历（显示本周7天）
 function renderWeeklyCalendar() {
+    console.log('renderWeeklyCalendar 被调用');
     // 查找所有周历容器（可能有多个页面包含周历）
     const containers = document.querySelectorAll('.weekly-calendar-container');
-    
-    console.log('渲染周历，找到容器数量:', containers.length);
-    
-    if (containers.length === 0) {
-        console.warn('未找到周历容器！');
-        return;
-    }
+    console.log('找到周历容器数量:', containers.length);
     
     containers.forEach((container, index) => {
+        console.log(`处理容器 ${index}:`, container);
         const grid = container.querySelector('.weekly-calendar-grid');
-        
-        console.log(`容器 ${index}:`, container, '网格:', grid);
+        console.log(`容器 ${index} 的网格:`, grid);
         
         if (grid) {
+            console.log(`开始渲染容器 ${index} 的周历`);
             renderWeeklyCalendarForContainer(grid);
-            console.log(`容器 ${index} 渲染完成，子元素数量:`, grid.children.length);
         } else {
-            console.warn(`容器 ${index} 未找到网格元素！`);
+            console.warn(`容器 ${index} 找不到网格元素`);
         }
     });
 }
@@ -1386,11 +1387,16 @@ function renderWeeklyCalendar() {
 // 为单个容器渲染周历
 function renderWeeklyCalendarForContainer(grid) {
     if (!grid) {
-        console.error('renderWeeklyCalendarForContainer: grid 为空！');
+        console.error('renderWeeklyCalendarForContainer: grid 元素不存在');
         return;
     }
     
-    console.log('开始渲染周历容器，grid:', grid);
+    console.log('renderWeeklyCalendarForContainer 开始，grid:', grid, '可见性:', window.getComputedStyle(grid).display);
+    
+    // 确保网格可见
+    grid.style.display = 'grid';
+    grid.style.visibility = 'visible';
+    grid.style.opacity = '1';
     
     // 获取本周的开始日期（周日）
     const today = new Date();
@@ -1404,11 +1410,12 @@ function renderWeeklyCalendarForContainer(grid) {
     
     // 清空网格
     grid.innerHTML = '';
+    console.log('网格已清空');
     
     const todayKey = getTodayKey();
-    console.log('本周开始日期:', startOfWeek, '今天:', todayKey);
     
     // 生成7天的内容
+    let buttonsCreated = 0;
     for (let i = 0; i < 7; i++) {
         const date = new Date(startOfWeek);
         date.setDate(startOfWeek.getDate() + i);
@@ -1460,6 +1467,9 @@ function renderWeeklyCalendarForContainer(grid) {
         });
         
         grid.appendChild(dayButton);
+        buttonsCreated++;
     }
+    
+    console.log(`周历渲染完成，创建了 ${buttonsCreated} 个日期按钮，网格子元素数量:`, grid.children.length);
 }
 
