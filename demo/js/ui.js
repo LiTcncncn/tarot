@@ -604,23 +604,44 @@ function showCalendarPage() {
                 toggleCalendarMode(e);
             };
             
-            // 绑定点击事件（桌面端）
-            newBtn.addEventListener('click', handleClick);
-            
-            // 绑定触摸事件（移动端）
-            newBtn.addEventListener('touchend', function(e) {
+            // 统一事件处理函数（同时支持点击和触摸）
+            const handleAction = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('触摸心情日历按钮，当前模式:', calendarMode);
+                console.log('触发心情日历按钮，事件类型:', e.type, '当前模式:', calendarMode);
                 toggleCalendarMode(e);
-            });
+                return false;
+            };
             
-            // 添加触摸反馈样式
+            // 绑定点击事件（桌面端和移动端都支持）
+            newBtn.addEventListener('click', handleAction, { passive: false });
+            
+            // 绑定触摸事件（移动端，使用touchstart更可靠）
+            newBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('触摸心情日历按钮（touchstart），当前模式:', calendarMode);
+                toggleCalendarMode(e);
+                // 阻止后续的click事件（避免双重触发）
+                setTimeout(() => {
+                    newBtn.click = function() { return false; };
+                }, 100);
+            }, { passive: false });
+            
+            // 添加触摸反馈样式和属性（移动端优化）
             newBtn.style.touchAction = 'manipulation';
+            newBtn.style.webkitTapHighlightColor = 'rgba(109, 92, 92, 0.2)';
             newBtn.style.userSelect = 'none';
             newBtn.style.webkitUserSelect = 'none';
+            newBtn.style.cursor = 'pointer';
             
-            console.log('心情日历按钮事件已绑定（点击+触摸），按钮:', newBtn);
+            // 确保按钮有足够的触摸区域（移动端）
+            if (window.innerWidth < 1330) {
+                newBtn.style.minHeight = '48px';
+                newBtn.style.minWidth = '120px';
+            }
+            
+            console.log('心情日历按钮事件已绑定（点击+touchstart），按钮:', newBtn, '宽度:', newBtn.offsetWidth, '高度:', newBtn.offsetHeight);
         } else {
             console.warn('心情日历按钮未找到，延迟重试...');
             // 如果按钮还没加载，再延迟一点重试
@@ -630,14 +651,23 @@ function showCalendarPage() {
                     const handleClick = function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('点击心情日历按钮（重试绑定），当前模式:', calendarMode);
+                        console.log('点击心情日历按钮（重试绑定），事件类型:', e.type, '当前模式:', calendarMode);
                         toggleCalendarMode(e);
+                        return false;
                     };
-                    retryBtn.addEventListener('click', handleClick);
-                    retryBtn.addEventListener('touchend', handleClick);
+                    retryBtn.addEventListener('click', handleClick, { passive: false });
+                    retryBtn.addEventListener('touchstart', handleClick, { passive: false });
                     retryBtn.style.touchAction = 'manipulation';
+                    retryBtn.style.webkitTapHighlightColor = 'rgba(109, 92, 92, 0.2)';
                     retryBtn.style.userSelect = 'none';
                     retryBtn.style.webkitUserSelect = 'none';
+                    retryBtn.style.cursor = 'pointer';
+                    
+                    // 移动端优化
+                    if (window.innerWidth < 1330) {
+                        retryBtn.style.minHeight = '48px';
+                        retryBtn.style.minWidth = '120px';
+                    }
                     console.log('心情日历按钮事件已绑定（重试成功）');
                 }
             }, 200);

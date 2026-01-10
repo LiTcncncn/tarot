@@ -1364,31 +1364,46 @@ body.show-nav .bottom-nav {
 /* 移动端：心情日历图标调整 */
 @media (max-width: 1329px) {
     .calendar-mood-icon {
-        width: 32px !important; /* 移动端增大图标尺寸 */
-        height: 32px !important;
-        min-width: 32px;
-        min-height: 32px;
+        width: 40px !important; /* 移动端增大图标尺寸到40px */
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        object-fit: contain;
     }
     
     .calendar-mood-icon-empty {
-        width: 32px;
-        height: 32px;
+        width: 40px !important;
+        height: 40px !important;
     }
     
     .calendar-moon {
-        font-size: 24px !important; /* 移动端增大月相图标 */
+        font-size: 28px !important; /* 移动端增大月相图标 */
     }
     
     .mood-calendar-btn {
-        padding: 12px 24px !important;
+        padding: 14px 28px !important;
         font-size: 16px !important;
-        min-height: 44px; /* 确保点击区域足够大 */
-        touch-action: manipulation; /* 优化触摸响应 */
+        min-height: 48px !important; /* 确保点击区域足够大 */
+        min-width: 120px !important; /* 确保按钮宽度足够 */
+        touch-action: manipulation !important; /* 优化触摸响应 */
+        -webkit-tap-highlight-color: rgba(109, 92, 92, 0.2); /* 移动端点击高亮 */
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    
+    .mood-calendar-btn:active {
+        transform: scale(0.98); /* 点击反馈 */
+        background: var(--primary-color) !important;
+        color: white !important;
     }
     
     .calendar-cell {
-        min-height: 60px; /* 移动端增大单元格高度 */
-        padding: 10px 6px; /* 减少padding，给图标更多空间 */
+        min-height: 70px !important; /* 移动端增大单元格高度 */
+        padding: 8px 4px !important; /* 减少padding，给图标更多空间 */
+    }
+    
+    .calendar-day-num {
+        font-size: 14px !important; /* 移动端日期数字稍大 */
     }
 }
 
