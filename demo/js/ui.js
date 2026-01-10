@@ -604,44 +604,23 @@ function showCalendarPage() {
                 toggleCalendarMode(e);
             };
             
-            // 统一事件处理函数（同时支持点击和触摸）
-            const handleAction = function(e) {
+            // 绑定点击事件（桌面端）
+            newBtn.addEventListener('click', handleClick);
+            
+            // 绑定触摸事件（移动端）
+            newBtn.addEventListener('touchend', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('触发心情日历按钮，事件类型:', e.type, '当前模式:', calendarMode);
+                console.log('触摸心情日历按钮，当前模式:', calendarMode);
                 toggleCalendarMode(e);
-                return false;
-            };
+            });
             
-            // 绑定点击事件（桌面端和移动端都支持）
-            newBtn.addEventListener('click', handleAction, { passive: false });
-            
-            // 绑定触摸事件（移动端，使用touchstart更可靠）
-            newBtn.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('触摸心情日历按钮（touchstart），当前模式:', calendarMode);
-                toggleCalendarMode(e);
-                // 阻止后续的click事件（避免双重触发）
-                setTimeout(() => {
-                    newBtn.click = function() { return false; };
-                }, 100);
-            }, { passive: false });
-            
-            // 添加触摸反馈样式和属性（移动端优化）
+            // 添加触摸反馈样式
             newBtn.style.touchAction = 'manipulation';
-            newBtn.style.webkitTapHighlightColor = 'rgba(109, 92, 92, 0.2)';
             newBtn.style.userSelect = 'none';
             newBtn.style.webkitUserSelect = 'none';
-            newBtn.style.cursor = 'pointer';
             
-            // 确保按钮有足够的触摸区域（移动端）
-            if (window.innerWidth < 1330) {
-                newBtn.style.minHeight = '48px';
-                newBtn.style.minWidth = '120px';
-            }
-            
-            console.log('心情日历按钮事件已绑定（点击+touchstart），按钮:', newBtn, '宽度:', newBtn.offsetWidth, '高度:', newBtn.offsetHeight);
+            console.log('心情日历按钮事件已绑定（点击+触摸），按钮:', newBtn);
         } else {
             console.warn('心情日历按钮未找到，延迟重试...');
             // 如果按钮还没加载，再延迟一点重试
@@ -651,23 +630,14 @@ function showCalendarPage() {
                     const handleClick = function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('点击心情日历按钮（重试绑定），事件类型:', e.type, '当前模式:', calendarMode);
+                        console.log('点击心情日历按钮（重试绑定），当前模式:', calendarMode);
                         toggleCalendarMode(e);
-                        return false;
                     };
-                    retryBtn.addEventListener('click', handleClick, { passive: false });
-                    retryBtn.addEventListener('touchstart', handleClick, { passive: false });
+                    retryBtn.addEventListener('click', handleClick);
+                    retryBtn.addEventListener('touchend', handleClick);
                     retryBtn.style.touchAction = 'manipulation';
-                    retryBtn.style.webkitTapHighlightColor = 'rgba(109, 92, 92, 0.2)';
                     retryBtn.style.userSelect = 'none';
                     retryBtn.style.webkitUserSelect = 'none';
-                    retryBtn.style.cursor = 'pointer';
-                    
-                    // 移动端优化
-                    if (window.innerWidth < 1330) {
-                        retryBtn.style.minHeight = '48px';
-                        retryBtn.style.minWidth = '120px';
-                    }
                     console.log('心情日历按钮事件已绑定（重试成功）');
                 }
             }, 200);
@@ -802,11 +772,12 @@ function renderCalendar(year, month) {
             // 心情日历模式：显示情绪对应的天气图标
             const reading = getReadingByDate(dateKey);
             if (reading && reading.emotion && EMOTION_WEATHER_MAP[reading.emotion]) {
+                // 已签到：显示情绪对应的天气图标
                 const weatherInfo = EMOTION_WEATHER_MAP[reading.emotion];
-                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="calendar-mood-icon" title="${reading.emotion}">`;
+                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="calendar-mood-icon calendar-mood-icon-active" title="${reading.emotion}">`;
             } else {
-                // 如果没有情绪数据，不显示图标（留空，但保持布局）
-                iconHtml = '<div class="calendar-mood-icon-empty" title="未记录"></div>';
+                // 未签到：显示默认天气图标（weather/2.png）的半透效果
+                iconHtml = `<img src="weather/2.png" alt="未签到" class="calendar-mood-icon calendar-mood-icon-inactive" title="未记录">`;
             }
         } else {
             // 月相日历模式：显示月相
