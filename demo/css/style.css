@@ -140,6 +140,8 @@ body {
     max-width: 600px;
     text-align: center;
     margin: 0 auto;
+    padding: 0 16px; /* 添加左右padding，确保周历有空间 */
+    box-sizing: border-box;
 }
 
 .page-title {
