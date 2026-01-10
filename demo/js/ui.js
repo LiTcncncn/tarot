@@ -596,14 +596,19 @@ function showCalendarPage() {
             calendarPage.removeEventListener('click', calendarPageClickHandler);
         }
         
-        // 创建新的事件处理器
+        // 创建新的事件处理器（使用事件委托）
         calendarPageClickHandler = function(e) {
-            const btn = e.target.closest('#mood-calendar-btn');
+            // 检查点击的是按钮或其内部元素
+            const btn = e.target.closest('#mood-calendar-btn') || 
+                       (e.target.id === 'mood-calendar-btn' ? e.target : null) ||
+                       (e.target.parentElement && e.target.parentElement.id === 'mood-calendar-btn' ? e.target.parentElement : null);
+            
             if (btn) {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('点击心情日历按钮，当前模式:', calendarMode); // 调试日志
                 toggleCalendarMode(e);
+                return false;
             }
         };
         
@@ -658,6 +663,7 @@ function updateNavActive(activeNav) {
 let currentCalendarYear = new Date().getFullYear();
 let currentCalendarMonth = new Date().getMonth();
 let calendarMode = 'moon'; // 'moon' 或 'mood' - 日历显示模式
+let calendarPageClickHandler = null; // 事件委托处理器
 let calendarPageClickHandler = null; // 保存事件处理器引用，用于移除
 
 // 情绪状态对应的天气图标映射
