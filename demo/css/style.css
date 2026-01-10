@@ -1364,46 +1364,67 @@ body.show-nav .bottom-nav {
 /* 移动端：心情日历图标调整 */
 @media (max-width: 1329px) {
     .calendar-mood-icon {
-        width: 40px !important; /* 移动端增大图标尺寸到40px */
-        height: 40px !important;
-        min-width: 40px !important;
-        min-height: 40px !important;
+        width: 42px !important; /* 移动端增大图标尺寸到42px */
+        height: 42px !important;
+        min-width: 42px !important;
+        min-height: 42px !important;
         object-fit: contain;
+        display: block;
+        margin: 0 auto;
     }
     
     .calendar-mood-icon-empty {
-        width: 40px !important;
-        height: 40px !important;
+        width: 42px !important;
+        height: 42px !important;
     }
     
     .calendar-moon {
-        font-size: 28px !important; /* 移动端增大月相图标 */
+        font-size: 32px !important; /* 移动端增大月相图标到32px */
+        line-height: 1;
     }
     
     .mood-calendar-btn {
         padding: 14px 28px !important;
         font-size: 16px !important;
-        min-height: 48px !important; /* 确保点击区域足够大 */
-        min-width: 120px !important; /* 确保按钮宽度足够 */
+        min-height: 48px !important; /* 确保点击区域足够大（至少48px，符合移动端标准） */
+        min-width: 140px !important; /* 确保按钮宽度足够 */
         touch-action: manipulation !important; /* 优化触摸响应 */
-        -webkit-tap-highlight-color: rgba(109, 92, 92, 0.2); /* 移动端点击高亮 */
-        user-select: none;
-        -webkit-user-select: none;
+        -webkit-tap-highlight-color: rgba(109, 92, 92, 0.2) !important; /* 移动端点击高亮 */
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        cursor: pointer !important;
+        position: relative;
+        z-index: 10; /* 确保按钮在上层 */
     }
     
     .mood-calendar-btn:active {
-        transform: scale(0.98); /* 点击反馈 */
-        background: var(--primary-color) !important;
-        color: white !important;
+        transform: scale(0.96) !important; /* 点击反馈 */
+        opacity: 0.9;
+    }
+    
+    .mood-calendar-btn:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
     }
     
     .calendar-cell {
-        min-height: 70px !important; /* 移动端增大单元格高度 */
+        min-height: 75px !important; /* 移动端增大单元格高度 */
         padding: 8px 4px !important; /* 减少padding，给图标更多空间 */
+        aspect-ratio: 1 / 1 !important; /* 保持正方形 */
     }
     
     .calendar-day-num {
-        font-size: 14px !important; /* 移动端日期数字稍大 */
+        font-size: 15px !important; /* 移动端日期数字稍大 */
+        font-weight: 800 !important;
+        margin-bottom: 4px;
+    }
+    
+    /* 确保日历图标区域有足够的空间 */
+    .calendar-cell > div:last-child {
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 
