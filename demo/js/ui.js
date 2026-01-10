@@ -633,6 +633,16 @@ function updateNavActive(activeNav) {
 // 渲染日历
 let currentCalendarYear = new Date().getFullYear();
 let currentCalendarMonth = new Date().getMonth();
+let calendarMode = 'moon'; // 'moon' 或 'mood' - 日历显示模式
+
+// 情绪状态对应的天气图标映射
+const EMOTION_WEATHER_MAP = {
+    '愉悦': { icon: 'weather/1.png', name: '阳光' },
+    '平静': { icon: 'weather/2.png', name: '多云' },
+    '疲惫': { icon: 'weather/3.png', name: '阴天' },
+    '迷茫': { icon: 'weather/4.png', name: '小雨' },
+    '焦虑': { icon: 'weather/5.png', name: '大雨' }
+};
 
 function renderCalendar(year, month) {
     currentCalendarYear = year;
@@ -666,16 +676,18 @@ function renderCalendar(year, month) {
         streakText.textContent = streak > 0 ? `连续 ${streak} 天` : '';
     }
     
-    // 从sessionStorage获取缓存的月相数据
+    // 从sessionStorage获取缓存的月相数据（仅月相模式需要）
     const cacheKey = `calendar_${year}_${month}`;
     let moonPhaseCache = {};
-    try {
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-            moonPhaseCache = JSON.parse(cached);
+    if (calendarMode === 'moon') {
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                moonPhaseCache = JSON.parse(cached);
+            }
+        } catch (e) {
+            console.error('Error reading cache:', e);
         }
-    } catch (e) {
-        console.error('Error reading cache:', e);
     }
     
     // 创建日期单元格
@@ -696,13 +708,29 @@ function renderCalendar(year, month) {
         const isToday = dateKey === todayKey;
         const isCompleted = isDateCompleted(dateKey);
         
-        // 获取月相（优先使用缓存）
-        let moonPhase;
-        if (moonPhaseCache[dateKey]) {
-            moonPhase = moonPhaseCache[dateKey];
+        // 根据模式显示不同的图标
+        let iconHtml = '';
+        
+        if (calendarMode === 'mood') {
+            // 心情日历模式：显示情绪对应的天气图标
+            const reading = getReadingByDate(dateKey);
+            if (reading && reading.emotion && EMOTION_WEATHER_MAP[reading.emotion]) {
+                const weatherInfo = EMOTION_WEATHER_MAP[reading.emotion];
+                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="calendar-mood-icon" title="${reading.emotion}">`;
+            } else {
+                // 如果没有情绪数据，显示默认图标或留空
+                iconHtml = '<div class="calendar-mood-icon-empty"></div>';
+            }
         } else {
-            moonPhase = getMoonPhaseForDate(date);
-            moonPhaseCache[dateKey] = moonPhase;
+            // 月相日历模式：显示月相
+            let moonPhase;
+            if (moonPhaseCache[dateKey]) {
+                moonPhase = moonPhaseCache[dateKey];
+            } else {
+                moonPhase = getMoonPhaseForDate(date);
+                moonPhaseCache[dateKey] = moonPhase;
+            }
+            iconHtml = `<div class="calendar-moon">${moonPhase.emoji}</div>`;
         }
         
         const dayCell = document.createElement('div');
@@ -713,7 +741,7 @@ function renderCalendar(year, month) {
         
         dayCell.innerHTML = `
             <div class="calendar-day-num">${day}</div>
-            <div class="calendar-moon">${moonPhase.emoji}</div>
+            ${iconHtml}
         `;
         
         // 点击事件：显示日期详情
@@ -733,11 +761,13 @@ function renderCalendar(year, month) {
         calendarGrid.appendChild(emptyCell);
     }
     
-    // 保存月相缓存到sessionStorage
-    try {
-        sessionStorage.setItem(cacheKey, JSON.stringify(moonPhaseCache));
-    } catch (e) {
-        console.error('Error saving cache:', e);
+    // 保存月相缓存到sessionStorage（仅月相模式需要）
+    if (calendarMode === 'moon') {
+        try {
+            sessionStorage.setItem(cacheKey, JSON.stringify(moonPhaseCache));
+        } catch (e) {
+            console.error('Error saving cache:', e);
+        }
     }
 }
 
@@ -1161,6 +1191,29 @@ function showCheckInCompleteModal() {
     }
 }
 
+// 切换日历模式（月相/心情）
+function toggleCalendarMode() {
+    calendarMode = calendarMode === 'moon' ? 'mood' : 'moon';
+    const btn = document.getElementById('mood-calendar-btn');
+    const btnIcon = btn?.querySelector('.btn-icon');
+    const btnText = btn?.querySelector('.btn-text');
+    
+    if (btn && btnIcon && btnText) {
+        if (calendarMode === 'mood') {
+            btn.classList.add('active');
+            btnIcon.textContent = '🌙';
+            btnText.textContent = '月相日历';
+        } else {
+            btn.classList.remove('active');
+            btnIcon.textContent = '😊';
+            btnText.textContent = '心情日历';
+        }
+    }
+    
+    // 重新渲染日历
+    renderCalendar(currentCalendarYear, currentCalendarMonth);
+}
+
 // 初始化日历页面
 function initCalendarPage() {
     // 绑定翻月按钮
@@ -1199,6 +1252,12 @@ function initCalendarPage() {
                 dateModal.style.display = 'none';
             }
         });
+    }
+    
+    // 绑定心情日历切换按钮
+    const moodCalendarBtn = document.getElementById('mood-calendar-btn');
+    if (moodCalendarBtn) {
+        moodCalendarBtn.addEventListener('click', toggleCalendarMode);
     }
 }
 
