@@ -1276,21 +1276,21 @@ body.show-nav .bottom-nav {
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 2px 8px rgba(109, 92, 92, 0.1);
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
-.calendar-mode-btn:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.2);
+/* 未选中状态（默认）：无hover效果，保持简洁 */
+.calendar-mode-btn:not(.active) {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
+/* 选中状态 */
 .calendar-mode-btn.active {
     background: var(--primary-color);
     border-color: var(--primary-color);
     color: white;
-    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.3);
 }
 
 .calendar-mode-btn .btn-icon {
