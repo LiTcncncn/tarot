@@ -1329,9 +1329,11 @@ body.show-nav .bottom-nav {
 .weekly-calendar-container {
     width: 100%;
     margin-bottom: 24px;
-    padding: 0 10px;
-    display: block; /* 确保容器可见 */
+    padding: 0;
+    display: block !important; /* 确保容器可见 */
     box-sizing: border-box;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .weekly-calendar-header {
@@ -1359,11 +1361,14 @@ body.show-nav .bottom-nav {
 }
 
 .weekly-calendar-grid {
-    display: grid;
+    display: grid !important;
     grid-template-columns: repeat(7, 1fr);
     gap: 8px;
     width: 100%;
     box-sizing: border-box;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 60px; /* 确保有最小高度 */
 }
 
 .weekly-day-button {
