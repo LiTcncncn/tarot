@@ -1356,11 +1356,26 @@ function initCalendarPage() {
 
 // 渲染周历（显示本周7天）
 function renderWeeklyCalendar() {
-    const container = document.getElementById('weekly-calendar-container');
-    const grid = document.getElementById('weekly-calendar-grid');
-    const monthAbbr = document.getElementById('weekly-month-abbr');
+    // 查找当前可见页面中的周历容器（可能有多个页面包含周历）
+    const containers = document.querySelectorAll('.weekly-calendar-container');
     
-    if (!container || !grid || !monthAbbr) return;
+    containers.forEach(container => {
+        // 检查容器是否在当前可见的页面中
+        const page = container.closest('.page');
+        if (page && page.style.display !== 'none' && page.classList.contains('active')) {
+            const grid = container.querySelector('.weekly-calendar-grid');
+            const monthAbbr = container.querySelector('.month-abbr');
+            
+            if (!grid || !monthAbbr) return;
+            
+            renderWeeklyCalendarForContainer(grid, monthAbbr);
+        }
+    });
+}
+
+// 为单个容器渲染周历
+function renderWeeklyCalendarForContainer(grid, monthAbbr) {
+    if (!grid || !monthAbbr) return;
     
     // 获取本周的开始日期（周日）
     const today = new Date();
