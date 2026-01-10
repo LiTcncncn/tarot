@@ -596,27 +596,48 @@ function showCalendarPage() {
             const newBtn = moodCalendarBtn.cloneNode(true);
             moodCalendarBtn.parentNode.replaceChild(newBtn, moodCalendarBtn);
             
-            // 直接绑定事件到按钮
-            newBtn.addEventListener('click', function(e) {
+            // 事件处理函数
+            const handleClick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('点击心情日历按钮，当前模式:', calendarMode);
                 toggleCalendarMode(e);
+            };
+            
+            // 绑定点击事件（桌面端）
+            newBtn.addEventListener('click', handleClick);
+            
+            // 绑定触摸事件（移动端）
+            newBtn.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('触摸心情日历按钮，当前模式:', calendarMode);
+                toggleCalendarMode(e);
             });
             
-            console.log('心情日历按钮事件已绑定，按钮:', newBtn);
+            // 添加触摸反馈样式
+            newBtn.style.touchAction = 'manipulation';
+            newBtn.style.userSelect = 'none';
+            newBtn.style.webkitUserSelect = 'none';
+            
+            console.log('心情日历按钮事件已绑定（点击+触摸），按钮:', newBtn);
         } else {
             console.warn('心情日历按钮未找到，延迟重试...');
             // 如果按钮还没加载，再延迟一点重试
             setTimeout(() => {
                 const retryBtn = document.getElementById('mood-calendar-btn');
                 if (retryBtn) {
-                    retryBtn.addEventListener('click', function(e) {
+                    const handleClick = function(e) {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('点击心情日历按钮（重试绑定），当前模式:', calendarMode);
                         toggleCalendarMode(e);
-                    });
+                    };
+                    retryBtn.addEventListener('click', handleClick);
+                    retryBtn.addEventListener('touchend', handleClick);
+                    retryBtn.style.touchAction = 'manipulation';
+                    retryBtn.style.userSelect = 'none';
+                    retryBtn.style.webkitUserSelect = 'none';
                     console.log('心情日历按钮事件已绑定（重试成功）');
                 }
             }, 200);

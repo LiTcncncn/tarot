@@ -1281,8 +1281,11 @@ body.show-nav .bottom-nav {
     padding: 8px;
     cursor: pointer;
     user-select: none;
+    -webkit-user-select: none;
     min-width: 0;
     transition: all 0.3s;
+    touch-action: manipulation; /* 优化触摸响应 */
+    -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
 }
 
 /* 未签到状态（默认）：浅底色 + 虚线边框 */
@@ -1354,7 +1357,39 @@ body.show-nav .bottom-nav {
 .calendar-mood-icon-empty {
     width: 28px;
     height: 28px;
-    opacity: 0.3;
+    opacity: 0;
+    /* 占位符，保持布局但不显示内容 */
+}
+
+/* 移动端：心情日历图标调整 */
+@media (max-width: 1329px) {
+    .calendar-mood-icon {
+        width: 32px !important; /* 移动端增大图标尺寸 */
+        height: 32px !important;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    
+    .calendar-mood-icon-empty {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .calendar-moon {
+        font-size: 24px !important; /* 移动端增大月相图标 */
+    }
+    
+    .mood-calendar-btn {
+        padding: 12px 24px !important;
+        font-size: 16px !important;
+        min-height: 44px; /* 确保点击区域足够大 */
+        touch-action: manipulation; /* 优化触摸响应 */
+    }
+    
+    .calendar-cell {
+        min-height: 60px; /* 移动端增大单元格高度 */
+        padding: 10px 6px; /* 减少padding，给图标更多空间 */
+    }
 }
 
 /* 日历底部按钮区域 */
