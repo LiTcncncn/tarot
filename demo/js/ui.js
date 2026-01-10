@@ -1362,18 +1362,35 @@ function renderWeeklyCalendar() {
     // 查找所有周历容器（可能有多个页面包含周历）
     const containers = document.querySelectorAll('.weekly-calendar-container');
     
-    containers.forEach(container => {
+    console.log('渲染周历，找到容器数量:', containers.length);
+    
+    if (containers.length === 0) {
+        console.warn('未找到周历容器！');
+        return;
+    }
+    
+    containers.forEach((container, index) => {
         const grid = container.querySelector('.weekly-calendar-grid');
+        
+        console.log(`容器 ${index}:`, container, '网格:', grid);
         
         if (grid) {
             renderWeeklyCalendarForContainer(grid);
+            console.log(`容器 ${index} 渲染完成，子元素数量:`, grid.children.length);
+        } else {
+            console.warn(`容器 ${index} 未找到网格元素！`);
         }
     });
 }
 
 // 为单个容器渲染周历
 function renderWeeklyCalendarForContainer(grid) {
-    if (!grid) return;
+    if (!grid) {
+        console.error('renderWeeklyCalendarForContainer: grid 为空！');
+        return;
+    }
+    
+    console.log('开始渲染周历容器，grid:', grid);
     
     // 获取本周的开始日期（周日）
     const today = new Date();
@@ -1389,6 +1406,7 @@ function renderWeeklyCalendarForContainer(grid) {
     grid.innerHTML = '';
     
     const todayKey = getTodayKey();
+    console.log('本周开始日期:', startOfWeek, '今天:', todayKey);
     
     // 生成7天的内容
     for (let i = 0; i < 7; i++) {
