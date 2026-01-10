@@ -669,8 +669,7 @@ function updateNavActive(activeNav) {
 let currentCalendarYear = new Date().getFullYear();
 let currentCalendarMonth = new Date().getMonth();
 let calendarMode = 'moon'; // 'moon' 或 'mood' - 日历显示模式
-let calendarPageClickHandler = null; // 事件委托处理器
-let calendarPageClickHandler = null; // 保存事件处理器引用，用于移除
+let calendarPageClickHandler = null; // 事件委托处理器（保存事件处理器引用，用于移除）
 
 // 情绪状态对应的天气图标映射
 const EMOTION_WEATHER_MAP = {
