@@ -11,6 +11,19 @@
     <!-- 页面1: 每日占卜页面（情绪选择 + 抽牌） -->
     <div id="daily-reading-page" class="page active">
         <div class="daily-reading-content">
+            <!-- 周历显示 -->
+            <div class="weekly-calendar-container" id="weekly-calendar-container">
+                <div class="weekly-calendar-header">
+                    <div class="weekly-calendar-month">
+                        <span class="calendar-icon">📅</span>
+                        <span class="month-abbr" id="weekly-month-abbr">Jan</span>
+                    </div>
+                </div>
+                <div class="weekly-calendar-grid" id="weekly-calendar-grid">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+            
             <h1 class="page-title">开始今日占卜</h1>
             
             <!-- 选择情绪状态 -->
@@ -106,7 +119,7 @@
                 </button>
                 <button class="calendar-mode-btn" id="mood-calendar-btn" data-mode="mood">
                     <span class="btn-icon">😊</span>
-                    <span class="btn-text">心情日历</span>
+                    <span class="btn-text">状态日历</span>
                 </button>
             </div>
             

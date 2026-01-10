@@ -1321,6 +1321,159 @@ body.show-nav .bottom-nav {
     gap: 8px;
 }
 
+/* ===== 周历样式 ===== */
+.weekly-calendar-container {
+    width: 100%;
+    margin-bottom: 24px;
+    padding: 0 10px;
+}
+
+.weekly-calendar-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.weekly-calendar-month {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.calendar-icon {
+    font-size: 16px;
+}
+
+.month-abbr {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.weekly-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.weekly-day-button {
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    border: 1px dashed rgba(109, 92, 92, 0.3);
+    background: rgba(245, 243, 243, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    min-width: 0;
+    transition: all 0.3s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    text-align: center;
+}
+
+.weekly-weekday-cell {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    line-height: 1;
+}
+
+.weekly-icon-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+}
+
+.weekly-mood-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    display: block;
+    margin: 0 auto;
+    flex-shrink: 0;
+}
+
+.weekly-mood-icon-active {
+    opacity: 1;
+}
+
+.weekly-mood-icon-inactive {
+    opacity: 0.35;
+}
+
+.weekly-date-cell {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.weekly-day-button:not(.completed) .weekly-date-cell {
+    color: rgba(109, 92, 92, 0.4);
+}
+
+.weekly-day-button.completed {
+    background: var(--card-bg);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(109, 92, 92, 0.15);
+}
+
+.weekly-day-button.completed .weekly-date-cell {
+    color: var(--text-primary);
+}
+
+.weekly-day-button.today {
+    border: 2px solid var(--base-dark);
+    box-shadow: 0 0 0 2px rgba(109, 92, 92, 0.2);
+}
+
+.weekly-day-button.today.completed {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(109, 92, 92, 0.3);
+}
+
+/* 移动端：周历调整 */
+@media (max-width: 1329px) {
+    .weekly-calendar-container {
+        padding: 0 8px;
+        margin-bottom: 20px;
+    }
+    
+    .weekly-calendar-grid {
+        gap: 6px;
+    }
+    
+    .weekly-day-button {
+        padding: 6px;
+        gap: 3px;
+    }
+    
+    .weekly-weekday-cell {
+        font-size: 10px;
+    }
+    
+    .weekly-mood-icon {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .weekly-date-cell {
+        font-size: 12px;
+    }
+}
+
 .calendar-cell {
     aspect-ratio: 1 / 1;
     border-radius: 14px;
