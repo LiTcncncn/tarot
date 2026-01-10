@@ -57,9 +57,10 @@ ${userEmotion}
 
 【Today's Tarot Card】
 Card Name: ${tarotCard.name} (${tarotCard.nameCn})
-Actual Orientation: ${actualReversed ? '逆位' : '正位'} (用于解读参考，用户界面统一显示为正位)
+Actual Orientation: ${actualReversed ? '逆位' : '正位'} (仅用于内部解读参考，用户界面统一显示为正位，生成内容中不得提及)
 Card Intensity: ${intensity} - ${intensityDescriptions[intensity] || '中性推进/资源可用'}
-Card Meaning: ${tarotCard.nameCn} ${actualReversed ? '逆位' : '正位'} represents ${tarotCard.name}${actualReversed ? ' in reversed position' : ''}
+Card Energy Expression: ${actualReversed ? '内在/缓慢/需要调整节奏的表达' : '外在/主动/推进的表达'}
+Card Meaning: ${tarotCard.nameCn} represents ${tarotCard.name}${actualReversed ? ', today expressing with a more inward, slower rhythm that requires adjustment in approach' : ''}
 
 【Today's Moon Phase】
 Moon Phase: ${moonPhase.nameCn} (${moonPhase.name})
@@ -95,7 +96,7 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
 {
   "guidance_one_line": "A single line of healing comfort and actionable advice (within 40 Chinese characters). STRICTLY FORBIDDEN: Do NOT mention tarot card names (e.g., '宝剑皇后', '愚者', etc.) or moon phase names (e.g., '下弦月', '满月', etc.). Do NOT explain what the tarot card or moon phase means. Use ONLY their energy to inform your guidance, but express it as pure comfort and advice without referencing the symbols. Directly provide warm, empathetic reassurance and practical suggestions based on the user's emotional state. Make it feel like natural, intuitive guidance.",
   
-  "today_analysis": "A detailed analysis (exactly 200 Chinese characters) that EXPLICITLY explains the analytical thinking behind the guidance. MUST include: (1) Explanation of the tarot card's meaning and how it relates to the user's emotional state (mention the card name like '宝剑皇后', '愚者', etc.), (2) Explanation of the moon phase energy and its influence (mention the moon phase name like '下弦月', '满月', etc.), (3) How these elements combine with the user's emotional state to form comprehensive daily fortune and healing guidance. This should be sincere, warm, and personalized, showing the analytical process and reasoning behind the advice. The content should explain WHY and HOW the analysis is derived from these sources.",
+  "today_analysis": "A detailed analysis (exactly 200 Chinese characters) that EXPLICITLY explains the analytical thinking behind the guidance. MUST include: (1) Explanation of the tarot card's meaning and how it relates to the user's emotional state (mention the card name like '宝剑皇后', '愚者', etc.), (2) Explanation of the moon phase energy and its influence (mention the moon phase name like '下弦月', '满月', etc.), (3) How these elements combine with the user's emotional state to form comprehensive daily fortune and healing guidance. STRICTLY PROHIBITED: Do NOT use any words related to card orientation such as '逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向'. Do NOT describe the card drawing process (avoid phrases like '你抽到的是...' or '你抽到了一张...'). If the card energy is inward/slower/needs adjustment, express it as '节奏更慢/需要调整方法/更偏内在整理/先稳住' or '这张牌今天更偏向内在/缓慢/需要调整节奏的表达', never attribute it to '逆位'. This should be sincere, warm, and personalized, showing the analytical process and reasoning behind the advice. The content should explain WHY and HOW the analysis is derived from these sources.",
   
   "healing_task": "One specific healing task (20 seconds to 2 minutes to complete), tailored to the user's emotional state. Format: '* [specific action] [duration]'. Example: '* 注视远方一座塔楼 20 秒'. The task should help address the user's current emotional state.",
   
@@ -128,6 +129,17 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
 
 【Important Instructions】
 
+0. **CRITICAL PROHIBITIONS for today_analysis (最高优先级禁止项)**:
+   - STRICTLY FORBIDDEN: Do NOT use any words related to card orientation: "逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向"
+   - STRICTLY FORBIDDEN: Do NOT describe the card drawing process (avoid "你抽到的是..." or "你抽到了一张..." or "你抽到了一张逆位牌" or any description of drawing cards)
+   - If the card energy is inward/slower/needs adjustment (when actualReversed is true), express it as:
+     * "节奏更慢/需要调整方法/更偏内在整理/先稳住"
+     * "这张牌今天更偏向内在/缓慢/需要调整节奏的表达"
+     * "能量更偏向内收和整理，需要放缓节奏"
+     * "今天这张牌的能量呈现更偏内在的表达"
+   - NEVER attribute energy differences to "逆位" - express them as natural energy expressions of the card
+   - The card is always displayed as upright to the user, so the generated text should never suggest otherwise
+
 1. **Emotional State Integration**: 
    - If the user feels ${emotionDescription}, acknowledge their feelings with empathy
    - Provide comfort and reassurance that addresses their emotional needs
@@ -144,7 +156,12 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
    - **I1 (中性推进/资源可用)**：中性、推进性的解读，强调资源可用和行动方向
    - **I2 (轻挑战/提醒/需要调整)**：以"提醒"和"成长机会"的角度，温和地指出需要调整的地方
    - **I3 (强转折/冲击)**：以"转变"和"新开始"的角度，强调这是成长和转变的契机
-   - **逆位牌处理**：即使抽到逆位牌，也要以正面的角度进行解读，强调疗愈和修复的能量，提供温柔的指引和建议，避免恐吓或负面暗示
+   - **卡牌能量表达调整**：
+     * 如果卡牌能量更偏向内在/缓慢/需要调整：用"节奏更慢/需要调整方法/更偏内在整理/先稳住"这类措辞表达
+     * 允许写成"这张牌今天更偏向内在/缓慢/需要调整节奏的表达"
+     * **严格禁止**：不得出现"逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向"等任何表达
+     * **严格禁止**：不得描述抽牌过程（不要说"你抽到的是...""你抽到了一张..."）
+     * 不归因于逆位，而是描述卡牌能量的自然表达方式
 
 3. **Content Tone**:
    - Be warm, gentle, and encouraging
@@ -170,11 +187,16 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
      * MUST mention the moon phase name (e.g., "下弦月", "满月", "新月") and explain its energy and influence
      * MUST explain how these elements combine with the user's emotional state to form the guidance
      * Should show the analytical process: why these symbols were chosen, what they mean, and how they inform the advice
+     * **CRITICAL PROHIBITIONS**:
+       - STRICTLY FORBIDDEN: Do NOT use any words related to card orientation: "逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向"
+       - STRICTLY FORBIDDEN: Do NOT describe the card drawing process (avoid "你抽到的是..." or "你抽到了一张...")
+       - If the card energy is inward/slower/needs adjustment, express it as "节奏更慢/需要调整方法/更偏内在整理/先稳住" or "这张牌今天更偏向内在/缓慢/需要调整节奏的表达"
+       - Never attribute energy differences to "逆位" - express them as natural energy expressions
      * This is where the user learns the SOURCE and LOGIC behind the guidance
 
 4. **Length Requirements**:
    - guidance_one_line: Exactly within 40 Chinese characters - must be direct healing comfort and advice, NO explanation of tarot or moon phase, NO mention of card/phase names
-   - today_analysis: Exactly 200 Chinese characters - MUST explicitly explain the tarot card meaning, moon phase energy, and how they combine with the user's emotional state. MUST mention the card name and moon phase name. This is the analytical explanation section.
+   - today_analysis: Exactly 200 Chinese characters - MUST explicitly explain the tarot card meaning, moon phase energy, and how they combine with the user's emotional state. MUST mention the card name and moon phase name. **STRICTLY PROHIBITED**: Do NOT use any words related to card orientation such as "逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向". Do NOT describe the card drawing process (avoid phrases like "你抽到的是..." or "你抽到了一张..."). If the card energy is inward/slower/needs adjustment, express it as "节奏更慢/需要调整方法/更偏内在整理/先稳住" or "这张牌今天更偏向内在/缓慢/需要调整节奏的表达", never attribute it to "逆位". This is the analytical explanation section.
    - healing_task: One simple, actionable task (20 sec - 2 min)
    - two_guidances: Each within 80 Chinese characters
    - category_guidances: Each within 60 Chinese characters
