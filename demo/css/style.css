@@ -1029,7 +1029,7 @@ section {
     }
     
     .page {
-        padding: 15px 8px; /* 移动端减少左右padding */
+        padding: 15px 4px; /* 移动端减少左右padding到4px */
         max-width: 100vw !important;
         overflow-x: hidden !important;
     }
@@ -1439,12 +1439,12 @@ body.show-nav .bottom-nav {
 /* 移动端：周历调整 */
 @media (max-width: 1329px) {
     .weekly-calendar-container {
-        padding: 0 8px;
+        padding: 0 2px; /* 移动端进一步减少左右padding，放大周历 */
         margin-bottom: 20px;
     }
     
     .weekly-calendar-grid {
-        gap: 6px;
+        gap: 4px; /* 减少间距，让日期按钮更大 */
     }
     
     .weekly-day-button {
