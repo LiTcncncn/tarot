@@ -1542,18 +1542,34 @@ function bindWeeklyCalendarSwipe(container) {
         const minSwipeDistance = 50; // 最小滑动距离
         
         if (Math.abs(diffX) > minSwipeDistance) {
-            if (diffX > 0) {
-                // 向左滑动，显示下一周
-                weeklyCalendarOffset++;
-                console.log('向左滑动，显示下一周，偏移:', weeklyCalendarOffset);
+            // 获取网格元素，添加滑动方向的动画
+            const grid = container.querySelector('.weekly-calendar-grid');
+            if (grid) {
+                // 根据滑动方向设置初始位置并触发淡出
+                if (diffX > 0) {
+                    // 向左滑动，显示下一周（从右侧滑入）
+                    grid.style.transform = 'translateX(-100px)';
+                    weeklyCalendarOffset++;
+                } else {
+                    // 向右滑动，显示上一周（从左侧滑入）
+                    grid.style.transform = 'translateX(100px)';
+                    weeklyCalendarOffset--;
+                }
+                grid.style.opacity = '0';
+                
+                // 延迟重新渲染，让淡出动画完成
+                setTimeout(() => {
+                    renderWeeklyCalendar();
+                }, 150); // 动画时长的一半，让切换更流畅
             } else {
-                // 向右滑动，显示上一周
-                weeklyCalendarOffset--;
-                console.log('向右滑动，显示上一周，偏移:', weeklyCalendarOffset);
+                // 如果没有网格元素，直接重新渲染
+                if (diffX > 0) {
+                    weeklyCalendarOffset++;
+                } else {
+                    weeklyCalendarOffset--;
+                }
+                renderWeeklyCalendar();
             }
-            
-            // 重新渲染周历
-            renderWeeklyCalendar();
         }
     }, { passive: true });
 }

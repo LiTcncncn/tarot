@@ -1357,6 +1357,8 @@ body.show-nav .bottom-nav {
     visibility: visible !important;
     opacity: 1 !important;
     min-height: 60px; /* 确保有最小高度 */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transform: translateX(0);
 }
 
 .weekly-day-button {
