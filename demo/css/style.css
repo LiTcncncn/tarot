@@ -1475,7 +1475,7 @@ body.show-nav .bottom-nav {
     }
     
     .weekly-moon-icon {
-        font-size: 24px; /* 移动端放大月相图标 */
+        font-size: 18px; /* 移动端月相图标（比天气图标稍小） */
     }
     
     .weekly-date-cell {
