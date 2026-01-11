@@ -655,7 +655,8 @@ let currentCalendarMonth = new Date().getMonth();
 let calendarMode = 'moon'; // 'moon' 或 'mood' - 日历显示模式，默认为月相日历
 let calendarPageClickHandler = null; // 事件委托处理器（保存事件处理器引用，用于移除）
 
-// 周历当前显示的周（相对于本周的偏移，0 = 本周，-1 = 上一周，1 = 下一周）
+// 周历当前显示的周（相对于本周的偏移，0 = 本周，-1 = 上一周，-2 = 上上周...）
+// 注意：不能大于0，即不能看未来
 let weeklyCalendarOffset = 0;
 
 // 情绪状态对应的天气图标映射
