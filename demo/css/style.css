@@ -1029,7 +1029,7 @@ section {
     }
     
     .page {
-        padding: 15px 4px; /* 移动端减少左右padding到4px */
+        padding: 15px 4px 60px 4px; /* 移动端减少左右padding到4px，增加底部padding到60px确保按钮可见 */
         max-width: 100vw !important;
         overflow-x: hidden !important;
     }
