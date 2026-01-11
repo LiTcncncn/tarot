@@ -1247,6 +1247,9 @@ function switchCalendarMode(mode) {
     
     // 重新渲染日历
     renderCalendar(currentCalendarYear, currentCalendarMonth);
+    
+    // 同步更新周历显示
+    renderWeeklyCalendar();
 }
 
 // 更新日历模式按钮状态
@@ -1463,18 +1466,29 @@ function renderWeeklyCalendarForContainer(grid) {
         weekdayCell.textContent = weekdays[i];
         dayButton.appendChild(weekdayCell);
         
-        // 第二行：天气图标
+        // 第二行：图标（根据calendarMode显示月相或状态）
         const iconCell = document.createElement('div');
         iconCell.className = 'weekly-icon-cell';
         
         let iconHtml = '';
-        if (reading && reading.emotion && EMOTION_WEATHER_MAP[reading.emotion]) {
-            // 已签到：显示情绪对应的天气图标
-            const weatherInfo = EMOTION_WEATHER_MAP[reading.emotion];
-            iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="weekly-mood-icon weekly-mood-icon-active" title="${reading.emotion}">`;
+        if (calendarMode === 'mood') {
+            // 状态日历模式：显示天气图标
+            if (reading && reading.emotion && EMOTION_WEATHER_MAP[reading.emotion]) {
+                // 已签到：显示情绪对应的天气图标
+                const weatherInfo = EMOTION_WEATHER_MAP[reading.emotion];
+                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="weekly-mood-icon weekly-mood-icon-active" title="${reading.emotion}">`;
+            } else {
+                // 未签到：显示默认天气图标（weather/2.png）的半透效果
+                iconHtml = `<img src="weather/2.png" alt="未签到" class="weekly-mood-icon weekly-mood-icon-inactive" title="未记录">`;
+            }
         } else {
-            // 未签到：显示默认天气图标（weather/2.png）的半透效果
-            iconHtml = `<img src="weather/2.png" alt="未签到" class="weekly-mood-icon weekly-mood-icon-inactive" title="未记录">`;
+            // 月相日历模式：显示月相图标
+            const moonPhase = getMoonPhase(date);
+            if (moonPhase && moonPhase.emoji) {
+                iconHtml = `<span class="weekly-moon-icon" title="${moonPhase.nameCn}">${moonPhase.emoji}</span>`;
+            } else {
+                iconHtml = `<span class="weekly-moon-icon weekly-moon-icon-inactive" title="未记录">🌑</span>`;
+            }
         }
         
         iconCell.innerHTML = iconHtml;
