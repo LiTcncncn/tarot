@@ -1,0 +1,542 @@
+/* 个人信息补充样式 - 移动端为主 */
+
+/* ===== 入口按钮 ===== */
+.add-profile-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 8px 16px;
+    background: rgba(109, 92, 92, 0.1);
+    border: 1px solid rgba(109, 92, 92, 0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+}
+
+.add-profile-btn:hover {
+    background: rgba(109, 92, 92, 0.2);
+}
+
+@media (max-width: 1329px) {
+    .add-profile-btn {
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+}
+
+/* ===== 个人页面 ===== */
+.profile-content {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.profile-info-container {
+    margin-top: 20px;
+}
+
+.profile-info-card {
+    background: rgba(245, 243, 243, 0.8);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px dashed rgba(109, 92, 92, 0.3);
+}
+
+.profile-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(109, 92, 92, 0.1);
+}
+
+.profile-info-item:last-child {
+    border-bottom: none;
+}
+
+.profile-info-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.profile-info-value {
+    font-size: 14px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.weather-icon-small {
+    width: 20px;
+    height: 20px;
+}
+
+.profile-edit-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: var(--base-dark);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.profile-edit-btn:hover {
+    background: rgba(109, 92, 92, 0.8);
+}
+
+.profile-empty-container {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.profile-empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.profile-empty-text {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.profile-add-btn {
+    padding: 14px 32px;
+    background: var(--base-dark);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.profile-add-btn:hover {
+    background: rgba(109, 92, 92, 0.8);
+}
+
+/* ===== 模态框 ===== */
+.profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: none;
+}
+
+.profile-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.profile-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    max-height: 85vh;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@media (max-width: 1329px) {
+    .profile-modal-content {
+        width: 95%;
+        max-height: 90vh;
+        border-radius: 16px;
+    }
+}
+
+.profile-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(109, 92, 92, 0.1);
+}
+
+.profile-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.profile-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.profile-modal-close:hover {
+    background: rgba(109, 92, 92, 0.1);
+}
+
+/* ===== 进度条 ===== */
+.profile-progress {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(109, 92, 92, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(109, 92, 92, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.profile-progress-fill {
+    height: 100%;
+    background: var(--base-dark);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 16.67%;
+}
+
+.profile-progress-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    min-width: 35px;
+}
+
+/* ===== 表单内容 ===== */
+.profile-form-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 20px;
+    min-height: 300px;
+}
+
+.profile-step-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.profile-step-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+.profile-step-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 24px 0;
+    text-align: center;
+}
+
+/* ===== 输入框 ===== */
+.profile-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(109, 92, 92, 0.3);
+    border-radius: 12px;
+    font-size: 15px;
+    color: var(--text-primary);
+    background: rgba(245, 243, 243, 0.5);
+    box-sizing: border-box;
+    transition: all 0.3s;
+}
+
+.profile-input:focus {
+    outline: none;
+    border-color: var(--base-dark);
+    background: white;
+}
+
+.profile-error {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #e74c3c;
+    display: none;
+}
+
+/* ===== 单选按钮组 ===== */
+.profile-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.profile-radio-label {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border: 1px solid rgba(109, 92, 92, 0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: rgba(245, 243, 243, 0.5);
+}
+
+.profile-radio-label:hover {
+    background: rgba(245, 243, 243, 0.8);
+}
+
+.profile-radio-label input[type="radio"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.profile-radio-label input[type="radio"]:checked + .radio-text {
+    font-weight: 600;
+}
+
+.profile-radio-label:has(input[type="radio"]:checked) {
+    border-color: var(--base-dark);
+    background: rgba(109, 92, 92, 0.1);
+}
+
+.radio-text {
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+/* ===== 星座显示 ===== */
+.profile-zodiac-display {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(109, 92, 92, 0.05);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.zodiac-emoji {
+    font-size: 24px;
+}
+
+.zodiac-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ===== 时间选择 ===== */
+.profile-time-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile-unknown-btn {
+    padding: 12px 16px;
+    border: 1px solid rgba(109, 92, 92, 0.3);
+    border-radius: 12px;
+    background: rgba(245, 243, 243, 0.5);
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.profile-unknown-btn:hover {
+    background: rgba(245, 243, 243, 0.8);
+}
+
+.profile-unknown-btn[data-selected="true"] {
+    border-color: var(--base-dark);
+    background: rgba(109, 92, 92, 0.1);
+    font-weight: 600;
+}
+
+/* ===== 天气选择网格 ===== */
+.profile-weather-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.profile-weather-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid rgba(109, 92, 92, 0.3);
+    border-radius: 12px;
+    background: rgba(245, 243, 243, 0.5);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.profile-weather-item:hover {
+    background: rgba(245, 243, 243, 0.8);
+}
+
+.profile-weather-item.selected {
+    border-color: var(--base-dark);
+    background: rgba(109, 92, 92, 0.1);
+}
+
+.profile-weather-item .weather-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.profile-weather-item .weather-label {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+/* ===== 按钮组 ===== */
+.profile-form-actions {
+    padding: 20px;
+    border-top: 1px solid rgba(109, 92, 92, 0.1);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.profile-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 100px;
+}
+
+.profile-btn-primary {
+    background: var(--base-dark);
+    color: white;
+}
+
+.profile-btn-primary:hover {
+    background: rgba(109, 92, 92, 0.8);
+}
+
+.profile-btn-secondary {
+    background: rgba(109, 92, 92, 0.1);
+    color: var(--text-primary);
+    border: 1px solid rgba(109, 92, 92, 0.3);
+}
+
+.profile-btn-secondary:hover {
+    background: rgba(109, 92, 92, 0.2);
+}
+
+@media (max-width: 1329px) {
+    .profile-content {
+        padding: 15px;
+    }
+    
+    .profile-info-card {
+        padding: 16px;
+    }
+    
+    .profile-info-item {
+        padding: 10px 0;
+    }
+    
+    .profile-info-label,
+    .profile-info-value {
+        font-size: 13px;
+    }
+    
+    .profile-modal-content {
+        border-radius: 16px 16px 0 0;
+        top: auto;
+        bottom: 0;
+        transform: translateX(-50%);
+        max-height: 90vh;
+    }
+    
+    .profile-form-container {
+        padding: 20px 15px;
+        min-height: 250px;
+    }
+    
+    .profile-step-title {
+        font-size: 18px;
+    }
+    
+    .profile-step-desc {
+        font-size: 13px;
+    }
+    
+    .profile-input {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+    
+    .profile-radio-label {
+        padding: 12px 14px;
+    }
+    
+    .profile-weather-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .profile-weather-item {
+        padding: 12px;
+    }
+    
+    .profile-weather-item .weather-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .profile-form-actions {
+        padding: 15px;
+        flex-direction: column;
+    }
+    
+    .profile-btn {
+        width: 100%;
+        padding: 14px;
+    }
+}
+

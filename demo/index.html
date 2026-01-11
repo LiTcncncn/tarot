@@ -11,6 +11,11 @@
     <!-- 页面1: 每日占卜页面（情绪选择 + 抽牌） -->
     <div id="daily-reading-page" class="page active">
         <div class="daily-reading-content">
+            <!-- 补充个人信息按钮（右上角，未填写时显示） -->
+            <button id="add-profile-btn" class="add-profile-btn" style="display: none;">
+                补充个人信息
+            </button>
+            
             <!-- 周历显示 -->
             <div class="weekly-calendar-container" id="weekly-calendar-container">
                 <div class="weekly-calendar-grid" id="weekly-calendar-grid">
@@ -209,6 +214,25 @@
         </div>
     </div>
 
+    <!-- 页面5: 个人模块 -->
+    <div id="profile-page" class="page" style="display: none;">
+        <div class="profile-content">
+            <h1 class="page-title">个人信息</h1>
+            
+            <!-- 个人信息显示区域 -->
+            <div id="profile-info-container" class="profile-info-container" style="display: none;">
+                <!-- 动态生成 -->
+            </div>
+            
+            <!-- 未填写信息提示 -->
+            <div id="profile-empty-container" class="profile-empty-container" style="display: none;">
+                <div class="profile-empty-icon">👤</div>
+                <p class="profile-empty-text">还没有填写个人信息</p>
+                <button id="profile-add-btn-empty" class="profile-add-btn">补充个人信息</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 页面4: 主界面（结果展示） -->
     <div id="main-page" class="page" style="display: none;">
         <!-- 今日占卜按钮（如果未完成） -->
@@ -369,6 +393,35 @@
         </div>
     </div>
 
+    <!-- 个人信息补充模态框 -->
+    <div class="profile-modal" id="profile-modal" style="display: none;">
+        <div class="profile-modal-backdrop" id="profile-modal-backdrop"></div>
+        <div class="profile-modal-content">
+            <div class="profile-modal-header">
+                <h2 class="profile-modal-title">补充个人信息</h2>
+                <button class="profile-modal-close" id="profile-modal-close">✕</button>
+            </div>
+            
+            <!-- 进度指示器 -->
+            <div class="profile-progress">
+                <div class="profile-progress-bar">
+                    <div class="profile-progress-fill" id="profile-progress-fill"></div>
+                </div>
+                <div class="profile-progress-text" id="profile-progress-text">1/6</div>
+            </div>
+            
+            <!-- 表单内容区域 -->
+            <div class="profile-form-container" id="profile-form-container">
+                <!-- 动态生成6步表单 -->
+            </div>
+            
+            <!-- 导航按钮 -->
+            <div class="profile-form-actions" id="profile-form-actions">
+                <!-- 动态生成按钮 -->
+            </div>
+        </div>
+    </div>
+
     <!-- 底部导航栏 -->
     <nav class="bottom-nav">
         <div class="nav-item" data-nav="calendar">
@@ -396,6 +449,8 @@
     <script src="js/card-intensity.js"></script>
     <script src="js/tarot-cards.js"></script>
     <script src="js/moon-phase.js"></script>
+    <script src="js/zodiac.js"></script>
+    <script src="js/user-profile.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/api.js"></script>
     <script src="js/tarot-storage.js"></script>

@@ -639,6 +639,31 @@ function showTarotPage() {
     }
 }
 
+// 显示个人页面
+function showProfilePage() {
+    // 先隐藏所有页面
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+        page.classList.remove('active');
+    });
+    
+    // 显示个人页面
+    const profilePage = document.getElementById('profile-page');
+    if (profilePage) {
+        profilePage.style.display = 'block';
+        profilePage.classList.add('active');
+    }
+    
+    // 显示导航栏
+    document.body.classList.add('show-nav');
+    
+    // 更新导航栏激活状态
+    updateNavActive('profile');
+    
+    // 渲染个人信息
+    renderProfilePage();
+}
+
 // 更新导航栏激活状态
 function updateNavActive(activeNav) {
     document.querySelectorAll('.nav-item').forEach(item => {

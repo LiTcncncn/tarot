@@ -72,8 +72,9 @@ function bindEvents() {
                     console.log('疗愈页面待实现');
                     break;
                 case 'profile':
-                    // TODO: 实现个人页面
-                    console.log('个人页面待实现');
+                    showProfilePage();
+                    updateNavActive('profile');
+                    document.body.classList.add('show-nav');
                     break;
             }
         });
@@ -81,6 +82,11 @@ function bindEvents() {
     
     // 初始化日历页面
     initCalendarPage();
+    
+    // 初始化个人信息模态框
+    if (typeof initProfileModal === 'function') {
+        initProfileModal();
+    }
     
     // 抽牌回调函数
     function getCardDrawCallback() {
