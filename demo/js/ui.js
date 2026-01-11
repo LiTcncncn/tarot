@@ -1401,10 +1401,21 @@ function renderWeeklyCalendarForContainer(grid) {
     
     console.log('renderWeeklyCalendarForContainer 开始，grid:', grid, '可见性:', window.getComputedStyle(grid).display);
     
+    // 添加淡出动画
+    grid.style.opacity = '0';
+    grid.style.transform = 'translateX(20px)';
+    
     // 确保网格可见
     grid.style.display = 'grid';
     grid.style.visibility = 'visible';
-    grid.style.opacity = '1';
+    
+    // 使用requestAnimationFrame确保动画流畅
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            grid.style.opacity = '1';
+            grid.style.transform = 'translateX(0)';
+        });
+    });
     
     // 获取目标周的开始日期（周日）
     const today = new Date();
