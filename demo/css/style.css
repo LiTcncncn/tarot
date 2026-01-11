@@ -1036,7 +1036,7 @@ section {
     
     .daily-reading-content {
         max-width: 100%;
-        padding: 0 4px; /* 移动端也减少左右padding */
+        padding: 0 2px; /* 移动端进一步减少左右padding，放大周历 */
     }
     
     /* 确保重置按钮在移动端显示 */
