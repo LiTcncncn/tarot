@@ -1483,7 +1483,7 @@ function renderWeeklyCalendarForContainer(grid) {
             }
         } else {
             // 月相日历模式：显示月相图标
-            const moonPhase = getMoonPhase(date);
+            const moonPhase = getTodayMoonPhase(date);
             if (moonPhase && moonPhase.emoji) {
                 iconHtml = `<span class="weekly-moon-icon" title="${moonPhase.nameCn}">${moonPhase.emoji}</span>`;
             } else {
