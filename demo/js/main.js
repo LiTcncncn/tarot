@@ -2,6 +2,11 @@
 
 // 初始化应用
 function initApp() {
+    // 初始化背景色为默认值（确保一致性）
+    if (typeof resetBackgroundToDefault === 'function') {
+        resetBackgroundToDefault();
+    }
+    
     // 初始化 UI
     initEmotionSlider();
     
@@ -86,6 +91,11 @@ function bindEvents() {
     // 初始化个人信息模态框
     if (typeof initProfileModal === 'function') {
         initProfileModal();
+    }
+    
+    // 初始化情绪记录按钮
+    if (typeof bindEmotionRecordButton === 'function') {
+        bindEmotionRecordButton();
     }
     
     // 抽牌回调函数

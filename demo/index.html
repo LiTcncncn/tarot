@@ -12,18 +12,6 @@
     <!-- 页面1: 每日占卜页面（情绪选择 + 抽牌） -->
     <div id="daily-reading-page" class="page active">
         <div class="daily-reading-content">
-            <!-- 补充个人信息按钮（右上角，未填写时显示） -->
-            <button id="add-profile-btn" class="add-profile-btn" style="display: none;">
-                补充个人信息
-            </button>
-            
-            <!-- 周历显示 -->
-            <div class="weekly-calendar-container" id="weekly-calendar-container">
-                <div class="weekly-calendar-grid" id="weekly-calendar-grid">
-                    <!-- 动态生成 -->
-                </div>
-            </div>
-            
             <h1 class="page-title">开始今日占卜</h1>
             
             <!-- 选择情绪状态 -->
@@ -70,7 +58,7 @@
                     <div class="card-pile" id="card-pile">
                         <img src="Cards-png/CardBacks.png" alt="塔罗牌堆" class="card-back">
                         <div class="draw-hint">
-                            <p>长按或点击牌堆抽牌</p>
+                            <p>点击牌堆抽牌</p>
                         </div>
                     </div>
                     <div class="drawn-card-container" id="drawn-card-container" style="display: none;">
@@ -236,6 +224,19 @@
 
     <!-- 页面4: 主界面（结果展示） -->
     <div id="main-page" class="page" style="display: none;">
+        <!-- 顶部头部区域 -->
+        <div class="main-page-header">
+            <div class="main-page-date" id="main-page-date">January 11</div>
+            <div class="main-page-right">
+                <button id="add-profile-btn" class="add-profile-btn" style="display: none;">
+                    补充个人信息
+                </button>
+                <div id="main-page-greeting" class="main-page-greeting" style="display: none;">
+                    Hi，<span id="main-page-nickname"></span>
+                </div>
+            </div>
+        </div>
+        
         <!-- 今日占卜按钮（如果未完成） -->
         <button id="start-daily-btn" class="start-daily-btn" style="display: none;">
             <span class="btn-icon">🔮</span>
@@ -250,27 +251,21 @@
                 </div>
             </div>
             
-            <!-- 1. 今日月相和塔罗牌（一行显示） -->
+            <!-- 1. 今日指引和塔罗牌（左右分列） -->
             <section class="moon-phase-section">
-                <div class="moon-emoji" id="moon-emoji">🌕</div>
-                <div class="moon-info">
-                    <div class="today-date-wrapper">
-                        <div class="today-date" id="today-date"></div>
-                        <div class="today-year" id="today-year"></div>
-                    </div>
-                    <h2 id="moon-phase-name">满月</h2>
-                    <p id="moon-phase-energy" class="moon-energy">能量充沛</p>
+                <!-- 左侧：今日指引 -->
+                <div class="guidance-left">
+                    <h3 class="section-title">今日指引</h3>
+                    <p class="guidance-one-line" id="guidance-one-line"></p>
                 </div>
+                <!-- 右侧：塔罗牌+月相图标 -->
                 <div class="today-card" id="today-card-container" style="display: none;">
-                    <img id="today-card-img" src="" alt="今日塔罗" class="today-card-img">
+                    <div class="card-image-wrapper">
+                        <img id="today-card-img" src="" alt="今日塔罗" class="today-card-img">
+                        <div class="moon-emoji-overlay" id="moon-emoji">🌕</div>
+                    </div>
                     <div class="today-card-name" id="today-card-name"></div>
                 </div>
-            </section>
-
-            <!-- 3. 今日综合指引 -->
-            <section class="guidance-section">
-                <h3 class="section-title">今日指引</h3>
-                <p class="guidance-one-line" id="guidance-one-line"></p>
             </section>
 
             <!-- 3.5. 今日分析 -->
@@ -279,29 +274,9 @@
                 <div class="today-analysis-content" id="today-analysis-content"></div>
             </section>
 
-            <!-- 3.6. 情绪记录 -->
-            <section class="emotion-record-section">
-                <h3 class="section-title">情绪记录</h3>
-                <div class="emotion-record-card">
-                    <textarea 
-                        id="emotion-record-input" 
-                        class="emotion-record-textarea" 
-                        placeholder="记录今日的心境、事件或想法...（选填）"
-                        rows="4"
-                    ></textarea>
-                    <button id="save-emotion-record-btn" class="btn-save-record" style="display: none;">
-                        <span>💾 保存</span>
-                    </button>
-                    <div class="record-saved" id="record-saved" style="display: none;">
-                        <span class="checkmark">✓</span>
-                        <span>已保存</span>
-                    </div>
-                </div>
-            </section>
-
             <!-- 4. 疗愈任务 -->
             <section class="healing-task-section">
-                <h3 class="section-title">今日疗愈任务</h3>
+                <h3 class="section-title">疗愈 Boost</h3>
                 <div class="healing-task-card" id="healing-task-card">
                     <p class="task-text" id="healing-task-text"></p>
                     <button id="complete-task-btn" class="btn-complete" style="display: none;">
@@ -312,6 +287,13 @@
                         <span>已完成</span>
                     </div>
                 </div>
+            </section>
+
+            <!-- 3.6. 情绪记录 -->
+            <section class="emotion-record-section">
+                <button id="emotion-record-btn" class="emotion-record-btn">
+                    <span>情绪记录</span>
+                </button>
             </section>
 
             <!-- 5. 查看各领域指引 -->
@@ -380,6 +362,79 @@
                 <button class="calendar-modal-close" id="calendar-modal-close" aria-label="Close">✕</button>
             </div>
             <div class="calendar-modal-content" id="calendar-modal-content"></div>
+        </div>
+    </div>
+
+    <!-- 情绪记录弹板 -->
+    <div class="emotion-record-modal" id="emotion-record-modal" style="display: none;">
+        <div class="emotion-record-modal-backdrop" id="emotion-record-modal-backdrop"></div>
+        <div class="emotion-record-modal-sheet">
+            <div class="emotion-record-modal-header">
+                <h3 class="emotion-record-modal-title">情绪记录</h3>
+                <button class="emotion-record-modal-close" id="emotion-record-modal-close">✕</button>
+            </div>
+            <div class="emotion-record-modal-content">
+                <div class="current-emotion-section">
+                    <div class="current-emotion-label">此刻状态</div>
+                    <div class="current-emotion-options">
+                        <button class="current-emotion-btn" data-emotion="愉悦">
+                            <img src="weather/1.png" alt="愉悦" class="current-emotion-icon">
+                            <span>愉悦</span>
+                        </button>
+                        <button class="current-emotion-btn" data-emotion="平静">
+                            <img src="weather/2.png" alt="平静" class="current-emotion-icon">
+                            <span>平静</span>
+                        </button>
+                        <button class="current-emotion-btn" data-emotion="疲惫">
+                            <img src="weather/3.png" alt="疲惫" class="current-emotion-icon">
+                            <span>疲惫</span>
+                        </button>
+                        <button class="current-emotion-btn" data-emotion="迷茫">
+                            <img src="weather/4.png" alt="迷茫" class="current-emotion-icon">
+                            <span>迷茫</span>
+                        </button>
+                        <button class="current-emotion-btn" data-emotion="焦虑">
+                            <img src="weather/5.png" alt="焦虑" class="current-emotion-icon">
+                            <span>焦虑</span>
+                        </button>
+                        <button class="current-emotion-btn" data-emotion="雨过天晴">
+                            <img src="weather/6.png" alt="雨过天晴" class="current-emotion-icon">
+                            <span>雨过天晴</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="emotion-record-input-section">
+                    <textarea 
+                        id="emotion-record-modal-input" 
+                        class="emotion-record-modal-textarea" 
+                        placeholder="记录今日的心境、事件或想法...（选填）"
+                        rows="4"
+                    ></textarea>
+                </div>
+                <div class="emotion-record-modal-actions">
+                    <button id="save-emotion-record-modal-btn" class="emotion-record-modal-save-btn">
+                        <span>💾 保存</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 情绪选择弹板（完成任务后） -->
+    <div class="emotion-select-toast" id="emotion-select-toast" style="display: none;">
+        <div class="emotion-select-toast-card">
+            <div class="emotion-select-toast-title">情绪能量？</div>
+            <div class="emotion-select-options">
+                <button class="emotion-select-btn" data-value="-1" id="emotion-select-minus">
+                    <span class="emotion-select-icon">-1</span>
+                </button>
+                <button class="emotion-select-btn" data-value="0" id="emotion-select-zero">
+                    <span class="emotion-select-icon">0</span>
+                </button>
+                <button class="emotion-select-btn" data-value="1" id="emotion-select-plus">
+                    <span class="emotion-select-icon">+1</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -452,6 +507,7 @@
     <script src="js/moon-phase.js"></script>
     <script src="js/zodiac.js"></script>
     <script src="js/user-profile.js"></script>
+    <script src="js/profile-modal.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/api.js"></script>
     <script src="js/tarot-storage.js"></script>

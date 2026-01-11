@@ -38,6 +38,20 @@ const EMOTION_DESCRIPTIONS = {
 function buildPrompt(userEmotion, tarotCard, moonPhase) {
     const emotionDescription = EMOTION_DESCRIPTIONS[userEmotion] || userEmotion;
     
+    // 获取用户信息（检查是否有星座信息）
+    let userProfile = null;
+    let zodiacInfo = null;
+    if (typeof getUserProfile === 'function') {
+        userProfile = getUserProfile();
+        if (userProfile && userProfile.zodiac) {
+            // 如果用户信息中有星座，使用它
+            zodiacInfo = userProfile.zodiac;
+        } else if (userProfile && userProfile.birthday && typeof getZodiacFromDate === 'function') {
+            // 如果用户有生日但没有星座，从生日计算
+            zodiacInfo = getZodiacFromDate(userProfile.birthday);
+        }
+    }
+    
     // 获取实际正逆位和强度等级
     const actualReversed = tarotCard.actualReversed !== undefined ? tarotCard.actualReversed : false;
     const intensity = tarotCard.intensity || getCardIntensity(tarotCard.name);
@@ -66,7 +80,9 @@ Card Meaning: ${tarotCard.nameCn} represents ${tarotCard.name}${actualReversed ?
 Moon Phase: ${moonPhase.nameCn} (${moonPhase.name})
 Moon Energy: ${moonPhase.energy}
 
----
+${zodiacInfo ? `【User's Zodiac Sign】
+Zodiac: ${zodiacInfo.nameCn} (${zodiacInfo.name}) ${zodiacInfo.emoji}
+` : ''}---
 
 【Critical Instructions for guidance_one_line】
 The "guidance_one_line" field must provide DIRECT healing comfort and actionable advice. 
@@ -96,7 +112,7 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
 {
   "guidance_one_line": "A single line of healing comfort and actionable advice (within 40 Chinese characters). STRICTLY FORBIDDEN: Do NOT mention tarot card names (e.g., '宝剑皇后', '愚者', etc.) or moon phase names (e.g., '下弦月', '满月', etc.). Do NOT explain what the tarot card or moon phase means. Use ONLY their energy to inform your guidance, but express it as pure comfort and advice without referencing the symbols. Directly provide warm, empathetic reassurance and practical suggestions based on the user's emotional state. Make it feel like natural, intuitive guidance.",
   
-  "today_analysis": "A detailed analysis (exactly 200 Chinese characters) that EXPLICITLY explains the analytical thinking behind the guidance. MUST include: (1) Explanation of the tarot card's meaning and how it relates to the user's emotional state (mention the card name like '宝剑皇后', '愚者', etc.), (2) Explanation of the moon phase energy and its influence (mention the moon phase name like '下弦月', '满月', etc.), (3) How these elements combine with the user's emotional state to form comprehensive daily fortune and healing guidance. STRICTLY PROHIBITED: Do NOT use any words related to card orientation such as '逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向'. Do NOT describe the card drawing process (avoid phrases like '你抽到的是...' or '你抽到了一张...'). If the card energy is inward/slower/needs adjustment, express it as '节奏更慢/需要调整方法/更偏内在整理/先稳住' or '这张牌今天更偏向内在/缓慢/需要调整节奏的表达', never attribute it to '逆位'. This should be sincere, warm, and personalized, showing the analytical process and reasoning behind the advice. The content should explain WHY and HOW the analysis is derived from these sources.",
+  "today_analysis": "**CRITICAL LENGTH REQUIREMENT: EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY and STRICTLY ENFORCED. The content MUST be divided into 2 paragraphs (use \\n to separate paragraphs), each paragraph should be complete and meaningful. Before finalizing, count the characters to ensure it falls within 280-320 characters.** A detailed analysis that EXPLICITLY explains the analytical thinking behind the guidance. MUST include: (1) Explanation of the tarot card's meaning and how it relates to the user's emotional state (mention the card name like '宝剑皇后', '愚者', etc.), (2) Explanation of the moon phase energy and its influence (mention the moon phase name like '下弦月', '满月', etc.)${zodiacInfo ? `, (3) A brief zodiac analysis (小篇幅) that combines the user's zodiac sign (${zodiacInfo.nameCn}) with today's tarot card and moon phase energy, explaining how the zodiac traits interact with today's guidance` : `, (3) How these elements combine with the user's emotional state to form comprehensive daily fortune and healing guidance`}. STRICTLY PROHIBITED: Do NOT use any words related to card orientation such as '逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向'. Do NOT describe the card drawing process (avoid phrases like '你抽到的是...' or '你抽到了一张...'). If the card energy is inward/slower/needs adjustment, express it as '节奏更慢/需要调整方法/更偏内在整理/先稳住' or '这张牌今天更偏向内在/缓慢/需要调整节奏的表达', never attribute it to '逆位'. This should be sincere, warm, and personalized, showing the analytical process and reasoning behind the advice. The content should explain WHY and HOW the analysis is derived from these sources.",
   
   "healing_task": "One specific healing task (20 seconds to 2 minutes to complete), tailored to the user's emotional state. Format: '* [specific action] [duration]'. Example: '* 注视远方一座塔楼 20 秒'. The task should help address the user's current emotional state.",
   
@@ -182,9 +198,12 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
      * The user will see the detailed analysis in "today_analysis" section, so guidance_one_line should be purely comforting advice
    
    - **REQUIRED for today_analysis**:
+     * **CRITICAL LENGTH REQUIREMENT: EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY and STRICTLY ENFORCED. You MUST count the characters before finalizing. If the content is too short, expand it. If it's too long, condense it. The final character count MUST be between 280 and 320, inclusive.**
+     * **MUST be divided into exactly 2 paragraphs (use \\n to separate paragraphs). Each paragraph should be complete and meaningful.**
      * MUST explain the analytical thinking and reasoning process
      * MUST mention the tarot card name (e.g., "宝剑皇后", "愚者") and explain what it means in the context of the user's emotional state
      * MUST mention the moon phase name (e.g., "下弦月", "满月", "新月") and explain its energy and influence
+     ${zodiacInfo ? `* MUST include a brief zodiac analysis (小篇幅) that combines the user's zodiac sign (${zodiacInfo.nameCn}) with today's tarot card and moon phase energy, explaining how the zodiac traits interact with today's guidance. The zodiac analysis should be naturally integrated and not dominate the content.` : ''}
      * MUST explain how these elements combine with the user's emotional state to form the guidance
      * Should show the analytical process: why these symbols were chosen, what they mean, and how they inform the advice
      * **CRITICAL PROHIBITIONS**:
@@ -194,9 +213,9 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
        - Never attribute energy differences to "逆位" - express them as natural energy expressions
      * This is where the user learns the SOURCE and LOGIC behind the guidance
 
-4. **Length Requirements**:
+4. **Length Requirements (CRITICAL - STRICTLY ENFORCED)**:
    - guidance_one_line: Exactly within 40 Chinese characters - must be direct healing comfort and advice, NO explanation of tarot or moon phase, NO mention of card/phase names
-   - today_analysis: Exactly 200 Chinese characters - MUST explicitly explain the tarot card meaning, moon phase energy, and how they combine with the user's emotional state. MUST mention the card name and moon phase name. **STRICTLY PROHIBITED**: Do NOT use any words related to card orientation such as "逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向". Do NOT describe the card drawing process (avoid phrases like "你抽到的是..." or "你抽到了一张..."). If the card energy is inward/slower/needs adjustment, express it as "节奏更慢/需要调整方法/更偏内在整理/先稳住" or "这张牌今天更偏向内在/缓慢/需要调整节奏的表达", never attribute it to "逆位". This is the analytical explanation section.
+   - **today_analysis: CRITICAL - EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY. You MUST count the characters and ensure the final count is between 280 and 320, inclusive. If too short, expand. If too long, condense. MUST be divided into exactly 2 paragraphs (use \\n to separate paragraphs), each paragraph should be complete and meaningful.** MUST explicitly explain the tarot card meaning, moon phase energy${zodiacInfo ? `, and a brief zodiac analysis (小篇幅) combining the user's zodiac sign (${zodiacInfo.nameCn}) with today's guidance` : ''}, and how they combine with the user's emotional state. MUST mention the card name and moon phase name${zodiacInfo ? `, and naturally integrate the zodiac analysis` : ''}. **STRICTLY PROHIBITED**: Do NOT use any words related to card orientation such as "逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向". Do NOT describe the card drawing process (avoid phrases like "你抽到的是..." or "你抽到了一张..."). If the card energy is inward/slower/needs adjustment, express it as "节奏更慢/需要调整方法/更偏内在整理/先稳住" or "这张牌今天更偏向内在/缓慢/需要调整节奏的表达", never attribute it to "逆位". This is the analytical explanation section.
    - healing_task: One simple, actionable task (20 sec - 2 min)
    - two_guidances: Each within 80 Chinese characters
    - category_guidances: Each within 60 Chinese characters
@@ -208,6 +227,21 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
 6. **Lucky Elements**:
    - Choose elements that resonate with today's energy and the user's emotional needs
    - Make them feel meaningful and personalized
+
+---
+
+**⚠️ CRITICAL REMINDER FOR today_analysis FIELD ⚠️**
+
+**MANDATORY LENGTH REQUIREMENT: The "today_analysis" field MUST contain EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces).**
+
+**BEFORE SUBMITTING YOUR RESPONSE:**
+1. Count the characters in your "today_analysis" field
+2. If the count is LESS than 280: Expand the content until it reaches at least 280 characters
+3. If the count is MORE than 320: Condense the content until it is no more than 320 characters
+4. The final count MUST be between 280 and 320, inclusive (280 ≤ count ≤ 320)
+5. The content MUST be divided into exactly 2 paragraphs (use \\n to separate them)
+
+**This length requirement is MANDATORY and will be strictly enforced. Failure to comply will result in rejection.**
 
 Please respond ONLY with valid JSON, no additional text.`;
 }

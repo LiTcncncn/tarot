@@ -136,7 +136,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 1000;
+    z-index: 2000;
     display: none;
 }
 
@@ -246,6 +246,7 @@
     overflow-y: auto;
     padding: 30px 20px;
     min-height: 300px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .profile-step-content {
@@ -400,7 +401,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 0;
     padding: 16px;
     border: 1px solid rgba(109, 92, 92, 0.3);
     border-radius: 12px;
@@ -419,13 +421,8 @@
 }
 
 .profile-weather-item .weather-icon {
-    width: 40px;
-    height: 40px;
-}
-
-.profile-weather-item .weather-label {
-    font-size: 13px;
-    color: var(--text-primary);
+    width: 50px;
+    height: 50px;
 }
 
 /* ===== 按钮组 ===== */
@@ -435,6 +432,11 @@
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+    flex-shrink: 0;
+    background: white;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 
 .profile-btn {
@@ -490,12 +492,18 @@
         top: auto;
         bottom: 0;
         transform: translateX(-50%);
-        max-height: 90vh;
+        max-height: calc(100vh - 70px); /* 减去底部导航栏高度（约60-70px） */
+        display: flex;
+        flex-direction: column;
     }
     
     .profile-form-container {
-        padding: 20px 15px;
-        min-height: 250px;
+        padding: 20px 15px 10px;
+        min-height: 200px;
+        max-height: calc(100vh - 280px); /* 减去头部、进度条、按钮区域和导航栏的高度 */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 20px; /* 增加底部padding，确保内容不被按钮遮挡 */
     }
     
     .profile-step-title {
@@ -521,22 +529,30 @@
     }
     
     .profile-weather-item {
-        padding: 12px;
+        padding: 16px;
     }
     
     .profile-weather-item .weather-icon {
-        width: 32px;
-        height: 32px;
+        width: 48px;
+        height: 48px;
     }
     
     .profile-form-actions {
         padding: 15px;
+        padding-bottom: max(15px, env(safe-area-inset-bottom)); /* 考虑安全区域 */
         flex-direction: column;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 100;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 0;
     }
     
     .profile-btn {
         width: 100%;
         padding: 14px;
+        min-height: 48px;
     }
 }
 

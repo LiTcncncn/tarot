@@ -34,7 +34,20 @@ const EMOTION_MAP = {
     4: { emoji: '😰', label: '焦虑', value: '焦虑', color: ['#a8a5a0', '#8e8a85'] }  // 莫兰迪深灰色
 };
 
-// 更新背景色
+// 默认背景色（统一管理）
+const DEFAULT_BACKGROUND = 'linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%)';
+
+// 重置背景色为默认值
+function resetBackgroundToDefault() {
+    // 先读取一次样式，强制浏览器重新计算
+    void document.body.offsetHeight;
+    
+    // 重置为默认背景色
+    document.body.style.background = DEFAULT_BACKGROUND;
+    document.body.style.backgroundAttachment = 'fixed';
+}
+
+// 更新背景色（根据情绪状态）
 function updateBackgroundColor(emotionValue) {
     const emotion = Object.values(EMOTION_MAP).find(e => e.value === emotionValue);
     if (emotion && emotion.color) {
@@ -47,6 +60,9 @@ function updateBackgroundColor(emotionValue) {
         // 设置新背景
         document.body.style.background = gradient;
         document.body.style.backgroundAttachment = 'fixed';
+    } else {
+        // 如果没有找到对应情绪，重置为默认背景色
+        resetBackgroundToDefault();
     }
 }
 
@@ -146,7 +162,7 @@ function showDailyReadingPage() {
     if (cardName) cardName.textContent = '';
     
     // 重置背景色为默认值
-    document.body.style.background = 'linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%)';
+    resetBackgroundToDefault();
     
     // 重置后，根据当前选中的情绪更新背景色
     const slider = document.getElementById('emotion-input');
@@ -158,13 +174,7 @@ function showDailyReadingPage() {
         }
     }
     
-    // 重置周历到本周并渲染
-    resetWeeklyCalendar();
-    
-    // 更新个人信息按钮显示状态
-    if (typeof updateProfileButtonVisibility === 'function') {
-        updateProfileButtonVisibility();
-    }
+    // 注意：每日占卜页面不显示周历，只有"今日"界面显示周历
 }
 
 // 显示页面2: Loading 界面
@@ -207,10 +217,21 @@ function showMainPage() {
     // 更新导航栏激活状态
     updateNavActive('today');
     
+    // 更新主界面头部（日期和按钮/问候语）
+    updateMainPageHeader();
+    
+    // 更新个人信息按钮显示状态（保留兼容性）
+    if (typeof updateProfileButtonVisibility === 'function') {
+        updateProfileButtonVisibility();
+    }
+    
     // 重置周历到本周并渲染（延迟执行，确保DOM已渲染）
     setTimeout(() => {
         resetWeeklyCalendar();
     }, 100);
+    
+    // 注意：主界面的背景色由 loadTodayData() 根据保存的情绪状态设置
+    // 如果没有今日数据，保持默认背景色（已在 CSS 中定义）
 }
 
 // 初始化抽牌交互
@@ -282,52 +303,63 @@ function initCardDraw(onCardDrawn) {
     // 更新引用
     cardPile = newCardPile;
     
-    // 长按抽牌
-    let longPressTimer;
-    cardPile.addEventListener('mousedown', () => {
-        longPressTimer = setTimeout(drawCard, 500);
-    });
+    // 为移动端添加 touch-action CSS 属性，优化触摸响应
+    cardPile.style.touchAction = 'manipulation';
+    cardPile.style.userSelect = 'none';
+    cardPile.style.webkitUserSelect = 'none';
+    cardPile.style.webkitTouchCallout = 'none';
     
-    cardPile.addEventListener('mouseup', () => {
-        clearTimeout(longPressTimer);
-    });
-    
-    cardPile.addEventListener('mouseleave', () => {
-        clearTimeout(longPressTimer);
-    });
-    
-    // 触摸事件（移动端）
+    // 标记是否已经触发抽牌（防止重复触发）
+    let hasTriggeredDraw = false;
     let touchStartTime = 0;
-    let hasLongPress = false;
     
+    // 统一的抽牌函数（防止重复调用）
+    function triggerDraw() {
+        if (hasTriggeredDraw) {
+            console.log('Already triggered, skip');
+            return;
+        }
+        hasTriggeredDraw = true;
+        drawCard();
+        
+        // 延迟重置标记，避免短时间内重复触发
+        setTimeout(() => {
+            hasTriggeredDraw = false;
+        }, 500);
+    }
+    
+    // 触摸事件（移动端）- 处理点击
     cardPile.addEventListener('touchstart', (e) => {
         touchStartTime = Date.now();
-        hasLongPress = false;
-        longPressTimer = setTimeout(() => {
-            hasLongPress = true;
-            drawCard();
-        }, 500);
-    });
+        console.log('Touch start on card pile');
+    }, { passive: true });
     
     cardPile.addEventListener('touchend', (e) => {
-        clearTimeout(longPressTimer);
-        // 如果触摸时间少于500ms，说明是点击，而不是长按
+        e.preventDefault(); // 阻止默认行为和后续的click事件
+        e.stopPropagation();
+        
         const touchDuration = Date.now() - touchStartTime;
-        if (touchDuration < 500 && !hasLongPress) {
-            // 这是一个点击操作，直接抽牌
-            e.preventDefault(); // 阻止默认行为，防止触发click事件两次
-            drawCard();
+        console.log('Touch end on card pile, duration:', touchDuration);
+        
+        // 只有快速触摸（点击）才触发，避免滑动误触
+        if (touchDuration < 300) {
+            triggerDraw();
         }
+        
         touchStartTime = 0;
-        hasLongPress = false;
-    });
+    }, { passive: false });
     
-    // 点击抽牌（PC端）
+    // 点击抽牌（PC端，移动端由touchend处理）
     cardPile.addEventListener('click', (e) => {
-        // 如果是触摸设备，click事件可能是由touch事件触发的，避免重复执行
-        if (touchStartTime === 0) {
-            drawCard();
+        // 如果是触摸事件触发的click（移动端），跳过
+        // 通过检查touchStartTime是否为0来判断
+        if (touchStartTime !== 0) {
+            console.log('Click from touch event, skip');
+            return;
         }
+        
+        console.log('Click on card pile (PC)');
+        triggerDraw();
     });
 }
 
@@ -353,37 +385,82 @@ function getFormattedYear() {
     return today.getFullYear().toString();
 }
 
+// 获取完整的日期格式（January 11）
+function getFullFormattedDate() {
+    const today = new Date();
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    const month = monthNames[today.getMonth()];
+    const day = today.getDate();
+    return `${month} ${day}`;
+}
+
+// 更新主界面头部
+function updateMainPageHeader() {
+    // 更新日期
+    const dateElement = document.getElementById('main-page-date');
+    if (dateElement) {
+        dateElement.textContent = getFullFormattedDate();
+    }
+    
+    // 更新右侧内容（按钮或问候语）
+    const addBtn = document.getElementById('add-profile-btn');
+    const greeting = document.getElementById('main-page-greeting');
+    const nicknameSpan = document.getElementById('main-page-nickname');
+    
+    // 检查是否已填写个人信息
+    if (typeof hasUserProfile === 'function' && hasUserProfile()) {
+        // 已填写个人信息，显示问候语
+        const profile = typeof getUserProfile === 'function' ? getUserProfile() : null;
+        if (addBtn) addBtn.style.display = 'none';
+        if (greeting) {
+            greeting.style.display = 'block';
+            if (nicknameSpan && profile && profile.nickname) {
+                nicknameSpan.textContent = profile.nickname;
+            }
+        }
+    } else {
+        // 未填写个人信息，显示按钮
+        if (addBtn) addBtn.style.display = 'block';
+        if (greeting) greeting.style.display = 'none';
+    }
+}
+
 // 渲染主界面内容
 function renderMainPage(readingData, card, moonPhase) {
-    // 显示日期和年份
-    document.getElementById('today-date').textContent = getFormattedDate();
-    document.getElementById('today-year').textContent = getFormattedYear();
-    
-    // 月相和塔罗牌（一行显示）
+    // 月相图标（叠加在塔罗牌右下角）
     const moonEmoji = document.getElementById('moon-emoji');
     moonEmoji.textContent = moonPhase.emoji;
-    document.getElementById('moon-phase-name').textContent = moonPhase.nameCn;
-    document.getElementById('moon-phase-energy').textContent = moonPhase.energy;
     
+    // 塔罗牌
     const todayCardContainer = document.getElementById('today-card-container');
     const todayCardImg = document.getElementById('today-card-img');
     const todayCardName = document.getElementById('today-card-name');
     
     todayCardImg.src = `Cards-png/${card.file}`;
     // 统一显示为正位，不显示逆位信息，也不显示"正位"文字
-    todayCardName.textContent = `${card.nameCn}`;
+    // 显示塔罗牌名称和月相名称
+    todayCardName.textContent = `${card.nameCn} · ${moonPhase.nameCn}`;
     todayCardContainer.style.display = 'block';
     
     // 统一显示为正位，不旋转图片
     todayCardImg.style.transform = 'rotate(0deg)';
     
-    // 综合指引
+    // 今日指引（左侧）
     document.getElementById('guidance-one-line').textContent = readingData.guidance_one_line;
     
-    // 今日分析
+    // 今日分析（支持分段显示）
     const todayAnalysisContent = document.getElementById('today-analysis-content');
     if (readingData.today_analysis) {
-        todayAnalysisContent.innerHTML = `<p class="analysis-text">${readingData.today_analysis}</p>`;
+        // 将内容按换行符分割成段落，如果没有换行符则作为一段显示
+        const paragraphs = readingData.today_analysis.split('\n').filter(p => p.trim().length > 0);
+        if (paragraphs.length > 1) {
+            // 多段显示
+            todayAnalysisContent.innerHTML = paragraphs.map(p => `<p class="analysis-text">${p.trim()}</p>`).join('');
+        } else {
+            // 单段显示（兼容旧格式）
+            todayAnalysisContent.innerHTML = `<p class="analysis-text">${readingData.today_analysis}</p>`;
+        }
     }
     
     // 疗愈任务
@@ -418,42 +495,8 @@ function renderMainPage(readingData, card, moonPhase) {
         showCategoryContent('情感', readingData);
     }
     
-    // 加载情绪记录（复用上面的 todayReading）
-    const emotionRecordInput = document.getElementById('emotion-record-input');
-    const saveRecordBtn = document.getElementById('save-emotion-record-btn');
-    const recordSaved = document.getElementById('record-saved');
-    
-    if (todayReading && todayReading.emotionRecord) {
-        emotionRecordInput.value = todayReading.emotionRecord;
-        saveRecordBtn.style.display = 'none';
-        recordSaved.style.display = 'flex';
-    } else {
-        emotionRecordInput.value = '';
-        saveRecordBtn.style.display = 'none';
-        recordSaved.style.display = 'none';
-    }
-    
-    // 监听输入变化
-    emotionRecordInput.addEventListener('input', () => {
-        const currentValue = emotionRecordInput.value.trim();
-        const savedValue = todayReading?.emotionRecord || '';
-        if (currentValue !== savedValue && currentValue !== '') {
-            saveRecordBtn.style.display = 'block';
-            recordSaved.style.display = 'none';
-        } else {
-            saveRecordBtn.style.display = 'none';
-            if (currentValue === savedValue && savedValue !== '') {
-                recordSaved.style.display = 'flex';
-            } else {
-                recordSaved.style.display = 'none';
-            }
-        }
-    });
-    
-    // 保存按钮点击事件
-    saveRecordBtn.onclick = () => {
-        saveEmotionRecord(emotionRecordInput.value.trim());
-    };
+    // 绑定情绪记录按钮
+    bindEmotionRecordButton();
 }
 
 // 显示分类内容（辅助函数）
@@ -529,35 +572,206 @@ function initCategoryButtons(readingData) {
 function completeTask() {
     const todayReading = getTodayReading();
     if (todayReading) {
-        todayReading.taskCompleted = true;
-        saveTodayReading(todayReading);
-        
         // 更新 UI
         document.getElementById('complete-task-btn').style.display = 'none';
         document.getElementById('task-completed').style.display = 'flex';
+        
+        // 第一个任务完成时，弹出情绪选择弹板
+        // 注意：目前只有一个任务，所以总是第一个任务
+        showEmotionSelectToast();
+    }
+}
+
+// 显示情绪选择弹板
+function showEmotionSelectToast() {
+    const toast = document.getElementById('emotion-select-toast');
+    if (!toast) return;
+    
+    // 显示弹板
+    toast.style.display = 'flex';
+    
+    // 绑定按钮事件
+    const buttons = toast.querySelectorAll('.emotion-select-btn');
+    buttons.forEach(btn => {
+        // 移除之前的事件监听器（如果存在）
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        // 绑定新的事件
+        newBtn.addEventListener('click', () => {
+            const value = parseInt(newBtn.dataset.value);
+            handleEmotionSelect(value);
+        });
+    });
+}
+
+// 处理情绪选择
+function handleEmotionSelect(value) {
+    // 隐藏情绪选择弹板
+    const toast = document.getElementById('emotion-select-toast');
+    if (toast) {
+        toast.style.display = 'none';
+    }
+    
+    // 保存任务完成状态和情绪变化值
+    const todayReading = getTodayReading();
+    if (todayReading) {
+        todayReading.taskCompleted = true;
+        todayReading.emotionChange = value; // 保存情绪变化值（+1, 0, -1）
+        saveTodayReading(todayReading);
         
         // 显示签到完成弹板
         showCheckInCompleteModal();
     }
 }
 
-// 保存情绪记录（今日）
+// 绑定情绪记录按钮
+function bindEmotionRecordButton() {
+    const emotionRecordBtn = document.getElementById('emotion-record-btn');
+    if (!emotionRecordBtn) return;
+    
+    // 移除旧的事件监听器
+    const newBtn = emotionRecordBtn.cloneNode(true);
+    emotionRecordBtn.parentNode.replaceChild(newBtn, emotionRecordBtn);
+    
+    // 绑定新的事件
+    newBtn.addEventListener('click', () => {
+        showEmotionRecordModal();
+    });
+}
+
+// 显示情绪记录弹板
+function showEmotionRecordModal() {
+    const modal = document.getElementById('emotion-record-modal');
+    if (!modal) return;
+    
+    const todayReading = getTodayReading();
+    const input = document.getElementById('emotion-record-modal-input');
+    
+    // 加载已保存的数据
+    if (todayReading) {
+        // 加载情绪记录文本
+        if (input) {
+            input.value = todayReading.emotionRecord || '';
+        }
+    } else {
+        // 如果没有今日数据，清空并重置
+        if (input) input.value = '';
+    }
+    
+    // 显示弹板
+    modal.style.display = 'flex';
+    
+    // 延迟执行，确保DOM已更新
+    setTimeout(() => {
+        const emotionBtns = modal.querySelectorAll('.current-emotion-btn');
+        
+        // 高亮已选择的情绪状态
+        if (todayReading && todayReading.currentEmotion) {
+            emotionBtns.forEach(btn => {
+                const emotion = btn.dataset.emotion;
+                if (todayReading.currentEmotion === emotion) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        } else {
+            emotionBtns.forEach(btn => btn.classList.remove('active'));
+        }
+        
+        // 绑定情绪状态选择按钮
+        emotionBtns.forEach(btn => {
+            // 移除旧的事件监听器（通过克隆节点）
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            newBtn.addEventListener('click', () => {
+                // 移除所有按钮的active状态
+                const allBtns = modal.querySelectorAll('.current-emotion-btn');
+                allBtns.forEach(b => {
+                    if (b !== newBtn) {
+                        b.classList.remove('active');
+                    }
+                });
+                // 添加当前按钮的active状态
+                newBtn.classList.add('active');
+            });
+        });
+        
+        // 绑定保存按钮
+        const saveBtn = document.getElementById('save-emotion-record-modal-btn');
+        if (saveBtn) {
+            const newSaveBtn = saveBtn.cloneNode(true);
+            saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+            
+            newSaveBtn.addEventListener('click', () => {
+                saveEmotionRecordWithCurrentState();
+            });
+        }
+        
+        // 绑定关闭按钮
+        const closeBtn = document.getElementById('emotion-record-modal-close');
+        const backdrop = document.getElementById('emotion-record-modal-backdrop');
+        
+        if (closeBtn) {
+            const newCloseBtn = closeBtn.cloneNode(true);
+            closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+            newCloseBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        if (backdrop) {
+            // 移除旧的事件监听器（通过克隆节点）
+            const newBackdrop = backdrop.cloneNode(true);
+            backdrop.parentNode.replaceChild(newBackdrop, backdrop);
+            newBackdrop.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+    }, 0);
+}
+
+// 保存情绪记录和当前状态
+function saveEmotionRecordWithCurrentState() {
+    const todayReading = getTodayReading();
+    if (!todayReading) return;
+    
+    const input = document.getElementById('emotion-record-modal-input');
+    const activeEmotionBtn = document.querySelector('.current-emotion-btn.active');
+    
+    // 获取情绪记录文本
+    const recordText = input ? input.value.trim() : '';
+    
+    // 获取选择的当前状态
+    const currentEmotion = activeEmotionBtn ? activeEmotionBtn.dataset.emotion : null;
+    
+    // 保存数据
+    todayReading.emotionRecord = recordText || undefined;
+    if (currentEmotion) {
+        todayReading.currentEmotion = currentEmotion;
+    }
+    saveTodayReading(todayReading);
+    
+    // 刷新日历和周历（无论是否选择情绪图标，只要保存了情绪记录就刷新）
+    // 这样在状态日历模式下，如果选择了情绪图标，会立即显示对应的图标
+    renderCalendar(currentCalendarYear, currentCalendarMonth);
+    renderWeeklyCalendar();
+    
+    // 关闭弹板
+    const modal = document.getElementById('emotion-record-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// 保存情绪记录（今日）- 保留兼容性
 function saveEmotionRecord(recordText) {
     const todayReading = getTodayReading();
     if (todayReading) {
         todayReading.emotionRecord = recordText;
         saveTodayReading(todayReading);
-        
-        // 更新 UI
-        const saveBtn = document.getElementById('save-emotion-record-btn');
-        const saved = document.getElementById('record-saved');
-        if (recordText) {
-            saveBtn.style.display = 'none';
-            saved.style.display = 'flex';
-        } else {
-            saveBtn.style.display = 'none';
-            saved.style.display = 'none';
-        }
     }
 }
 
@@ -601,6 +815,9 @@ function showCalendarPage() {
     // 更新导航栏激活状态
     updateNavActive('calendar');
     
+    // 重置背景色为默认值（日历页面不使用情绪背景色）
+    resetBackgroundToDefault();
+    
     // 初始化日历模式（如果是第一次打开，默认为月相日历）
     // 如果之前已经选择过模式，保持之前的选择
     if (calendarMode !== 'moon' && calendarMode !== 'mood') {
@@ -638,6 +855,9 @@ function showTarotPage() {
     // 更新导航栏激活状态
     updateNavActive('tarot');
     
+    // 重置背景色为默认值（塔罗页面不使用情绪背景色）
+    resetBackgroundToDefault();
+    
     // 初始化塔罗模块
     if (typeof initTarotModule === 'function') {
         initTarotModule();
@@ -665,6 +885,9 @@ function showProfilePage() {
     // 更新导航栏激活状态
     updateNavActive('profile');
     
+    // 重置背景色为默认值（个人页面不使用情绪背景色）
+    resetBackgroundToDefault();
+    
     // 渲染个人信息
     renderProfilePage();
 }
@@ -689,13 +912,14 @@ let calendarPageClickHandler = null; // 事件委托处理器（保存事件处�
 // 注意：不能大于0，即不能看未来
 let weeklyCalendarOffset = 0;
 
-// 情绪状态对应的天气图标映射
+// 情绪状态对应的天气图标映射（包含"雨过天晴"）
 const EMOTION_WEATHER_MAP = {
     '愉悦': { icon: 'weather/1.png', name: '阳光' },
     '平静': { icon: 'weather/2.png', name: '多云' },
     '疲惫': { icon: 'weather/3.png', name: '阴天' },
     '迷茫': { icon: 'weather/4.png', name: '小雨' },
-    '焦虑': { icon: 'weather/5.png', name: '大雨' }
+    '焦虑': { icon: 'weather/5.png', name: '大雨' },
+    '雨过天晴': { icon: 'weather/6.png', name: '雨过天晴' }
 };
 
 function renderCalendar(year, month) {
@@ -768,10 +992,12 @@ function renderCalendar(year, month) {
         if (calendarMode === 'mood') {
             // 状态日历模式：显示情绪对应的天气图标
             const reading = getReadingByDate(dateKey);
-            if (reading && reading.emotion && EMOTION_WEATHER_MAP[reading.emotion]) {
+            // 优先使用currentEmotion（如果存在），否则使用emotion
+            const emotionToShow = reading?.currentEmotion || reading?.emotion;
+            if (reading && emotionToShow && EMOTION_WEATHER_MAP[emotionToShow]) {
                 // 已签到：显示情绪对应的天气图标
-                const weatherInfo = EMOTION_WEATHER_MAP[reading.emotion];
-                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="calendar-mood-icon calendar-mood-icon-active" title="${reading.emotion}">`;
+                const weatherInfo = EMOTION_WEATHER_MAP[emotionToShow];
+                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="calendar-mood-icon calendar-mood-icon-active" title="${emotionToShow}">`;
             } else {
                 // 未签到：显示默认天气图标（weather/2.png）的半透效果
                 iconHtml = `<img src="weather/2.png" alt="未签到" class="calendar-mood-icon calendar-mood-icon-inactive" title="未记录">`;
@@ -1503,10 +1729,12 @@ function renderWeeklyCalendarForContainer(grid) {
         let iconHtml = '';
         if (calendarMode === 'mood') {
             // 状态日历模式：显示天气图标
-            if (reading && reading.emotion && EMOTION_WEATHER_MAP[reading.emotion]) {
+            // 优先使用currentEmotion（如果存在），否则使用emotion
+            const emotionToShow = reading?.currentEmotion || reading?.emotion;
+            if (reading && emotionToShow && EMOTION_WEATHER_MAP[emotionToShow]) {
                 // 已签到：显示情绪对应的天气图标
-                const weatherInfo = EMOTION_WEATHER_MAP[reading.emotion];
-                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="weekly-mood-icon weekly-mood-icon-active" title="${reading.emotion}">`;
+                const weatherInfo = EMOTION_WEATHER_MAP[emotionToShow];
+                iconHtml = `<img src="${weatherInfo.icon}" alt="${weatherInfo.name}" class="weekly-mood-icon weekly-mood-icon-active" title="${emotionToShow}">`;
             } else {
                 // 未签到：显示默认天气图标（weather/2.png）的半透效果
                 iconHtml = `<img src="weather/2.png" alt="未签到" class="weekly-mood-icon weekly-mood-icon-inactive" title="未记录">`;

@@ -125,6 +125,24 @@ function getRecentCardIds(days = 5) {
 
 // 抽取一张塔罗牌（优化后的三阶段抽牌算法）
 function drawTarotCard(userEmotion = '平静') {
+    // 检查必需的函数是否存在（防止 card-intensity.js 未加载或文件被清空）
+    if (typeof getReversedProbability !== 'function') {
+        console.error('❌ 错误：getReversedProbability 函数未定义！请检查 card-intensity.js 文件是否正确加载。');
+        throw new Error('card-intensity.js 文件未正确加载，请刷新页面重试。');
+    }
+    if (typeof getIntensityDistribution !== 'function') {
+        console.error('❌ 错误：getIntensityDistribution 函数未定义！请检查 card-intensity.js 文件是否正确加载。');
+        throw new Error('card-intensity.js 文件未正确加载，请刷新页面重试。');
+    }
+    if (typeof selectIntensityByDistribution !== 'function') {
+        console.error('❌ 错误：selectIntensityByDistribution 函数未定义！请检查 card-intensity.js 文件是否正确加载。');
+        throw new Error('card-intensity.js 文件未正确加载，请刷新页面重试。');
+    }
+    if (typeof getCardIntensity !== 'function') {
+        console.error('❌ 错误：getCardIntensity 函数未定义！请检查 card-intensity.js 文件是否正确加载。');
+        throw new Error('card-intensity.js 文件未正确加载，请刷新页面重试。');
+    }
+    
     const allCards = getAllTarotCards();
     
     // 第一阶段：根据用户状态确定逆位出现几率

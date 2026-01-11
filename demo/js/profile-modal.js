@@ -360,7 +360,6 @@ function renderStep6(container) {
                         data-weather="${weather.value}"
                     >
                         <img src="${weather.icon}" alt="${weather.label}" class="weather-icon">
-                        <span class="weather-label">${weather.label}</span>
                     </div>
                 `).join('')}
             </div>
@@ -551,6 +550,11 @@ function completeProfile() {
         
         // 更新按钮显示状态
         updateProfileButtonVisibility();
+        
+        // 更新主界面头部（如果当前在主界面）
+        if (typeof updateMainPageHeader === 'function') {
+            updateMainPageHeader();
+        }
         
         // 更新个人页面显示
         renderProfilePage();

@@ -142,6 +142,7 @@ body {
     margin: 0 auto;
     padding: 0 4px; /* 进一步减少左右padding */
     box-sizing: border-box;
+    position: relative; /* 为绝对定位的按钮提供定位上下文 */
 }
 
 .page-title {
@@ -342,6 +343,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* 移动端触摸优化 */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* 确保可点击区域足够大 */
+    min-height: 200px;
+    min-width: 160px;
 }
 
 .card-pile:hover {
@@ -576,6 +585,54 @@ body {
     padding: 20px 10px; /* 减少左右padding */
 }
 
+/* 主界面头部区域 */
+.main-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 0 4px;
+}
+
+.main-page-date {
+    font-size: 24px;
+    font-weight: 900;
+    color: #000;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+.main-page-right {
+    display: flex;
+    align-items: center;
+}
+
+.main-page-greeting {
+    font-size: 24px;
+    font-weight: 900;
+    color: #000;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+.add-profile-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.add-profile-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
 .start-daily-btn {
     display: none;
     width: 100%;
@@ -610,6 +667,7 @@ body {
     gap: 24px;
     padding: 0 4px; /* 进一步减少左右padding */
     box-sizing: border-box;
+    position: relative; /* 为绝对定位的按钮提供定位上下文 */
 }
 
 /* 卡片样式 */
@@ -627,66 +685,54 @@ section {
     color: var(--text-primary);
 }
 
-/* 月相和塔罗牌区域（居中并排显示） */
+/* 今日指引标题特殊样式 */
+.guidance-left .section-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+/* 今日指引和塔罗牌区域（左右分列显示） */
 .moon-phase-section {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 40px;
-    flex-wrap: wrap;
-}
-
-.moon-emoji {
-    font-size: 48px;
-}
-
-.moon-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.today-date-wrapper {
-    display: flex;
-    flex-direction: column;
     align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: nowrap;
+}
+
+/* 左侧：今日指引 */
+.guidance-left {
+    flex: 1;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.guidance-one-line {
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.6;
+    color: #2D2525;
     text-align: left;
-    margin-bottom: 8px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border-radius: 0;
 }
 
-.today-date {
-    font-size: 28px;
-    font-weight: 900;
-    color: #000;
-    letter-spacing: 1px;
-    line-height: 1.2;
-}
-
-.today-year {
-    font-size: 28px;
-    font-weight: 900;
-    color: #000;
-    letter-spacing: 1px;
-    line-height: 1.2;
-    margin-top: 2px;
-}
-
-.moon-info h2 {
-    font-size: 20px;
-    margin-bottom: 6px;
-}
-
-.moon-energy {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-/* 塔罗牌区域（合并到月相section中） */
+/* 右侧：塔罗牌+月相图标 */
 .today-card {
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.card-image-wrapper {
+    position: relative;
+    display: inline-block;
 }
 
 .today-card-img {
@@ -694,6 +740,33 @@ section {
     height: auto;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     transition: transform 0.3s;
+    display: block;
+}
+
+/* 月相图标叠加在塔罗牌右下角 */
+.moon-emoji-overlay {
+    position: absolute;
+    bottom: -12px;
+    right: -12px;
+    font-size: 56px;
+    line-height: 1;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 1)) 
+            drop-shadow(0 0 20px rgba(255, 255, 255, 0.95))
+            drop-shadow(0 0 30px rgba(255, 255, 255, 0.9))
+            drop-shadow(0 0 40px rgba(255, 255, 255, 0.8))
+            drop-shadow(0 0 50px rgba(255, 255, 255, 0.7))
+            drop-shadow(0 0 60px rgba(255, 255, 255, 0.5));
+    z-index: 10;
+    background: transparent;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 25px rgba(255, 255, 255, 1),
+                 0 0 35px rgba(255, 255, 255, 0.9),
+                 0 0 45px rgba(255, 255, 255, 0.7);
 }
 
 .today-card-name {
@@ -701,18 +774,6 @@ section {
     font-size: 14px;
     font-weight: 600;
     text-align: center;
-}
-
-/* 指引区域 */
-.guidance-one-line {
-    font-size: 20px;
-    font-weight: 900;
-    line-height: 1.6;
-    color: #2D2525;
-    text-align: left;
-    padding: 16px;
-    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
-    border-radius: 12px;
 }
 
 /* 今日分析 */
@@ -790,6 +851,28 @@ section {
 /* 情绪记录模块 */
 .emotion-record-section {
     grid-column: 1 / -1;
+}
+
+.emotion-record-btn {
+    width: 100%;
+    padding: 16px 24px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.emotion-record-btn:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.2);
 }
 
 .emotion-record-card {
@@ -982,13 +1065,13 @@ section {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    /* 月相和塔罗牌合并显示在一行 */
+    /* 今日指引和塔罗牌合并显示在一行 */
     .moon-phase-section {
         grid-column: 1 / -1;
         display: flex;
         flex-direction: row;
-        align-items: center;
-        justify-content: center;
+        align-items: flex-start;
+        justify-content: space-between;
     }
     
     
@@ -1131,6 +1214,90 @@ section {
         padding: 16px;
         font-size: 17px;
         line-height: 1.7;
+    }
+    
+    /* 移动端：主界面头部调整 */
+    .main-page-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 0 2px;
+    }
+    
+    .main-page-date {
+        font-size: 20px;
+    }
+    
+    .main-page-right {
+        width: auto;
+        justify-content: flex-end;
+    }
+    
+    .main-page-greeting {
+        font-size: 20px;
+    }
+    
+    .add-profile-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    /* 移动端：今日指引和塔罗牌左右分列 */
+    .moon-phase-section {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 16px;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+    
+    .guidance-left {
+        flex: 1;
+        min-width: 0;
+        flex-shrink: 1;
+    }
+    
+    .guidance-one-line {
+        font-size: 20px;
+    }
+    
+    .today-card {
+        flex: 0 0 auto;
+        flex-shrink: 0;
+    }
+    
+    .today-card-img {
+        width: 100px;
+    }
+    
+    .moon-emoji-overlay {
+        font-size: 44px;
+        width: 44px;
+        height: 44px;
+        bottom: -10px;
+        right: -10px;
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) 
+                drop-shadow(0 0 16px rgba(255, 255, 255, 0.95))
+                drop-shadow(0 0 24px rgba(255, 255, 255, 0.9))
+                drop-shadow(0 0 32px rgba(255, 255, 255, 0.8))
+                drop-shadow(0 0 40px rgba(255, 255, 255, 0.7))
+                drop-shadow(0 0 48px rgba(255, 255, 255, 0.5));
+        text-shadow: 0 0 20px rgba(255, 255, 255, 1),
+                     0 0 28px rgba(255, 255, 255, 0.9),
+                     0 0 36px rgba(255, 255, 255, 0.7);
+    }
+    
+    /* 移动端：今日指引标题 */
+    .guidance-left .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+    
+    .today-card-name {
+        font-size: 12px;
     }
 }
 
@@ -1404,29 +1571,47 @@ body.show-nav .bottom-nav {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
     display: block;
-    margin: 0 auto;
-    flex-shrink: 0;
+    margin: 0 auto; /* 水平居中 */
+    flex-shrink: 0; /* 防止缩小 */
 }
 
+/* 已签到的天气图标（与日历模块完全一致） */
 .weekly-mood-icon-active {
     opacity: 1;
 }
 
+/* 未签到的天气图标（半透效果，与日历模块完全一致） */
 .weekly-mood-icon-inactive {
-    opacity: 0.35;
+    opacity: 0.35; /* 半透明效果 */
+}
+
+/* 周历月相图标（与日历模块完全一致） */
+.weekly-moon-icon {
+    font-size: 20px;
+    line-height: 1;
 }
 
 .weekly-date-cell {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 800; /* 与日历模块一致：800 */
     color: var(--text-primary);
     line-height: 1;
+    width: 100%;
+    text-align: center;
 }
 
+/* 未签到的日期数字颜色更浅，增强视觉差异（与日历模块完全一致） */
 .weekly-day-button:not(.completed) .weekly-date-cell {
-    color: rgba(109, 92, 92, 0.4);
+    color: rgba(109, 92, 92, 0.4) !important; /* 与日历模块一致：使用 !important */
 }
 
+/* 未签到状态（默认）：浅底色 + 虚线边框（与日历模块完全一致） */
+.weekly-day-button:not(.completed) {
+    background: rgba(245, 243, 243, 0.5);
+    border: 1px dashed rgba(109, 92, 92, 0.3);
+}
+
+/* 已签到状态：深底色 + 实线边框（与日历模块完全一致） */
 .weekly-day-button.completed {
     background: var(--card-bg);
     border: 2px solid var(--primary-color);
@@ -1437,11 +1622,13 @@ body.show-nav .bottom-nav {
     color: var(--text-primary);
 }
 
+/* 今天高亮（与日历模块完全一致） */
 .weekly-day-button.today {
     border: 2px solid var(--base-dark);
     box-shadow: 0 0 0 2px rgba(109, 92, 92, 0.2);
 }
 
+/* 今天 + 已签到（与日历模块完全一致） */
 .weekly-day-button.today.completed {
     border: 2px solid var(--primary-color);
     box-shadow: 0 0 0 2px rgba(109, 92, 92, 0.3);
@@ -1470,16 +1657,21 @@ body.show-nav .bottom-nav {
     }
     
     .weekly-mood-icon {
-        width: 24px; /* 从18px放大到24px */
-        height: 24px;
+        width: 26px !important; /* 与日历模块移动端完全一致：26px */
+        height: 26px !important;
     }
     
     .weekly-moon-icon {
-        font-size: 18px; /* 移动端月相图标（比天气图标稍小） */
+        font-size: 24px !important; /* 与日历模块移动端完全一致：24px */
     }
     
     .weekly-date-cell {
         font-size: 14px; /* 从12px放大到14px */
+    }
+    
+    /* 移动端：确保未签到日期数字颜色更浅（与日历模块完全一致） */
+    .weekly-day-button:not(.completed) .weekly-date-cell {
+        color: rgba(109, 92, 92, 0.4) !important; /* 移动端也使用浅色 */
     }
     
     /* 周历容器支持滑动 */
@@ -2023,5 +2215,337 @@ body.show-nav .bottom-nav {
 .checkin-toast-btn:hover {
     background: var(--base-dark);
     transform: translateY(-1px);
+}
+
+/* ===== 情绪选择弹板（完成任务后） ===== */
+.emotion-select-toast {
+    position: fixed;
+    inset: 0;
+    z-index: 2600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(45, 37, 37, 0.35);
+}
+
+.emotion-select-toast-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 32px 24px 24px;
+    box-shadow: 0 12px 30px rgba(45, 37, 37, 0.18);
+    text-align: center;
+}
+
+.emotion-select-toast-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+}
+
+.emotion-select-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 8px;
+}
+
+.emotion-select-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.emotion-select-btn:hover,
+.emotion-select-btn:active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.3);
+}
+
+.emotion-select-icon {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* 移动端：情绪选择弹板调整 */
+@media (max-width: 1329px) {
+    .emotion-select-toast-card {
+        padding: 28px 20px 20px;
+        max-width: 90%;
+    }
+    
+    .emotion-select-toast-title {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .emotion-select-options {
+        gap: 16px;
+    }
+    
+    .emotion-select-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 20px;
+    }
+    
+    .emotion-select-icon {
+        font-size: 24px;
+    }
+}
+
+/* ===== 情绪记录弹板 ===== */
+.emotion-record-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2700;
+    display: none;
+}
+
+.emotion-record-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(45, 37, 37, 0.35);
+}
+
+.emotion-record-modal-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--card-bg);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 -10px 30px rgba(45, 37, 37, 0.18);
+    padding: 20px 16px 24px;
+    max-height: 85vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.emotion-record-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.emotion-record-modal-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text-primary);
+}
+
+.emotion-record-modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.emotion-record-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.current-emotion-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.current-emotion-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.current-emotion-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.current-emotion-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.current-emotion-btn:hover,
+.current-emotion-btn:active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.2);
+}
+
+.current-emotion-btn.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+}
+
+.current-emotion-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.current-emotion-btn span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.current-emotion-btn.active span {
+    color: white;
+}
+
+.emotion-record-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.emotion-record-modal-textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+.emotion-record-modal-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.emotion-record-modal-textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.emotion-record-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.emotion-record-modal-save-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.emotion-record-modal-save-btn:hover {
+    background: var(--base-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.2);
+}
+
+/* 移动端：情绪记录弹板调整 */
+@media (max-width: 1329px) {
+    .emotion-record-modal-sheet {
+        padding: 18px 14px 20px;
+        max-height: 90vh;
+    }
+    
+    .emotion-record-modal-title {
+        font-size: 16px;
+    }
+    
+    .current-emotion-options {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    
+    .current-emotion-btn {
+        padding: 14px 10px;
+        gap: 6px;
+    }
+    
+    .current-emotion-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .current-emotion-btn span {
+        font-size: 13px;
+    }
+    
+    .emotion-record-modal-textarea {
+        min-height: 120px;
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    .emotion-record-modal-save-btn {
+        padding: 12px 24px;
+        font-size: 14px;
+    }
+    
+    .emotion-record-btn {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
 }
 
