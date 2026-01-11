@@ -69,7 +69,7 @@ body {
 .page {
     display: none !important;
     min-height: 100vh;
-    padding: 20px;
+    padding: 20px 10px; /* 减少左右padding */
     position: fixed;
     top: 0;
     left: 0;
@@ -1029,14 +1029,14 @@ section {
     }
     
     .page {
-        padding: 15px; /* 移动端减少padding */
+        padding: 15px 8px; /* 移动端减少左右padding */
         max-width: 100vw !important;
         overflow-x: hidden !important;
     }
     
     .daily-reading-content {
         max-width: 100%;
-        padding: 0;
+        padding: 0 4px; /* 移动端也减少左右padding */
     }
     
     /* 确保重置按钮在移动端显示 */
