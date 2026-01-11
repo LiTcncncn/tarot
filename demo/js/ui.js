@@ -160,6 +160,11 @@ function showDailyReadingPage() {
     
     // 重置周历到本周并渲染
     resetWeeklyCalendar();
+    
+    // 更新个人信息按钮显示状态
+    if (typeof updateProfileButtonVisibility === 'function') {
+        updateProfileButtonVisibility();
+    }
 }
 
 // 显示页面2: Loading 界面
