@@ -1067,6 +1067,7 @@ section {
     
     .main-content {
         grid-template-columns: 1fr;
+        padding: 0 2px; /* 移动端进一步减少左右padding，放大周历 */
     }
     
     .guidance-section,
