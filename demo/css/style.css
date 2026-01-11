@@ -1043,8 +1043,10 @@ section {
     .reset-btn {
         display: flex !important;
         visibility: visible !important;
-        padding: 8px 16px;
-        font-size: 13px;
+        padding: 12px 20px;
+        font-size: 14px;
+        margin: 20px auto 0;
+        max-width: 90%;
     }
     
     /* 移动端情绪标记优化 */
