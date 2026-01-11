@@ -1045,8 +1045,14 @@ section {
         visibility: visible !important;
         padding: 12px 20px;
         font-size: 14px;
-        margin: 20px auto 0;
+        margin: 20px auto 20px; /* 增加底部margin，确保按钮在滚动区域内 */
         max-width: 90%;
+    }
+    
+    /* 移动端：增加main-page和calendar-page的底部padding */
+    #main-page,
+    #calendar-page {
+        padding-bottom: 80px !important; /* 移动端增加底部padding，确保按钮完全可见 */
     }
     
     /* 移动端情绪标记优化 */
