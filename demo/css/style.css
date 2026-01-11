@@ -85,7 +85,7 @@ body {
 /* 主界面/日历界面为导航栏预留空间（占卜页、loading页不需要） */
 #main-page,
 #calendar-page {
-    padding-bottom: 90px !important;
+    padding-bottom: 20px !important; /* 减少底部padding，因为按钮在内容流中 */
 }
 
 .page.active {
