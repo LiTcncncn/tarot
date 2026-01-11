@@ -1375,7 +1375,7 @@ body.show-nav .bottom-nav {
     -webkit-user-select: none;
     min-width: 0;
     transition: all 0.3s;
-    touch-action: manipulation;
+    touch-action: pan-y; /* 允许垂直滚动，水平滑动 */
     -webkit-tap-highlight-color: transparent;
     text-align: center;
 }
@@ -1457,21 +1457,29 @@ body.show-nav .bottom-nav {
     }
     
     .weekly-day-button {
-        padding: 6px;
-        gap: 3px;
+        aspect-ratio: 0.85 / 1; /* 移动端拉高容器，高度大于宽度 */
+        padding: 8px 6px;
+        gap: 4px;
+        min-height: 70px; /* 确保最小高度 */
     }
     
     .weekly-weekday-cell {
-        font-size: 10px;
+        font-size: 11px; /* 稍微放大 */
     }
     
     .weekly-mood-icon {
-        width: 18px;
-        height: 18px;
+        width: 24px; /* 从18px放大到24px */
+        height: 24px;
     }
     
     .weekly-date-cell {
-        font-size: 12px;
+        font-size: 14px; /* 从12px放大到14px */
+    }
+    
+    /* 周历容器支持滑动 */
+    .weekly-calendar-container {
+        touch-action: pan-y; /* 允许垂直滚动，水平滑动 */
+        overflow-x: hidden; /* 隐藏横向滚动条 */
     }
 }
 

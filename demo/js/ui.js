@@ -158,10 +158,8 @@ function showDailyReadingPage() {
         }
     }
     
-    // 渲染周历（延迟执行，确保DOM已渲染）
-    setTimeout(() => {
-        renderWeeklyCalendar();
-    }, 100);
+    // 重置周历到本周并渲染
+    resetWeeklyCalendar();
 }
 
 // 显示页面2: Loading 界面
@@ -656,6 +654,9 @@ let currentCalendarYear = new Date().getFullYear();
 let currentCalendarMonth = new Date().getMonth();
 let calendarMode = 'moon'; // 'moon' 或 'mood' - 日历显示模式，默认为月相日历
 let calendarPageClickHandler = null; // 事件委托处理器（保存事件处理器引用，用于移除）
+
+// 周历当前显示的周（相对于本周的偏移，0 = 本周，-1 = 上一周，1 = 下一周）
+let weeklyCalendarOffset = 0;
 
 // 情绪状态对应的天气图标映射
 const EMOTION_WEATHER_MAP = {
@@ -1363,9 +1364,9 @@ function initCalendarPage() {
     // 这里不绑定，避免重复绑定问题
 }
 
-// 渲染周历（显示本周7天）
+// 渲染周历（显示指定周的7天）
 function renderWeeklyCalendar() {
-    console.log('renderWeeklyCalendar 被调用');
+    console.log('renderWeeklyCalendar 被调用，当前周偏移:', weeklyCalendarOffset);
     // 查找所有周历容器（可能有多个页面包含周历）
     const containers = document.querySelectorAll('.weekly-calendar-container');
     console.log('找到周历容器数量:', containers.length);
@@ -1378,6 +1379,8 @@ function renderWeeklyCalendar() {
         if (grid) {
             console.log(`开始渲染容器 ${index} 的周历`);
             renderWeeklyCalendarForContainer(grid);
+            // 绑定滑动事件（仅移动端）
+            bindWeeklyCalendarSwipe(container);
         } else {
             console.warn(`容器 ${index} 找不到网格元素`);
         }
@@ -1398,12 +1401,17 @@ function renderWeeklyCalendarForContainer(grid) {
     grid.style.visibility = 'visible';
     grid.style.opacity = '1';
     
-    // 获取本周的开始日期（周日）
+    // 获取目标周的开始日期（周日）
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = 周日, 1 = 周一, ...
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
+    
+    // 根据周偏移调整日期
+    if (weeklyCalendarOffset !== 0) {
+        startOfWeek.setDate(startOfWeek.getDate() + (weeklyCalendarOffset * 7));
+    }
     
     // 星期标题
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
