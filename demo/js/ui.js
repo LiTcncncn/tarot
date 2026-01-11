@@ -1379,12 +1379,17 @@ function renderWeeklyCalendar() {
         if (grid) {
             console.log(`开始渲染容器 ${index} 的周历`);
             renderWeeklyCalendarForContainer(grid);
-            // 绑定滑动事件（仅移动端）
-            bindWeeklyCalendarSwipe(container);
         } else {
             console.warn(`容器 ${index} 找不到网格元素`);
         }
     });
+    
+    // 绑定滑动事件（仅移动端，在所有容器渲染完成后绑定一次）
+    if (containers.length > 0 && window.innerWidth < 1330) {
+        containers.forEach((container) => {
+            bindWeeklyCalendarSwipe(container);
+        });
+    }
 }
 
 // 为单个容器渲染周历
@@ -1491,3 +1496,63 @@ function renderWeeklyCalendarForContainer(grid) {
     }
 }
 
+
+// 绑定周历滑动事件（仅移动端）
+function bindWeeklyCalendarSwipe(container) {
+    if (!container || window.innerWidth >= 1330) {
+        // 桌面端不需要滑动
+        return;
+    }
+    
+    // 避免重复绑定
+    if (container.dataset.swipeBound === 'true') {
+        return;
+    }
+    container.dataset.swipeBound = 'true';
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let isSwiping = false;
+    
+    container.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        isSwiping = false;
+    }, { passive: true });
+    
+    container.addEventListener('touchmove', (e) => {
+        isSwiping = true;
+    }, { passive: true });
+    
+    container.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        
+        touchEndX = e.changedTouches[0].screenX;
+        const diffX = touchStartX - touchEndX;
+        const minSwipeDistance = 50; // 最小滑动距离
+        
+        if (Math.abs(diffX) > minSwipeDistance) {
+            if (diffX > 0) {
+                // 向左滑动，显示下一周
+                weeklyCalendarOffset++;
+                console.log('向左滑动，显示下一周，偏移:', weeklyCalendarOffset);
+            } else {
+                // 向右滑动，显示上一周
+                weeklyCalendarOffset--;
+                console.log('向右滑动，显示上一周，偏移:', weeklyCalendarOffset);
+            }
+            
+            // 重新渲染周历
+            renderWeeklyCalendar();
+        }
+    }, { passive: true });
+}
+
+// 重置周历到本周
+function resetWeeklyCalendar() {
+    weeklyCalendarOffset = 0;
+    // 清除滑动绑定标记，允许重新绑定
+    document.querySelectorAll('.weekly-calendar-container').forEach(container => {
+        container.dataset.swipeBound = 'false';
+    });
+    renderWeeklyCalendar();
+}
