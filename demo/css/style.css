@@ -1204,7 +1204,7 @@ body.show-nav .bottom-nav {
     
     #main-page,
     #calendar-page {
-        padding-bottom: 100px; /* 大屏版稍高一些 */
+        padding-bottom: 40px; /* 确保按钮在滚动区域内可见 */
     }
 }
 
