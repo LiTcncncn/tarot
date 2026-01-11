@@ -1544,30 +1544,50 @@ function bindWeeklyCalendarSwipe(container) {
         if (Math.abs(diffX) > minSwipeDistance) {
             // 获取网格元素，添加滑动方向的动画
             const grid = container.querySelector('.weekly-calendar-grid');
-            if (grid) {
+            
+            let shouldUpdate = false;
+            let newOffset = weeklyCalendarOffset;
+            
+            if (diffX > 0) {
+                // 向左滑动，尝试显示下一周（但只能到本周，不能看未来）
+                if (weeklyCalendarOffset < 0) {
+                    // 如果在历史周，可以向右回到本周
+                    newOffset = Math.min(0, weeklyCalendarOffset + 1);
+                    shouldUpdate = true;
+                    console.log('向左滑动，回到本周或更近的周，偏移:', newOffset);
+                } else {
+                    // 已经是本周，不能再向左滑动
+                    console.log('已经是本周，不能再向左滑动');
+                    return;
+                }
+            } else {
+                // 向右滑动，显示上一周（可以看历史）
+                newOffset = weeklyCalendarOffset - 1;
+                shouldUpdate = true;
+                console.log('向右滑动，显示上一周，偏移:', newOffset);
+            }
+            
+            if (shouldUpdate && grid) {
                 // 根据滑动方向设置初始位置并触发淡出
                 if (diffX > 0) {
-                    // 向左滑动，显示下一周（从右侧滑入）
+                    // 向左滑动，从右侧滑入
                     grid.style.transform = 'translateX(-100px)';
-                    weeklyCalendarOffset++;
                 } else {
-                    // 向右滑动，显示上一周（从左侧滑入）
+                    // 向右滑动，从左侧滑入
                     grid.style.transform = 'translateX(100px)';
-                    weeklyCalendarOffset--;
                 }
                 grid.style.opacity = '0';
+                
+                // 更新偏移量
+                weeklyCalendarOffset = newOffset;
                 
                 // 延迟重新渲染，让淡出动画完成
                 setTimeout(() => {
                     renderWeeklyCalendar();
                 }, 150); // 动画时长的一半，让切换更流畅
-            } else {
-                // 如果没有网格元素，直接重新渲染
-                if (diffX > 0) {
-                    weeklyCalendarOffset++;
-                } else {
-                    weeklyCalendarOffset--;
-                }
+            } else if (shouldUpdate) {
+                // 如果没有网格元素，直接更新并重新渲染
+                weeklyCalendarOffset = newOffset;
                 renderWeeklyCalendar();
             }
         }
