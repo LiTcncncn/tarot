@@ -230,6 +230,18 @@ function showMainPage() {
         resetWeeklyCalendar();
     }, 100);
     
+    // 绑定星座星盘分析按钮并更新图标（延迟执行，确保DOM已渲染）
+    console.log('ui.js showMainPage: 准备绑定星座星盘按钮');
+    setTimeout(() => {
+        console.log('ui.js showMainPage: 延迟执行绑定，函数存在:', typeof bindZodiacHoroscopeButtons);
+        if (typeof bindZodiacHoroscopeButtons === 'function') {
+            console.log('ui.js showMainPage: 调用 bindZodiacHoroscopeButtons');
+            bindZodiacHoroscopeButtons();
+        } else {
+            console.error('ui.js showMainPage: bindZodiacHoroscopeButtons 函数不存在！');
+        }
+    }, 300);
+    
     // 注意：主界面的背景色由 loadTodayData() 根据保存的情绪状态设置
     // 如果没有今日数据，保持默认背景色（已在 CSS 中定义）
 }
@@ -497,6 +509,13 @@ function renderMainPage(readingData, card, moonPhase) {
     
     // 绑定情绪记录按钮
     bindEmotionRecordButton();
+    
+    // 绑定星座星盘分析按钮并更新图标
+    setTimeout(() => {
+        if (typeof bindZodiacHoroscopeButtons === 'function') {
+            bindZodiacHoroscopeButtons();
+        }
+    }, 100);
 }
 
 // 显示分类内容（辅助函数）

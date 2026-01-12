@@ -11,6 +11,9 @@ let profileData = {
     defaultWeather: null
 };
 
+// 将变量暴露到全局，供其他模块访问
+window.currentStep = currentStep;
+
 // 天气图标映射（用于第6步）
 const WEATHER_OPTIONS = [
     { value: 'sunny', icon: 'weather/1.png', label: '阳光', emotion: '愉悦' },
@@ -100,6 +103,70 @@ function initProfileModal() {
     
     // 检查并显示/隐藏入口按钮
     updateProfileButtonVisibility();
+    
+    // 将 openModal 暴露为全局函数，供其他模块调用（如果还没有定义）
+    if (!window.showProfileModal) {
+        window.showProfileModal = openModal;
+    }
+    
+    // 标记已初始化
+    window.profileModalInitialized = true;
+}
+
+// 全局函数：显示个人信息模态框（供其他模块调用）
+// 确保在全局作用域中定义（在 initProfileModal 之前就定义好）
+window.showProfileModal = function showProfileModal() {
+    const modal = document.getElementById('profile-modal');
+    if (!modal) {
+        console.error('Profile modal not found');
+        return;
+    }
+    
+    // 加载已保存的数据
+    const saved = getUserProfile();
+    if (saved) {
+        profileData = {
+            nickname: saved.nickname || null,
+            gender: saved.gender || null,
+            birthday: saved.birthday || null,
+            birthTime: saved.birthTime || null,
+            birthPlace: saved.birthPlace || null,
+            defaultWeather: saved.defaultWeather || null
+        };
+        // 找到最后一个已填写的步骤
+        if (profileData.nickname && profileData.gender && profileData.birthday) {
+            currentStep = 4; // 从第4步开始
+            if (profileData.birthTime) currentStep = 5;
+            if (profileData.birthPlace) currentStep = 6;
+            if (profileData.defaultWeather) currentStep = 6;
+        } else if (profileData.nickname && profileData.gender) {
+            currentStep = 3;
+        } else if (profileData.nickname) {
+            currentStep = 2;
+        } else {
+            currentStep = 1;
+        }
+    } else {
+        currentStep = 1;
+        profileData = {
+            nickname: null,
+            gender: null,
+            birthday: null,
+            birthTime: null,
+            birthPlace: null,
+            defaultWeather: null
+        };
+    }
+    
+    modal.style.display = 'block';
+    renderCurrentStep();
+};
+
+// 同时保留函数声明形式（兼容性）
+function showProfileModal() {
+    if (window.showProfileModal) {
+        window.showProfileModal();
+    }
 }
 
 // 更新入口按钮显示状态
@@ -285,6 +352,9 @@ function renderStep3(container) {
 
 // 第4步：出生时间
 function renderStep4(container) {
+    // 判断是否选择了"我不知道"：如果 birthTime 是 null 或空字符串，且不是有效的 HH:mm 格式
+    const isUnknown = !profileData.birthTime || profileData.birthTime === null || profileData.birthTime === '';
+    
     container.innerHTML = `
         <div class="profile-step-content">
             <h3 class="profile-step-title">你的出生时间</h3>
@@ -294,16 +364,16 @@ function renderStep4(container) {
                     type="time" 
                     id="profile-birthtime-input" 
                     class="profile-input" 
-                    value="${profileData.birthTime || ''}"
+                    value="${profileData.birthTime && profileData.birthTime !== null ? profileData.birthTime : ''}"
                     step="3600"
                 >
                 <button 
                     type="button" 
                     id="profile-unknown-time-btn" 
                     class="profile-unknown-btn"
-                    ${profileData.birthTime === null ? 'data-selected="true"' : ''}
+                    ${isUnknown ? 'data-selected="true"' : ''}
                 >
-                    ${profileData.birthTime === null ? '✓ 我不知道' : '我不知道'}
+                    ${isUnknown ? '✓ 我不知道' : '我不知道'}
                 </button>
             </div>
         </div>
@@ -318,15 +388,30 @@ function renderStep4(container) {
             timeInput.value = '';
             unknownBtn.textContent = '✓ 我不知道';
             unknownBtn.dataset.selected = 'true';
+            // 确保输入框可以再次使用
+            timeInput.disabled = false;
         });
         
+        // 监听时间输入框的变化
         timeInput.addEventListener('change', () => {
-            if (timeInput.value) {
+            if (timeInput.value && timeInput.value.trim() !== '') {
                 profileData.birthTime = timeInput.value;
                 unknownBtn.textContent = '我不知道';
                 unknownBtn.dataset.selected = 'false';
             }
         });
+        
+        // 也监听 input 事件（实时更新）
+        timeInput.addEventListener('input', () => {
+            if (timeInput.value && timeInput.value.trim() !== '') {
+                profileData.birthTime = timeInput.value;
+                unknownBtn.textContent = '我不知道';
+                unknownBtn.dataset.selected = 'false';
+            }
+        });
+        
+        // 确保输入框始终可用（即使"我不知道"被选中）
+        timeInput.disabled = false;
     }
 }
 

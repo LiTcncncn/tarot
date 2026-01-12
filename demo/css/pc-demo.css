@@ -1,0 +1,144 @@
+/* PC演示版样式 - 在PC大屏中间模拟16:10手机尺寸 */
+
+/* PC演示版外层容器 */
+.pc-demo-body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pc-demo-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* 模拟手机屏幕框架 (16:10比例) */
+.phone-frame {
+    width: 90vh; /* 基于视口高度的90% */
+    max-width: 900px; /* 最大宽度限制 */
+    min-width: 500px; /* 最小宽度限制 */
+    aspect-ratio: 16 / 10; /* 16:10比例 */
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 32px;
+    padding: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 0 2px rgba(255, 255, 255, 0.1),
+                inset 0 0 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 手机屏幕内容区域 */
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    background: #F5F3F3; /* 使用应用的基础背景色 */
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 将所有页面内容限制在手机屏幕内 */
+.phone-screen .page {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 确保底部导航栏在手机屏幕内 */
+.phone-screen .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* 调整滚动条样式（可选） */
+.phone-screen ::-webkit-scrollbar {
+    width: 4px;
+}
+
+.phone-screen ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.phone-screen ::-webkit-scrollbar-thumb {
+    background: rgba(109, 92, 92, 0.3);
+    border-radius: 2px;
+}
+
+.phone-screen ::-webkit-scrollbar-thumb:hover {
+    background: rgba(109, 92, 92, 0.5);
+}
+
+/* 响应式调整 - 如果屏幕太小，缩小手机框架 */
+@media (max-width: 1400px) {
+    .phone-frame {
+        width: 85vh;
+        max-width: 800px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .phone-frame {
+        width: 80vh;
+        max-width: 700px;
+    }
+}
+
+@media (max-width: 900px) {
+    .phone-frame {
+        width: 75vh;
+        max-width: 600px;
+        min-width: 400px;
+    }
+    
+    .pc-demo-container {
+        padding: 20px;
+    }
+}
+
+/* 确保模态框和弹板在手机屏幕内 */
+.phone-screen .emotion-record-modal,
+.phone-screen .emotion-select-toast,
+.phone-screen .checkin-toast,
+.phone-screen .profile-modal,
+.phone-screen .calendar-day-modal {
+    position: fixed;
+    inset: 0;
+    z-index: inherit;
+}
+
+/* 调整模态框背景，使其覆盖整个手机屏幕 */
+.phone-screen .emotion-record-modal-backdrop,
+.phone-screen .profile-modal-backdrop {
+    position: absolute;
+    inset: 0;
+}
+

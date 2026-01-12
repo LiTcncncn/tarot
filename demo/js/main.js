@@ -1,7 +1,12 @@
 // 主逻辑入口
 
+console.log('main.js: 脚本已加载');
+console.log('main.js: bindZodiacHoroscopeButtons 函数存在:', typeof bindZodiacHoroscopeButtons);
+
 // 初始化应用
 function initApp() {
+    console.log('main.js: initApp 被调用');
+    
     // 初始化背景色为默认值（确保一致性）
     if (typeof resetBackgroundToDefault === 'function') {
         resetBackgroundToDefault();
@@ -97,6 +102,18 @@ function bindEvents() {
     if (typeof bindEmotionRecordButton === 'function') {
         bindEmotionRecordButton();
     }
+    
+    // 初始化星座星盘分析按钮（延迟执行，确保DOM已加载）
+    console.log('main.js: 准备绑定星座星盘按钮，检查函数是否存在:', typeof bindZodiacHoroscopeButtons);
+    setTimeout(() => {
+        console.log('main.js: 延迟执行绑定，函数存在:', typeof bindZodiacHoroscopeButtons);
+        if (typeof bindZodiacHoroscopeButtons === 'function') {
+            console.log('main.js: 调用 bindZodiacHoroscopeButtons');
+            bindZodiacHoroscopeButtons();
+        } else {
+            console.error('main.js: bindZodiacHoroscopeButtons 函数不存在！');
+        }
+    }, 500);
     
     // 抽牌回调函数
     function getCardDrawCallback() {

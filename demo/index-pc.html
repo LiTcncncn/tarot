@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarot Mirror - 每日塔罗</title>
+    <title>Tarot Mirror - 每日塔罗 (PC演示版)</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/tarot-module.css">
     <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/pc-demo.css">
 </head>
-<body>
+<body class="pc-demo-body">
+    <!-- PC演示版外层容器 -->
+    <div class="pc-demo-container">
+        <!-- 模拟手机屏幕容器 (16:10比例) -->
+        <div class="phone-frame">
+            <div class="phone-screen">
     <!-- 页面1: 每日占卜页面（情绪选择 + 抽牌） -->
     <div id="daily-reading-page" class="page active">
         <div class="daily-reading-content">
@@ -309,24 +315,6 @@
                 <div class="category-content" id="category-content"></div>
             </section>
 
-            <!-- 6. 星座星盘分析 -->
-            <section class="zodiac-horoscope-section">
-                <div class="zodiac-horoscope-buttons">
-                    <button id="zodiac-analysis-btn" class="zodiac-horoscope-btn">
-                        <span class="zodiac-horoscope-icon" id="zodiac-icon">✨</span>
-                        <span class="zodiac-horoscope-text">每日星座</span>
-                    </button>
-                    <button id="horoscope-analysis-btn" class="zodiac-horoscope-btn">
-                        <span class="zodiac-horoscope-icon">🔮</span>
-                        <span class="zodiac-horoscope-text">星盘分析</span>
-                    </button>
-                </div>
-                <!-- 分析结果展示区域 -->
-                <div class="zodiac-horoscope-content" id="zodiac-horoscope-content" style="display: none;">
-                    <div class="zodiac-horoscope-result" id="zodiac-horoscope-result"></div>
-                </div>
-            </section>
-
             <!-- 7. 今日幸运元素 -->
             <section class="lucky-elements-section">
                 <h3 class="section-title">今日幸运元素</h3>
@@ -528,13 +516,15 @@
     <script src="js/profile-modal.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/zodiac-horoscope.js"></script>
     <script src="js/tarot-storage.js"></script>
     <script src="js/tarot-spread.js"></script>
     <script src="js/tarot-chat.js"></script>
     <script src="js/tarot-module.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

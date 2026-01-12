@@ -1015,6 +1015,94 @@ section {
     color: var(--text-primary);
 }
 
+/* 星座星盘分析模块 */
+.zodiac-horoscope-section {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 24px;
+}
+
+.zodiac-horoscope-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+}
+
+.zodiac-horoscope-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 16px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 100px;
+}
+
+.zodiac-horoscope-btn:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 92, 92, 0.2);
+}
+
+.zodiac-horoscope-icon {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.zodiac-horoscope-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.zodiac-horoscope-btn:hover .zodiac-horoscope-text {
+    color: white;
+}
+
+.zodiac-horoscope-content {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #F5F3F3 0%, #E5E0E0 100%);
+    border-radius: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+.zodiac-horoscope-result {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.zodiac-horoscope-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.zodiac-horoscope-loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
 /* 幸运元素 */
 .lucky-elements-section {
     grid-column: 1 / -1; /* 确保占整行 */
