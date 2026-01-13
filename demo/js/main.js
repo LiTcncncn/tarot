@@ -193,7 +193,6 @@ function bindEvents() {
             setTimeout(() => {
                 showMainPage();
                 renderMainPage(readingData, card, moonPhase);
-                initCategoryButtons(readingData);
             }, 1000);
             
         } catch (error) {
@@ -230,7 +229,6 @@ function loadTodayData() {
         }
         
         renderMainPage(reading, card, moonPhase);
-        initCategoryButtons(reading);
     } else {
         // 没有今日数据，显示开始占卜按钮
         document.getElementById('start-daily-btn').style.display = 'flex';

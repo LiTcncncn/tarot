@@ -257,6 +257,11 @@
                 </div>
             </div>
             
+            <!-- 0. 精炼指引（在今日指引模块上方） -->
+            <section class="concise-guidance-section">
+                <p class="concise-guidance" id="concise-guidance"></p>
+            </section>
+
             <!-- 1. 今日指引和塔罗牌（左右分列） -->
             <section class="moon-phase-section">
                 <!-- 左侧：今日指引 -->
@@ -306,14 +311,32 @@
             <section class="category-section">
                 <h3 class="section-title">查看各领域指引</h3>
                 <div class="category-buttons">
-                    <button class="category-btn" data-category="情感">情感</button>
+                    <button class="category-btn" data-category="爱情">爱情</button>
+                    <button class="category-btn" data-category="财富">财富</button>
                     <button class="category-btn" data-category="工作">工作</button>
                     <button class="category-btn" data-category="学习">学习</button>
-                    <button class="category-btn" data-category="生活">生活</button>
                     <button class="category-btn" data-category="家庭">家庭</button>
+                    <button class="category-btn" data-category="人际">人际</button>
                 </div>
-                <div class="category-content" id="category-content"></div>
             </section>
+            
+            <!-- 领域指引模态框 -->
+            <div id="category-modal" class="category-modal" style="display: none;">
+                <div class="category-modal-overlay"></div>
+                <div class="category-modal-content">
+                    <div class="category-modal-header">
+                        <h3 id="category-modal-title">领域指引</h3>
+                        <button class="category-modal-close" id="category-modal-close">×</button>
+                    </div>
+                    <div class="category-modal-body">
+                        <div id="category-modal-loading" class="category-modal-loading" style="display: none;">
+                            <div class="loading-spinner"></div>
+                            <p>正在生成指引...</p>
+                        </div>
+                        <div id="category-modal-content" class="category-modal-text"></div>
+                    </div>
+                </div>
+            </div>
 
             <!-- 7. 今日幸运元素 -->
             <section class="lucky-elements-section">

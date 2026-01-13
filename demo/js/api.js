@@ -84,8 +84,8 @@ ${zodiacInfo ? `【User's Zodiac Sign】
 Zodiac: ${zodiacInfo.nameCn} (${zodiacInfo.name}) ${zodiacInfo.emoji}
 ` : ''}---
 
-【Critical Instructions for guidance_one_line】
-The "guidance_one_line" field must provide DIRECT healing comfort and actionable advice. 
+【Critical Instructions for concise_guidance and guidance_one_line】
+Both "concise_guidance" and "guidance_one_line" fields must provide DIRECT healing comfort and actionable advice. 
 
 STRICT PROHIBITIONS:
 - Do NOT mention the tarot card name (e.g., "宝剑皇后", "愚者", "皇后", "星星", etc.)
@@ -93,24 +93,27 @@ STRICT PROHIBITIONS:
 - Do NOT explain what the tarot card or moon phase means
 - Do NOT say things like "今天的塔罗牌是..." or "月相显示..." or "这张牌意味着..."
 - Do NOT reference "塔罗" or "月相" explicitly
+- **CRITICAL: Do NOT mention user's emotional state** - STRICTLY FORBIDDEN to use words like "愉悦", "平静", "疲惫", "迷茫", "焦虑" or any other emotional state descriptions in the guidance text
 
 REQUIREMENTS:
 - Use ONLY the energy and meaning of the tarot card and moon phase to inform your guidance, but express it as pure healing comfort and advice
 - Directly offer warm, empathetic reassurance and practical suggestions
-- Make it feel like natural, intuitive guidance based on understanding the user's emotional state
+- Make it feel like natural, intuitive guidance WITHOUT referencing the user's current emotional state
 - Focus on comfort, encouragement, and actionable suggestions
-- The guidance should feel timeless and universal, not tied to specific symbols or elements
+- The guidance should feel timeless and universal, not tied to specific symbols, elements, or emotional states
 
 Example of BAD guidance: "在愉悦中保持清醒的觉察，让下弦月的宁静沉淀你的智慧，以宝剑皇后的明晰照亮前路。"
 
-Example of GOOD guidance: "在愉悦中保持清醒的觉察，让内心的宁静沉淀你的智慧，用清晰的视角照亮前路。"
+Example of GOOD guidance: "保持清醒的觉察，让内心的宁静沉淀你的智慧，用清晰的视角照亮前路。"
 
 ---
 
 Please generate ALL of the following content in ONE response, formatted as JSON:
 
 {
-  "guidance_one_line": "A single line of healing comfort and actionable advice (within 40 Chinese characters). STRICTLY FORBIDDEN: Do NOT mention tarot card names (e.g., '宝剑皇后', '愚者', etc.) or moon phase names (e.g., '下弦月', '满月', etc.). Do NOT explain what the tarot card or moon phase means. Use ONLY their energy to inform your guidance, but express it as pure comfort and advice without referencing the symbols. Directly provide warm, empathetic reassurance and practical suggestions based on the user's emotional state. Make it feel like natural, intuitive guidance.",
+  "concise_guidance": "A concise, impactful one-line guidance (WITHIN 15-18 Chinese characters). This should be a brief, powerful statement that captures the essence of today's guidance. It can be a complete sentence with punctuation. Examples: '有些话不必急着说出口', '暂时放下心中的事，让时间沉淀', '让时间沉淀答案，静待花开', '静待花开的声音，让心自然舒展'. It should be poetic, meaningful, and directly actionable. STRICTLY FORBIDDEN: Do NOT mention tarot card names or moon phase names. Do NOT mention user's emotional state (e.g., '愉悦', '平静', '疲惫', '迷茫', '焦虑'). Use ONLY the energy to inform the guidance, but express it as pure, timeless wisdom without referencing emotional states.",
+  
+  "guidance_one_line": "A single line of healing comfort and actionable advice (within 25-30 Chinese characters). STRICTLY FORBIDDEN: Do NOT mention tarot card names (e.g., '宝剑皇后', '愚者', etc.) or moon phase names (e.g., '下弦月', '满月', etc.). Do NOT explain what the tarot card or moon phase means. Do NOT mention user's emotional state (e.g., '愉悦', '平静', '疲惫', '迷茫', '焦虑'). Use ONLY their energy to inform your guidance, but express it as pure comfort and advice without referencing the symbols or emotional states. Directly provide warm, empathetic reassurance and practical suggestions. Make it feel like natural, intuitive guidance.",
   
   "today_analysis": "**CRITICAL LENGTH REQUIREMENT: EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY and STRICTLY ENFORCED. The content MUST be divided into 2 paragraphs (use \\n to separate paragraphs), each paragraph should be complete and meaningful. Before finalizing, count the characters to ensure it falls within 280-320 characters.** A detailed analysis that EXPLICITLY explains the analytical thinking behind the guidance. MUST include: (1) Explanation of the tarot card's meaning and how it relates to the user's emotional state (mention the card name like '宝剑皇后', '愚者', etc.), (2) Explanation of the moon phase energy and its influence (mention the moon phase name like '下弦月', '满月', etc.)${zodiacInfo ? `, (3) A brief zodiac analysis (小篇幅) that combines the user's zodiac sign (${zodiacInfo.nameCn}) with today's tarot card and moon phase energy, explaining how the zodiac traits interact with today's guidance` : `, (3) How these elements combine with the user's emotional state to form comprehensive daily fortune and healing guidance`}. STRICTLY PROHIBITED: Do NOT use any words related to card orientation such as '逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向'. Do NOT describe the card drawing process (avoid phrases like '你抽到的是...' or '你抽到了一张...'). If the card energy is inward/slower/needs adjustment, express it as '节奏更慢/需要调整方法/更偏内在整理/先稳住' or '这张牌今天更偏向内在/缓慢/需要调整节奏的表达', never attribute it to '逆位'. This should be sincere, warm, and personalized, showing the analytical process and reasoning behind the advice. The content should explain WHY and HOW the analysis is derived from these sources.",
   
@@ -126,14 +129,6 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
       "guidance": "Detailed guidance for this category (within 80 Chinese characters), combining tarot + moon phase + emotional state, with comfort and actionable advice."
     }
   ],
-  
-  "category_guidances": {
-    "情感": "Detailed guidance for emotions/love (within 60 Chinese characters), specifically addressing the user's emotional state and providing comfort or suggestions.",
-    "工作": "Detailed guidance for work/career (within 60 Chinese characters), considering the user's emotional state and moon phase energy.",
-    "学习": "Detailed guidance for study/learning (within 60 Chinese characters), tailored to the user's current state.",
-    "生活": "Detailed guidance for daily life (within 60 Chinese characters), providing practical suggestions.",
-    "家庭": "Detailed guidance for family (within 60 Chinese characters), considering emotional needs."
-  },
   
   "lucky_elements": {
     "lucky_color": "A specific color name (e.g., '柔和的薰衣草紫', '温暖的金色')",
@@ -189,13 +184,14 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
    - Naturally weave together tarot meaning + moon phase energy + emotional state
    - Don't list them separately, but integrate them organically
    - Make the guidance feel personalized and relevant
-   - **CRITICAL for guidance_one_line**: 
+   - **CRITICAL for concise_guidance and guidance_one_line**: 
      * STRICTLY FORBIDDEN: Do NOT mention tarot card names (宝剑皇后, 愚者, 皇后, etc.) or moon phase names (下弦月, 满月, 新月, etc.)
      * Do NOT explain what the tarot card or moon phase means
      * Do NOT reference "塔罗" or "月相" explicitly
+     * **CRITICAL: Do NOT mention user's emotional state** - STRICTLY FORBIDDEN to use words like "愉悦", "平静", "疲惫", "迷茫", "焦虑" or any other emotional state descriptions
      * Use ONLY the energy and meaning of tarot and moon phase to inform your guidance, but express it as pure healing comfort and advice
-     * Make it feel like natural, intuitive guidance, not tied to specific symbols
-     * The user will see the detailed analysis in "today_analysis" section, so guidance_one_line should be purely comforting advice
+     * Make it feel like natural, intuitive guidance, not tied to specific symbols or emotional states
+     * The user will see the detailed analysis in "today_analysis" section, so concise_guidance and guidance_one_line should be purely comforting advice without referencing emotional states
    
    - **REQUIRED for today_analysis**:
      * **CRITICAL LENGTH REQUIREMENT: EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY and STRICTLY ENFORCED. You MUST count the characters before finalizing. If the content is too short, expand it. If it's too long, condense it. The final character count MUST be between 280 and 320, inclusive.**
@@ -214,11 +210,11 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
      * This is where the user learns the SOURCE and LOGIC behind the guidance
 
 4. **Length Requirements (CRITICAL - STRICTLY ENFORCED)**:
-   - guidance_one_line: Exactly within 40 Chinese characters - must be direct healing comfort and advice, NO explanation of tarot or moon phase, NO mention of card/phase names
+   - concise_guidance: Exactly within 15-18 Chinese characters - must be a poetic, impactful statement that captures the essence of today's guidance. It can be a complete sentence with punctuation. STRICTLY FORBIDDEN: Do NOT mention user's emotional state (愉悦, 平静, 疲惫, 迷茫, 焦虑, etc.)
+   - guidance_one_line: Exactly within 25-30 Chinese characters - must be direct healing comfort and advice, NO explanation of tarot or moon phase, NO mention of card/phase names, NO mention of user's emotional state (愉悦, 平静, 疲惫, 迷茫, 焦虑, etc.)
    - **today_analysis: CRITICAL - EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY. You MUST count the characters and ensure the final count is between 280 and 320, inclusive. If too short, expand. If too long, condense. MUST be divided into exactly 2 paragraphs (use \\n to separate paragraphs), each paragraph should be complete and meaningful.** MUST explicitly explain the tarot card meaning, moon phase energy${zodiacInfo ? `, and a brief zodiac analysis (小篇幅) combining the user's zodiac sign (${zodiacInfo.nameCn}) with today's guidance` : ''}, and how they combine with the user's emotional state. MUST mention the card name and moon phase name${zodiacInfo ? `, and naturally integrate the zodiac analysis` : ''}. **STRICTLY PROHIBITED**: Do NOT use any words related to card orientation such as "逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向". Do NOT describe the card drawing process (avoid phrases like "你抽到的是..." or "你抽到了一张..."). If the card energy is inward/slower/needs adjustment, express it as "节奏更慢/需要调整方法/更偏内在整理/先稳住" or "这张牌今天更偏向内在/缓慢/需要调整节奏的表达", never attribute it to "逆位". This is the analytical explanation section.
    - healing_task: One simple, actionable task (20 sec - 2 min)
    - two_guidances: Each within 80 Chinese characters
-   - category_guidances: Each within 60 Chinese characters
 
 5. **Category Selection for two_guidances**:
    - Choose the 2 most relevant categories based on the tarot card, moon phase, and user's emotional state
@@ -508,6 +504,135 @@ ${readingContext.overall_reading || ''}
         return data.choices[0].message.content.trim();
     } catch (error) {
         console.error('Tarot chat API call error:', error);
+        throw error;
+    }
+}
+
+// 生成单个领域的指引（200字）
+async function generateCategoryGuidance(category, todayReading) {
+    try {
+        if (!todayReading || !todayReading.reading || !todayReading.card || !todayReading.moonPhase) {
+            throw new Error('缺少必要的今日占卜数据');
+        }
+
+        const card = todayReading.card;
+        const moonPhase = todayReading.moonPhase;
+        const emotion = todayReading.emotion || '平静';
+        const emotionDescription = EMOTION_DESCRIPTIONS[emotion] || emotion;
+        
+        // 获取用户信息（检查是否有星座信息）
+        let userProfile = null;
+        let zodiacInfo = null;
+        if (typeof getUserProfile === 'function') {
+            userProfile = getUserProfile();
+            if (userProfile && userProfile.zodiac) {
+                zodiacInfo = userProfile.zodiac;
+            } else if (userProfile && userProfile.birthday && typeof getZodiacFromDate === 'function') {
+                zodiacInfo = getZodiacFromDate(userProfile.birthday);
+            }
+        }
+        
+        // 获取实际正逆位和强度等级
+        const actualReversed = card.actualReversed !== undefined ? card.actualReversed : false;
+        const intensity = card.intensity || getCardIntensity(card.name);
+        
+        // 强度等级描述
+        const intensityDescriptions = {
+            'I0': '安抚/稳定/修复 - 温和、治愈、稳定能量',
+            'I1': '中性推进/资源可用 - 中性、推进、资源导向',
+            'I2': '轻挑战/提醒/需要调整 - 提醒、需要调整、轻微挑战',
+            'I3': '强转折/冲击 - 强烈变化、冲击、转折'
+        };
+
+        // 领域描述映射
+        const categoryDescriptions = {
+            '爱情': 'love and romantic relationships',
+            '财富': 'wealth, money, and financial matters',
+            '工作': 'work and career',
+            '学习': 'study and learning',
+            '家庭': 'family and home life',
+            '人际': 'social relationships, friends, and people around you'
+        };
+
+        const categoryDescription = categoryDescriptions[category] || category;
+
+        const prompt = `Please provide guidance for the "${category}" (${categoryDescription}) category based on today's tarot reading.
+
+【User's Emotional State】
+${emotion}
+
+【Today's Tarot Card】
+Card Name: ${card.name} (${card.nameCn})
+Card Intensity: ${intensity} - ${intensityDescriptions[intensity] || '中性推进/资源可用'}
+Card Energy Expression: ${actualReversed ? '内在/缓慢/需要调整节奏的表达' : '外在/主动/推进的表达'}
+Card Meaning: ${card.nameCn} represents ${card.name}${actualReversed ? ', today expressing with a more inward, slower rhythm that requires adjustment in approach' : ''}
+
+【Today's Moon Phase】
+Moon Phase: ${moonPhase.nameCn} (${moonPhase.name})
+Moon Energy: ${moonPhase.energy}
+
+${zodiacInfo ? `【User's Zodiac Sign】
+Zodiac: ${zodiacInfo.nameCn} (${zodiacInfo.name}) ${zodiacInfo.emoji}
+` : ''}---
+
+Please generate guidance for the "${category}" category in Chinese. The guidance should:
+
+1. **Length**: EXACTLY 200 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY and STRICTLY ENFORCED.
+
+2. **Content Requirements**:
+   - Combine the tarot card meaning, moon phase energy, and user's emotional state
+   - Provide specific, actionable advice for the "${category}" category
+   - Be warm, empathetic, and healing
+   - Offer practical suggestions that the user can apply
+   - Feel personalized and relevant
+
+3. **Prohibitions**:
+   - Do NOT mention the tarot card name (e.g., "宝剑皇后", "愚者", etc.) or moon phase name (e.g., "下弦月", "满月", etc.) explicitly
+   - Do NOT explain what the tarot card or moon phase means
+   - Do NOT mention user's emotional state (e.g., "愉悦", "平静", "疲惫", "迷茫", "焦虑") in the guidance text
+   - Use ONLY the energy and meaning to inform your guidance, but express it as pure advice
+
+4. **Style**:
+   - Be warm, gentle, and encouraging
+   - Use language that feels like a caring friend
+   - Focus on comfort, encouragement, and actionable suggestions
+
+Please respond with ONLY the guidance text in Chinese (exactly 200 characters), no JSON format, no additional text.`;
+
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: SYSTEM_PROMPT
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 500
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API request failed: ${response.status} ${errorText}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content.trim();
+        
+        return content;
+    } catch (error) {
+        console.error('Category guidance API call error:', error);
         throw error;
     }
 }

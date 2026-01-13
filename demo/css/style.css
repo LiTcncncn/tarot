@@ -708,6 +708,25 @@ section {
     flex-shrink: 1;
 }
 
+/* 精炼指引模块（在今日指引模块上方） */
+.concise-guidance-section {
+    margin-bottom: 24px;
+}
+
+/* 精炼指引（粗体放大） */
+.concise-guidance {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1.5;
+    color: #2D2525;
+    text-align: left;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border-radius: 0;
+    display: none; /* 默认隐藏，有内容时再显示 */
+}
+
 .guidance-one-line {
     font-size: 24px;
     font-weight: 900;
@@ -946,7 +965,8 @@ section {
 /* 分类按钮 */
 .category-buttons {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 20px;
     width: 100%;
@@ -1013,6 +1033,192 @@ section {
     font-size: 15px;
     line-height: 1.8;
     color: var(--text-primary);
+}
+
+/* 领域指引模态框 */
+.category-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.category-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.category-modal-content {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    /* 确保移动端按钮2行3列布局 */
+    .category-buttons {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-rows: repeat(2, 1fr) !important;
+        gap: 8px;
+        width: 100%;
+    }
+    
+    .category-btn {
+        padding: 10px 8px;
+        font-size: 13px;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .category-modal-content {
+        max-width: 90%;
+        max-height: 85vh;
+        border-radius: 12px;
+    }
+    
+    .category-modal-header {
+        padding: 16px 20px;
+    }
+    
+    .category-modal-header h3 {
+        font-size: 18px;
+    }
+    
+    .category-modal-body {
+        padding: 20px;
+    }
+    
+    .category-modal-text {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+}
+
+/* 小屏移动端（宽度 <= 480px） */
+@media (max-width: 480px) {
+    .category-buttons {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-rows: repeat(2, 1fr) !important;
+        gap: 6px;
+    }
+    
+    .category-btn {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.category-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.category-modal-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.category-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.category-modal-close:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.category-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.category-modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 16px;
+}
+
+.category-modal-loading p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.category-modal-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 /* 星座星盘分析模块 */
@@ -1183,7 +1389,8 @@ section {
     }
     
     .category-buttons {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
     }
     
     .lucky-elements {
@@ -1263,14 +1470,15 @@ section {
     }
     
     .category-buttons {
-        grid-template-columns: repeat(5, 1fr); /* 确保5个按钮在一行 */
-        gap: 6px; /* 减小间距 */
+        grid-template-columns: repeat(3, 1fr); /* 3列布局 */
+        grid-template-rows: repeat(2, 1fr); /* 2行布局 */
+        gap: 8px; /* 减小间距 */
         width: 100%;
     }
     
     .category-btn {
-        padding: 8px 6px; /* 减小内边距 */
-        font-size: 12px; /* 减小字体 */
+        padding: 10px 8px; /* 适当的内边距 */
+        font-size: 13px; /* 字体大小 */
         min-width: 0; /* 允许按钮缩小 */
         flex-shrink: 1; /* 允许收缩 */
     }
@@ -2636,4 +2844,3 @@ body.show-nav .bottom-nav {
         font-size: 15px;
     }
 }
-

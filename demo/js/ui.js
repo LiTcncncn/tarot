@@ -458,6 +458,17 @@ function renderMainPage(readingData, card, moonPhase) {
     // 统一显示为正位，不旋转图片
     todayCardImg.style.transform = 'rotate(0deg)';
     
+    // 精炼指引（在今日指引上方）
+    const conciseGuidanceEl = document.getElementById('concise-guidance');
+    if (conciseGuidanceEl) {
+        if (readingData.concise_guidance) {
+            conciseGuidanceEl.textContent = readingData.concise_guidance;
+            conciseGuidanceEl.style.display = 'block';
+        } else {
+            conciseGuidanceEl.style.display = 'none';
+        }
+    }
+    
     // 今日指引（左侧）
     document.getElementById('guidance-one-line').textContent = readingData.guidance_one_line;
     
@@ -498,14 +509,8 @@ function renderMainPage(readingData, card, moonPhase) {
     document.getElementById('lucky-number').textContent = readingData.lucky_elements.lucky_number;
     document.getElementById('lucky-decoration').textContent = readingData.lucky_elements.lucky_decoration;
     
-    // 分类内容（默认显示情感）
-    const categoryContent = document.getElementById('category-content');
-    categoryContent.innerHTML = '';
-    
-    // 默认显示情感指引
-    if (readingData.category_guidances && readingData.category_guidances['情感']) {
-        showCategoryContent('情感', readingData);
-    }
+    // 绑定领域指引按钮
+    bindCategoryButtons();
     
     // 绑定情绪记录按钮
     bindEmotionRecordButton();
@@ -518,73 +523,100 @@ function renderMainPage(readingData, card, moonPhase) {
     }, 100);
 }
 
-// 显示分类内容（辅助函数）
-function showCategoryContent(category, readingData) {
+// 绑定领域指引按钮（点击时生成并显示）
+function bindCategoryButtons() {
     const categoryButtons = document.querySelectorAll('.category-btn');
-    const categoryContent = document.getElementById('category-content');
+    const modal = document.getElementById('category-modal');
+    const modalTitle = document.getElementById('category-modal-title');
+    const modalContent = document.getElementById('category-modal-content');
+    const modalLoading = document.getElementById('category-modal-loading');
+    const modalClose = document.getElementById('category-modal-close');
+    const modalOverlay = modal?.querySelector('.category-modal-overlay');
     
-    // 切换按钮状态
-    categoryButtons.forEach(b => b.classList.remove('active'));
-    const targetBtn = Array.from(categoryButtons).find(btn => btn.dataset.category === category);
-    if (targetBtn) {
-        targetBtn.classList.add('active');
+    // 存储已生成的指引（避免重复生成）
+    const generatedGuidances = {};
+    
+    // 关闭模态框
+    function closeModal() {
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
     
-    // 显示/隐藏内容
-    const existingContent = categoryContent.querySelector(`[data-category="${category}"]`);
-    
-    if (existingContent) {
-        // 如果已存在，显示它
-        categoryContent.querySelectorAll('.category-detail').forEach(item => {
-            item.style.display = 'none';
-        });
-        existingContent.style.display = 'block';
-    } else {
-        // 创建新内容
-        const content = document.createElement('div');
-        content.className = 'category-detail';
-        content.dataset.category = category;
-        content.innerHTML = `
-            <div class="category-detail-content">
-                <h4>${category}</h4>
-                <p>${readingData.category_guidances[category]}</p>
-            </div>
-        `;
-        categoryContent.appendChild(content);
-        content.style.display = 'block';
+    // 打开模态框
+    function openModal(category) {
+        if (!modal) return;
         
-        // 隐藏其他所有内容
-        categoryContent.querySelectorAll('.category-detail').forEach(item => {
-            if (item !== content) {
-                item.style.display = 'none';
-            }
-        });
+        modalTitle.textContent = category;
+        modalContent.textContent = '';
+        modal.style.display = 'flex';
+        
+        // 如果已生成过，直接显示
+        if (generatedGuidances[category]) {
+            modalLoading.style.display = 'none';
+            modalContent.textContent = generatedGuidances[category];
+            return;
+        }
+        
+        // 显示加载状态
+        modalLoading.style.display = 'flex';
+        modalContent.style.display = 'none';
+        
+        // 获取今日占卜数据
+        const todayReading = getTodayReading();
+        if (!todayReading || !todayReading.reading) {
+            modalLoading.style.display = 'none';
+            modalContent.style.display = 'block';
+            modalContent.textContent = '请先完成今日占卜';
+            return;
+        }
+        
+        // 生成指引
+        if (typeof generateCategoryGuidance === 'function') {
+            generateCategoryGuidance(category, todayReading)
+                .then(guidance => {
+                    generatedGuidances[category] = guidance;
+                    modalLoading.style.display = 'none';
+                    modalContent.style.display = 'block';
+                    modalContent.textContent = guidance;
+                })
+                .catch(error => {
+                    console.error('生成领域指引失败:', error);
+                    modalLoading.style.display = 'none';
+                    modalContent.style.display = 'block';
+                    modalContent.textContent = '生成指引失败，请稍后重试';
+                });
+        } else {
+            modalLoading.style.display = 'none';
+            modalContent.style.display = 'block';
+            modalContent.textContent = '功能暂不可用';
+        }
     }
-}
-
-// 初始化分类按钮
-function initCategoryButtons(readingData) {
-    const categoryButtons = document.querySelectorAll('.category-btn');
-    const categoryContent = document.getElementById('category-content');
     
+    // 绑定按钮点击事件
     categoryButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const category = btn.dataset.category;
-            
-            // 如果点击的是当前激活的按钮，不做任何操作
-            if (btn.classList.contains('active')) {
-                return;
-            }
-            
-            // 切换显示对应分类的内容
-            showCategoryContent(category, readingData);
+            openModal(category);
         });
     });
     
-    // 默认显示"情感"分类
-    if (readingData.category_guidances && readingData.category_guidances['情感']) {
-        showCategoryContent('情感', readingData);
+    // 绑定关闭按钮
+    if (modalClose) {
+        modalClose.addEventListener('click', closeModal);
     }
+    
+    // 点击遮罩层关闭
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', closeModal);
+    }
+    
+    // ESC 键关闭
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeModal();
+        }
+    });
 }
 
 // 完成任务
