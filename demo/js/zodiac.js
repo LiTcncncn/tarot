@@ -61,3 +61,4 @@ function getZodiacFromDateObject(date) {
     return calculateZodiac(month, day);
 }
 
+
