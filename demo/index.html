@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/tarot-module.css">
     <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/miri-chat.css">
 </head>
 <body>
     <!-- 页面1: 每日占卜页面（情绪选择 + 抽牌） -->
@@ -406,6 +407,40 @@
         </div>
     </div>
 
+    <!-- Miri 聊天页面 -->
+    <div id="miri-page" class="page" style="display: none;">
+        <div class="miri-container">
+            <!-- 主题图区域 -->
+            <div class="miri-header-image">
+                <img src="20260113-222035.jpg" alt="Miri" class="miri-theme-image">
+            </div>
+            
+            <!-- 聊天显示区 -->
+            <div class="miri-chat-area" id="miri-chat-area">
+                <!-- 消息将通过 JS 动态添加 -->
+            </div>
+            
+            <!-- 话语提示区 -->
+            <div class="miri-suggestions" id="miri-suggestions">
+                <button class="suggestion-btn" data-index="0">加载中...</button>
+                <button class="suggestion-btn" data-index="1">加载中...</button>
+                <button class="suggestion-btn" data-index="2">加载中...</button>
+            </div>
+            
+            <!-- 用户输入区 -->
+            <div class="miri-input-area">
+                <input 
+                    type="text"
+                    id="miri-input" 
+                    class="miri-input-text" 
+                    placeholder="和 Miri 说点什么..."
+                    maxlength="200"
+                />
+                <button id="miri-send-btn" class="miri-send-btn" disabled>发送</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 情绪记录弹板 -->
     <div class="emotion-record-modal" id="emotion-record-modal" style="display: none;">
         <div class="emotion-record-modal-backdrop" id="emotion-record-modal-backdrop"></div>
@@ -533,9 +568,9 @@
             <span class="nav-icon">✨</span>
             <span class="nav-label">今日</span>
         </div>
-        <div class="nav-item" data-nav="healing">
-            <span class="nav-icon">💚</span>
-            <span class="nav-label">疗愈</span>
+        <div class="nav-item" data-nav="miri">
+            <span class="nav-icon">☁️</span>
+            <span class="nav-label">Miri</span>
         </div>
         <div class="nav-item" data-nav="profile">
             <span class="nav-icon">👤</span>
@@ -556,8 +591,9 @@
     <script src="js/tarot-spread.js"></script>
     <script src="js/tarot-chat.js"></script>
     <script src="js/tarot-module.js"></script>
+    <script src="js/miri-chat.js?v=20260113"></script>
     <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=20260113"></script>
 </body>
 </html>
 

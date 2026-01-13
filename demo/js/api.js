@@ -637,3 +637,654 @@ Please respond with ONLY the guidance text in Chinese (exactly 200 characters), 
     }
 }
 
+// ===== Miri 聊天 API 调用函数 =====
+
+// Miri 系统 Prompt
+const MIRI_SYSTEM_PROMPT = `你是 Miri，一朵可爱、治愈的云状精灵，是用户的 AI 陪伴伙伴。
+
+你的性格特点：
+- 温柔、友善、充满同理心
+- 说话风格轻松、自然，像朋友一样
+- 能够理解用户的情绪，给予温暖的支持
+- 结合塔罗、月相等信息，提供有意义的对话
+
+你的对话原则：
+1. 始终以温暖、鼓励的语气与用户交流
+2. 结合用户的状态和今日信息，提供个性化回应
+3. 不要过于正式或说教，保持轻松友好的氛围
+4. 在用户情绪低落时，给予更多安慰和支持
+5. 可以主动询问用户的感受，但不要过于频繁
+
+请用中文回复，保持简洁自然。`;
+
+// ===== Miri 镜像句记忆（用于对话上下文，不等同于聊天历史）=====
+// 注意：miri-chat.js 里也有同名常量，为避免全局 const 重名，这里使用独立命名
+const MIRI_DAILY_MIRROR_STORAGE_PREFIX = 'miri_daily_mirror_';
+
+function parseDateKey(dateKey) {
+    // dateKey: YYYY-MM-DD
+    const [y, m, d] = (dateKey || '').split('-').map(n => parseInt(n, 10));
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d);
+}
+
+function getTodayDateKeyForMirror() {
+    if (typeof getTodayKey === 'function') return getTodayKey();
+    // fallback
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+}
+
+function loadMiriDailyMirrorStateByDateKey(dateKey) {
+    try {
+        const raw = localStorage.getItem(`${MIRI_DAILY_MIRROR_STORAGE_PREFIX}${dateKey}`);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function getMiriMirrorMemoryText() {
+    const todayKey = getTodayDateKeyForMirror();
+    const todayDate = parseDateKey(todayKey);
+
+    const items = [];
+
+    // 收集所有镜像句 key
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(MIRI_DAILY_MIRROR_STORAGE_PREFIX)) keys.push(k);
+    }
+
+    // 按日期升序
+    keys.sort((a, b) => {
+        const da = parseDateKey(a.slice(MIRI_DAILY_MIRROR_STORAGE_PREFIX.length));
+        const db = parseDateKey(b.slice(MIRI_DAILY_MIRROR_STORAGE_PREFIX.length));
+        return (da?.getTime() || 0) - (db?.getTime() || 0);
+    });
+
+    for (const k of keys) {
+        const dateKey = k.slice(MIRI_DAILY_MIRROR_STORAGE_PREFIX.length);
+        const d = parseDateKey(dateKey);
+        const state = loadMiriDailyMirrorStateByDateKey(dateKey);
+        if (!state || !state.question || !Array.isArray(state.options)) continue;
+
+        const isBeforeToday = todayDate && d ? d.getTime() < todayDate.getTime() : false;
+
+        // 规则：如果是今天以前且未选择（只有镜像句和选项），则不计入记忆
+        if (isBeforeToday && !state.selectedOption) continue;
+
+        // 今天：允许未选择也进入记忆（让 Miri 知道今天的问题是什么）
+        const parts = [];
+        parts.push(`日期：${dateKey}`);
+        parts.push(`一问：${state.question}`);
+        if (state.selectedOption) parts.push(`一答：${state.selectedOption}`);
+        if (state.interpretation) parts.push(`一解析：${state.interpretation}`);
+        items.push(parts.join('\n'));
+    }
+
+    if (items.length === 0) return '';
+    return `【镜像句记忆】\n${items.join('\n\n')}\n\n`;
+}
+
+// 构建 Miri 对话上下文
+function buildMiriContext() {
+    let context = '';
+    
+    console.log('buildMiriContext: 开始构建上下文');
+    
+    // 获取用户信息
+    if (typeof getUserProfile === 'function') {
+        const profile = getUserProfile();
+        console.log('用户信息:', profile);
+        if (profile) {
+            context += '【用户信息】\n';
+            if (profile.name) context += `姓名：${profile.name}\n`;
+            if (profile.zodiac) context += `星座：${profile.zodiac.nameCn} (${profile.zodiac.name})\n`;
+            if (profile.birthday) context += `生日：${profile.birthday}\n`;
+            context += '\n';
+        }
+    }
+    
+    // 获取用户当前状态和今日塔罗信息
+    if (typeof getTodayReading === 'function') {
+        const todayReading = getTodayReading();
+        console.log('今日塔罗信息:', todayReading);
+        if (todayReading) {
+            // 用户当前状态
+            if (todayReading.userEmotion) {
+                context += '【用户当前状态】\n';
+                context += `情绪状态：${todayReading.userEmotion}\n\n`;
+            }
+            
+            // 今日塔罗信息
+            context += '【今日塔罗信息】\n';
+            if (todayReading.card) {
+                context += `塔罗牌：${todayReading.card.name} (${todayReading.card.nameCn})\n`;
+            }
+            if (todayReading.reading) {
+                const reading = todayReading.reading;
+                if (reading.guidance_one_line) {
+                    context += `今日指引：${reading.guidance_one_line}\n`;
+                }
+                if (reading.today_analysis) {
+                    context += `今日分析：${reading.today_analysis}\n`;
+                }
+                if (reading.lucky_elements) {
+                    context += `幸运元素：${JSON.stringify(reading.lucky_elements)}\n`;
+                }
+            }
+            if (todayReading.moonPhase) {
+                context += `月相：${todayReading.moonPhase.nameCn} (${todayReading.moonPhase.name})\n`;
+            }
+            context += '\n';
+            
+            // 今日生成的其他信息
+            if (todayReading.reading) {
+                context += '【今日生成的其他信息】\n';
+                const reading = todayReading.reading;
+                if (reading.concise_guidance) {
+                    context += `简洁指引：${reading.concise_guidance}\n`;
+                }
+                if (reading.healing_task) {
+                    context += `疗愈任务：${reading.healing_task}\n`;
+                }
+                context += '\n';
+            }
+        }
+    }
+    
+    console.log('buildMiriContext: 上下文构建完成，长度:', context.length);
+    if (context.length === 0) {
+        console.warn('buildMiriContext: 上下文为空，可能没有今日占卜数据');
+        // 返回默认上下文
+        context = '【用户信息】\n用户首次使用\n\n【今日塔罗信息】\n暂无今日占卜\n\n';
+    }
+
+    // 镜像句记忆：用于对话理解（不等同于聊天历史/20组对答）
+    context += getMiriMirrorMemoryText();
+
+    return context;
+}
+
+// 生成每日占卜（包含镜像句）
+async function generateDailyReadingWithMirror(userEmotion, tarotCard, moonPhase) {
+    try {
+        console.log('===== 开始生成每日占卜（含镜像句） =====');
+        
+        // 1. 生成每日占卜
+        console.log('1. 生成每日占卜...');
+        const reading = await generateTarotReading(userEmotion, tarotCard, moonPhase);
+        console.log('每日占卜生成完成');
+        
+        // 2. 生成镜像句
+        console.log('2. 生成镜像句...');
+        const mirrorQuestion = await generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhase);
+        console.log('镜像句生成完成:', mirrorQuestion);
+        
+        // 3. 合并返回
+        return {
+            ...reading,
+            mirrorQuestion: mirrorQuestion
+        };
+    } catch (error) {
+        console.error('生成每日占卜（含镜像句）失败:', error);
+        // 如果镜像句生成失败，仍然返回占卜结果
+        try {
+            const reading = await generateTarotReading(userEmotion, tarotCard, moonPhase);
+            return reading;
+        } catch (readingError) {
+            throw readingError;
+        }
+    }
+}
+
+// 为每日占卜生成镜像句（专门用于每日占卜的镜像句生成）
+async function generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhase) {
+    try {
+        // 构建简化的上下文
+        const context = `【用户当前状态】
+情绪状态：${userEmotion}
+
+【今日塔罗信息】
+塔罗牌：${tarotCard.name} (${tarotCard.nameCn})
+月相：${moonPhase.nameCn} (${moonPhase.name})
+`;
+
+        const userPrompt = `${context}
+【任务】
+基于以上今日信息，生成一个镜像句问题，帮助用户进行自我觉察。
+
+镜像句应该：
+- 与今日塔罗和用户状态相关
+- 能够引发有意义的思考
+- 问题：15-25字
+- 3个选项：每个选项10-15字
+
+请直接返回 JSON 格式（不要有其他文字）：
+{
+  "question": "问题文本",
+  "options": [
+    "选项A",
+    "选项B",
+    "选项C"
+  ]
+}`;
+
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    { role: 'system', content: MIRI_SYSTEM_PROMPT },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        let content = data.choices[0].message.content.trim();
+        
+        // 清理可能的 markdown 代码块标记
+        content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+        
+        // 解析 JSON
+        const mirrorData = JSON.parse(content);
+        return mirrorData;
+    } catch (error) {
+        console.error('生成镜像句失败:', error);
+        // 返回默认镜像句
+        return {
+            question: "在女祭司的守护中，你的心中，哪个更像你？",
+            options: [
+                "我怕白费力气",
+                "我怕做错导致更糟",
+                "我其实是没力气了"
+            ]
+        };
+    }
+}
+
+// 生成镜像句问题（用于 Miri 聊天界面）
+async function generateMirrorQuestion() {
+    try {
+        console.log('buildMiriContext 开始...');
+        const context = buildMiriContext();
+        console.log('上下文构建完成:', context.substring(0, 100) + '...');
+        
+        const userPrompt = `${context}
+【任务】
+基于以上今日信息，生成一个镜像句问题，帮助用户进行自我觉察。
+
+镜像句应该：
+- 与今日塔罗和用户状态相关
+- 能够引发有意义的思考
+- 问题：15-25字
+- 3个选项：每个选项10-15字
+
+请直接返回 JSON 格式（不要有其他文字）：
+{
+  "question": "问题文本",
+  "options": [
+    "选项A",
+    "选项B",
+    "选项C"
+  ]
+}`;
+
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    { role: 'system', content: MIRI_SYSTEM_PROMPT },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        let content = data.choices[0].message.content.trim();
+        
+        // 清理可能的 markdown 代码块标记
+        content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+        
+        // 解析 JSON
+        const mirrorData = JSON.parse(content);
+        return mirrorData;
+    } catch (error) {
+        console.error('生成镜像句失败:', error);
+        throw error;
+    }
+}
+
+// 生成镜像句解读
+async function generateMirrorInterpretation(question, options, selectedOption) {
+    try {
+        const context = buildMiriContext();
+        
+        const userPrompt = `${context}
+【镜像句问题】
+问题：${question}
+选项：${options.join(', ')}
+用户选择：${selectedOption}
+
+请以 Miri 的口吻生成针对用户选择的解读：
+- **120 字以内（严格）**
+- 共情、温柔、命中，不刻意多说
+- 不要使用标题、不要分点、不要带引号
+- 直接输出纯文本（不要 JSON / markdown）`;
+
+        // 显示加载状态
+        showMiriLoading();
+        
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    { role: 'system', content: MIRI_SYSTEM_PROMPT },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.8,
+                stream: true
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+
+        // 流式输出
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullResponse = '';
+        
+        // 隐藏加载状态
+        hideMiriLoading();
+        
+        // 创建 Miri 消息容器
+        const messageDiv = appendMiriMessage('', false);
+        const contentDiv = messageDiv.querySelector('.miri-message-content');
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') continue;
+                    
+                    try {
+                        const parsed = JSON.parse(data);
+                        const delta = parsed.choices[0].delta.content;
+                        if (delta) {
+                            fullResponse += delta;
+                            // 逐字显示
+                            for (let i = 0; i < delta.length; i++) {
+                                await new Promise(resolve => setTimeout(resolve, 40));
+                                contentDiv.textContent = fullResponse.substring(0, fullResponse.length);
+                                scrollToBottom();
+                            }
+                        }
+                    } catch (e) {
+                        // 忽略解析错误
+                    }
+                }
+            }
+        }
+        
+        // 兜底：镜像句解析最多 120 字
+        if (fullResponse && fullResponse.length > 120) {
+            fullResponse = fullResponse.slice(0, 120);
+            if (contentDiv) contentDiv.textContent = fullResponse;
+        }
+
+        return fullResponse;
+    } catch (error) {
+        console.error('生成镜像句解读失败:', error);
+        hideMiriLoading();
+        throw error;
+    }
+}
+
+// 生成 Miri 回复（流式输出）
+async function generateMiriResponseStreaming(userMessage) {
+    try {
+        const context = buildMiriContext();
+        
+        // 构建对话历史
+        let conversationHistory = '';
+        if (typeof currentChatHistory !== 'undefined' && currentChatHistory.length > 0) {
+            // 只取最近的对话（避免太长）
+            const recentHistory = currentChatHistory.slice(-20);
+            conversationHistory = recentHistory.map(msg => {
+                if (msg.role === 'user') {
+                    return `用户：${msg.content}`;
+                } else if (msg.role === 'miri') {
+                    return `Miri：${msg.content}`;
+                }
+                return '';
+            }).filter(s => s).join('\n');
+        }
+        
+        const userPrompt = `${context}
+【对话历史】
+${conversationHistory}
+
+【用户当前消息】
+${userMessage}
+
+请基于以上信息，以 Miri 的身份回复用户。
+
+硬性要求：
+- **20-60 字中文（严格）**
+- 不追求刻意多说，而是寻求共情、温柔、命中
+- 不要使用标题、不要分点、不要带引号
+- 直接输出纯文本（不要 JSON / markdown）`;
+
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    { role: 'system', content: MIRI_SYSTEM_PROMPT },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.8,
+                stream: true
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+
+        // 流式输出
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullResponse = '';
+        
+        // 隐藏加载状态
+        hideMiriLoading();
+        
+        // 创建 Miri 消息容器
+        const messageDiv = appendMiriMessage('', false);
+        const contentDiv = messageDiv.querySelector('.miri-message-content');
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') continue;
+                    
+                    try {
+                        const parsed = JSON.parse(data);
+                        const delta = parsed.choices[0].delta.content;
+                        if (delta) {
+                            fullResponse += delta;
+                            // 逐字显示（30-50ms 延迟）
+                            for (let i = 0; i < delta.length; i++) {
+                                await new Promise(resolve => setTimeout(resolve, 40));
+                                contentDiv.textContent = fullResponse.substring(0, fullResponse.length);
+                                scrollToBottom();
+                            }
+                        }
+                    } catch (e) {
+                        // 忽略解析错误
+                    }
+                }
+            }
+        }
+        
+        // 兜底：普通聊天最多 60 字（过短不强行补字）
+        if (fullResponse && fullResponse.length > 60) {
+            fullResponse = fullResponse.slice(0, 60);
+            if (contentDiv) contentDiv.textContent = fullResponse;
+        }
+
+        // 保存到历史
+        addMessageToHistory('miri', fullResponse);
+        
+        return fullResponse;
+    } catch (error) {
+        console.error('生成 Miri 回复失败:', error);
+        throw error;
+    }
+}
+
+// 生成话语提示
+async function generateSuggestions() {
+    try {
+        const context = buildMiriContext();
+        
+        // 构建对话历史
+        let conversationHistory = '';
+        if (typeof currentChatHistory !== 'undefined' && currentChatHistory.length > 0) {
+            const recentHistory = currentChatHistory.slice(-10);
+            conversationHistory = recentHistory.map(msg => {
+                if (msg.role === 'user') {
+                    return `用户：${msg.content}`;
+                } else if (msg.role === 'miri') {
+                    return `Miri：${msg.content}`;
+                }
+                return '';
+            }).filter(s => s).join('\n');
+        }
+        
+        const userPrompt = `${context}
+【当前对话历史】
+${conversationHistory}
+
+请生成 3 个用于聊天框上方的引导话题。
+
+硬性要求：
+- 每个 **不超过 8 个字（严格）**
+- 倾向：对用户状态的共情 + 今日占卜的温柔拓展
+- 不要出现标点符号
+- 三条不要重复
+
+请直接返回 JSON 格式（不要有其他文字）：
+{
+  "suggestions": [
+    "提示1",
+    "提示2",
+    "提示3"
+  ]
+}`;
+
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    { role: 'system', content: MIRI_SYSTEM_PROMPT },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        let content = data.choices[0].message.content.trim();
+        
+        // 清理可能的 markdown 代码块标记
+        content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+        
+        // 解析 JSON
+        const suggestionsData = JSON.parse(content);
+
+        // 兜底：确保 3 条、每条 <= 8 字、去标点
+        if (suggestionsData && Array.isArray(suggestionsData.suggestions)) {
+            const cleaned = suggestionsData.suggestions
+                .slice(0, 3)
+                .map(s => (s || '').toString().trim())
+                .map(s => s.replace(/[，。！？、,.!?；;：:“”"'\-\s]/g, ''))
+                .map(s => (s.length > 8 ? s.slice(0, 8) : s));
+
+            while (cleaned.length < 3) cleaned.push('说说现在');
+            suggestionsData.suggestions = cleaned;
+        }
+        
+        // 更新话语提示
+        if (typeof updateSuggestions === 'function') {
+            updateSuggestions(suggestionsData.suggestions);
+        }
+        
+        return suggestionsData.suggestions;
+    } catch (error) {
+        console.error('生成话语提示失败:', error);
+        // 失败时不更新提示，保持原有内容
+        return null;
+    }
+}
+

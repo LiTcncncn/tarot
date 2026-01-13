@@ -77,9 +77,14 @@ function bindEvents() {
                     updateNavActive('tarot');
                     document.body.classList.add('show-nav');
                     break;
-                case 'healing':
-                    // TODO: 实现疗愈页面
-                    console.log('疗愈页面待实现');
+                case 'miri':
+                    console.log('点击了 Miri 导航');
+                    if (typeof showMiriPage === 'function') {
+                        console.log('showMiriPage 函数存在，正在调用...');
+                        showMiriPage();
+                    } else {
+                        console.error('showMiriPage 函数不存在！');
+                    }
                     break;
                 case 'profile':
                     showProfilePage();
@@ -164,12 +169,14 @@ function bindEvents() {
             // 获取月相
             const moonPhase = getTodayMoonPhase();
             
-            // 调用 API 生成占卜内容
-            const readingData = await generateTarotReading(
+            // 调用 API 生成占卜内容（包含镜像句）
+            console.log('开始生成每日占卜（含镜像句）...');
+            const readingData = await generateDailyReadingWithMirror(
                 selectedEmotion,
                 card,
                 moonPhase
             );
+            console.log('每日占卜生成完成，包含镜像句:', readingData.mirrorQuestion ? '是' : '否');
             
             // 保存数据（包含实际正逆位和强度等级）
             const fullData = {
