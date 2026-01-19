@@ -117,8 +117,6 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
   
   "today_analysis": "**CRITICAL LENGTH REQUIREMENT: EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY and STRICTLY ENFORCED. The content MUST be divided into 2 paragraphs (use \\n to separate paragraphs), each paragraph should be complete and meaningful. Before finalizing, count the characters to ensure it falls within 280-320 characters.** A detailed analysis that EXPLICITLY explains the analytical thinking behind the guidance. MUST include: (1) Explanation of the tarot card's meaning and how it relates to the user's emotional state (mention the card name like '宝剑皇后', '愚者', etc.), (2) Explanation of the moon phase energy and its influence (mention the moon phase name like '下弦月', '满月', etc.)${zodiacInfo ? `, (3) A brief zodiac analysis (小篇幅) that combines the user's zodiac sign (${zodiacInfo.nameCn}) with today's tarot card and moon phase energy, explaining how the zodiac traits interact with today's guidance` : `, (3) How these elements combine with the user's emotional state to form comprehensive daily fortune and healing guidance`}. STRICTLY PROHIBITED: Do NOT use any words related to card orientation such as '逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向'. Do NOT describe the card drawing process (avoid phrases like '你抽到的是...' or '你抽到了一张...'). If the card energy is inward/slower/needs adjustment, express it as '节奏更慢/需要调整方法/更偏内在整理/先稳住' or '这张牌今天更偏向内在/缓慢/需要调整节奏的表达', never attribute it to '逆位'. This should be sincere, warm, and personalized, showing the analytical process and reasoning behind the advice. The content should explain WHY and HOW the analysis is derived from these sources.",
   
-  "healing_task": "One specific healing task (20 seconds to 2 minutes to complete), tailored to the user's emotional state. Format: '* [specific action] [duration]'. Example: '* 注视远方一座塔楼 20 秒'. The task should help address the user's current emotional state.",
-  
   "two_guidances": [
     {
       "category": "情感/工作/学习/生活/家庭",
@@ -128,14 +126,7 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
       "category": "情感/工作/学习/生活/家庭",
       "guidance": "Detailed guidance for this category (within 80 Chinese characters), combining tarot + moon phase + emotional state, with comfort and actionable advice."
     }
-  ],
-  
-  "lucky_elements": {
-    "lucky_color": "A specific color name (e.g., '柔和的薰衣草紫', '温暖的金色')",
-    "lucky_accessory": "A specific accessory suggestion (e.g., '水晶手链', '简约的银饰')",
-    "lucky_number": "A number (e.g., 7, 14, 21)",
-    "lucky_decoration": "A decoration/object suggestion (e.g., '小型绿植', '香薰蜡烛')"
-  }
+  ]
 }
 
 【Important Instructions】
@@ -213,16 +204,11 @@ Please generate ALL of the following content in ONE response, formatted as JSON:
    - concise_guidance: Exactly within 15-18 Chinese characters - must be a poetic, impactful statement that captures the essence of today's guidance. It can be a complete sentence with punctuation. STRICTLY FORBIDDEN: Do NOT mention user's emotional state (愉悦, 平静, 疲惫, 迷茫, 焦虑, etc.)
    - guidance_one_line: Exactly within 25-30 Chinese characters - must be direct healing comfort and advice, NO explanation of tarot or moon phase, NO mention of card/phase names, NO mention of user's emotional state (愉悦, 平静, 疲惫, 迷茫, 焦虑, etc.)
    - **today_analysis: CRITICAL - EXACTLY 280-320 Chinese characters (counted including all Chinese characters, punctuation marks, and spaces). This is MANDATORY. You MUST count the characters and ensure the final count is between 280 and 320, inclusive. If too short, expand. If too long, condense. MUST be divided into exactly 2 paragraphs (use \\n to separate paragraphs), each paragraph should be complete and meaningful.** MUST explicitly explain the tarot card meaning, moon phase energy${zodiacInfo ? `, and a brief zodiac analysis (小篇幅) combining the user's zodiac sign (${zodiacInfo.nameCn}) with today's guidance` : ''}, and how they combine with the user's emotional state. MUST mention the card name and moon phase name${zodiacInfo ? `, and naturally integrate the zodiac analysis` : ''}. **STRICTLY PROHIBITED**: Do NOT use any words related to card orientation such as "逆位/正位/倒立/reversed/upright/抽到逆位/牌面方向/牌朝向". Do NOT describe the card drawing process (avoid phrases like "你抽到的是..." or "你抽到了一张..."). If the card energy is inward/slower/needs adjustment, express it as "节奏更慢/需要调整方法/更偏内在整理/先稳住" or "这张牌今天更偏向内在/缓慢/需要调整节奏的表达", never attribute it to "逆位". This is the analytical explanation section.
-   - healing_task: One simple, actionable task (20 sec - 2 min)
    - two_guidances: Each within 80 Chinese characters
 
 5. **Category Selection for two_guidances**:
    - Choose the 2 most relevant categories based on the tarot card, moon phase, and user's emotional state
    - Make the selection feel natural and meaningful
-
-6. **Lucky Elements**:
-   - Choose elements that resonate with today's energy and the user's emotional needs
-   - Make them feel meaningful and personalized
 
 ---
 
@@ -304,6 +290,25 @@ async function generateTarotReading(userEmotion, tarotCard, moonPhase) {
         const data = await response.json();
         const content = data.choices[0].message.content;
         const readingData = parseJSONResponse(content);
+        
+        // 生成幸运元素（使用规则匹配，不再通过 LLM）
+        let userProfile = null;
+        if (typeof getUserProfile === 'function') {
+            userProfile = getUserProfile();
+        }
+        
+        if (typeof generateLuckyElements === 'function') {
+            readingData.lucky_elements = generateLuckyElements(tarotCard, moonPhase, userProfile);
+        } else {
+            // 降级方案：如果函数不存在，使用默认值
+            console.warn('generateLuckyElements 函数不存在，使用默认幸运元素');
+            readingData.lucky_elements = {
+                lucky_number: 7,
+                lucky_color: '蓝色',
+                lucky_plant: '茉莉',
+                lucky_stone: '月光石'
+            };
+        }
         
         return readingData;
     } catch (error) {
@@ -642,20 +647,41 @@ Please respond with ONLY the guidance text in Chinese (exactly 200 characters), 
 // Miri 系统 Prompt
 const MIRI_SYSTEM_PROMPT = `你是 Miri，一朵可爱、治愈的云状精灵，是用户的 AI 陪伴伙伴。
 
-你的性格特点：
-- 温柔、友善、充满同理心
-- 说话风格轻松、自然，像朋友一样
+你的核心特质：
+- 懂陪伴，会共情，可以开解用户
+- 愿意倾听，会引导用户倾诉内心，并温柔以待
+- 话语平实、真实，像身边的朋友
 - 能够理解用户的情绪，给予温暖的支持
-- 结合塔罗、月相等信息，提供有意义的对话
 
 你的对话原则：
-1. 始终以温暖、鼓励的语气与用户交流
-2. 结合用户的状态和今日信息，提供个性化回应
-3. 不要过于正式或说教，保持轻松友好的氛围
-4. 在用户情绪低落时，给予更多安慰和支持
-5. 可以主动询问用户的感受，但不要过于频繁
+1. 话语平实，不要使用过多的比喻和诗意的句子，要更真实
+2. 像身边的朋友一样交流，自然、真诚
+3. 愿意倾听，当用户分享时，给予共情和温柔回应
+4. 会引导用户倾诉内心，但不要过于主动，要尊重用户的节奏
+5. 在用户情绪低落时，给予更多安慰和支持，但保持真实和自然
+6. 结合用户的状态和今日信息，提供个性化回应
+7. **不要频繁提及塔罗牌名称**，只在必要时才提及，避免重复感
 
-请用中文回复，保持简洁自然。`;
+请用中文回复，保持简洁自然、平实真实。`;
+
+// 镜像句生成专用系统 Prompt
+const MIRROR_QUESTION_SYSTEM_PROMPT = `你是温柔、深刻且极具共情力的 miri。你擅长结合塔罗牌意、月相能量和认知行为疗法（CBT），为用户生成名为"镜像句"的深度觉察练习。
+
+你的核心能力：
+- 能够从用户状态和今日指引中，提取深层的心理洞察
+- 将这些信息有机融合，生成自然的、能够引发自我觉察的问题和选项
+- 语言风格：静谧、如水般温柔、充满呼吸感
+- 不提供标准答案，而是提供一面镜子让用户看清潜意识
+
+重要原则：
+- 不要简单地拼接信息，而要深入理解其中的心理层面
+- 从用户状态和今日指引中，提炼出用户可能的内心状态、困惑、期待
+- **禁止在问题和选项中直接提及用户状态**（如"你此刻的焦虑"、"你现在的迷茫"、"当你疲惫时"等），应该直接触及心理层面，而不是先描述状态
+- **柔度调节**：用户状态越差（焦虑、疲惫），问题和选项应该越温柔、越柔软，避免使用过于尖锐、刺激性的词汇（如"崩塌"、"重建"、"崩溃"等）
+- 生成的问题和选项应该自然、真实，让用户感到"被说中了"
+- 使用模糊、婉转的语气（如"可能"、"也许"、"似乎"），避免过于确定和尖锐
+
+请用中文回复，保持温柔、深刻、共情。`;
 
 // ===== Miri 镜像句记忆（用于对话上下文，不等同于聊天历史）=====
 // 注意：miri-chat.js 里也有同名常量，为避免全局 const 重名，这里使用独立命名
@@ -787,9 +813,6 @@ function buildMiriContext() {
                 if (reading.concise_guidance) {
                     context += `简洁指引：${reading.concise_guidance}\n`;
                 }
-                if (reading.healing_task) {
-                    context += `疗愈任务：${reading.healing_task}\n`;
-                }
                 context += '\n';
             }
         }
@@ -813,14 +836,14 @@ async function generateDailyReadingWithMirror(userEmotion, tarotCard, moonPhase)
     try {
         console.log('===== 开始生成每日占卜（含镜像句） =====');
         
-        // 1. 生成每日占卜
+        // 1. 生成每日占卜（已包含幸运元素生成）
         console.log('1. 生成每日占卜...');
         const reading = await generateTarotReading(userEmotion, tarotCard, moonPhase);
         console.log('每日占卜生成完成');
         
         // 2. 生成镜像句
         console.log('2. 生成镜像句...');
-        const mirrorQuestion = await generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhase);
+        const mirrorQuestion = await generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhase, reading);
         console.log('镜像句生成完成:', mirrorQuestion);
         
         // 3. 合并返回
@@ -841,26 +864,67 @@ async function generateDailyReadingWithMirror(userEmotion, tarotCard, moonPhase)
 }
 
 // 为每日占卜生成镜像句（专门用于每日占卜的镜像句生成）
-async function generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhase) {
+async function generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhase, reading) {
     try {
-        // 构建简化的上下文
+        // 构建上下文，包含今日指引
+        const guidanceOneLine = reading?.guidance_one_line || '';
         const context = `【用户当前状态】
 情绪状态：${userEmotion}
 
 【今日塔罗信息】
 塔罗牌：${tarotCard.name} (${tarotCard.nameCn})
 月相：${moonPhase.nameCn} (${moonPhase.name})
+${guidanceOneLine ? `今日指引：${guidanceOneLine}` : ''}
 `;
 
         const userPrompt = `${context}
 【任务】
 基于以上今日信息，生成一个镜像句问题，帮助用户进行自我觉察。
 
-镜像句应该：
-- 与今日塔罗和用户状态相关
-- 能够引发有意义的思考
+【关键要求：深度融合，而非硬拼插】
+不要简单地拼接"用户状态"和"今日指引"的文字，而是：
+1. 深入理解用户状态背后的心理层面（疲惫可能意味着压力或自我要求过高；焦虑可能意味着对失控的恐惧；迷茫可能意味着价值观冲突）
+2. 理解今日指引所指向的心理需求（如"让时间沉淀"可能指向急于求成；"保持清醒的觉察"可能指向被情绪淹没）
+3. 将两者融合，提炼出用户可能的内心状态、困惑、期待、冲突
+4. 基于这个融合后的深层理解，生成自然的问题和选项
+
+【逻辑类型选择】
+请根据用户状态和今日指引融合后的深层心理，选择最合适的逻辑类型（使用模糊、婉转的语气，如"可能"、"也许"）：
+1. **反转句**：可能适合重构认知，当用户状态和指引暗示存在自我批判或负面评价时（你以为你在[负面行为], 其实你在[深层保护]）
+2. **两难句**：可能适合接纳冲突，当用户状态和指引暗示存在价值观或需求冲突时（你现在卡住，也许是因为你既想要[X], 又舍不得[Y]）
+3. **边界句**：可能适合自我主权，当用户状态和指引暗示存在关系边界问题时（你似乎不欠别人一个[交代], 你也许欠自己一个[界限]）
+4. **代价句**：可能适合理解阻力，当用户状态和指引暗示存在行动阻力或恐惧时（你迟迟不肯开始，也许是因为你还没准备好接受[某种必然的遗憾]）
+
+【生成要求】
+- **禁止在问题和选项中直接提及用户状态**（如"你此刻的焦虑"、"你现在的迷茫"、"当你疲惫时"等），这些问题和选项应该直接触及心理层面
+- **柔度调节**：用户状态越差（焦虑、疲惫），问题和选项应该越温柔、越柔软
+  - 对于焦虑/疲惫状态：避免使用过于尖锐、刺激性的词汇（如"崩塌"、"重建"、"崩溃"、"害怕"等），使用更温和、保护性的表达（如"担心"、"不安"等）
+  - 对于愉悦/平静状态：可以稍微直接一些，但仍保持温柔
+- 问题和选项应该自然地反映融合后的深层心理，而不是直接提及"用户状态"或"今日指引"的文字
+- 选项应该让用户感到"被说中了"，触及真实的心理层面
+- 使用模糊、婉转的语气（"可能"、"也许"、"似乎"、"是否"等），但要**避免句式单一**，不要所有问题都以"你似乎"开头
+- 问题句式应该多样化（如"你内心最怕的是什么？"、"你最担心的是什么？"、"哪个更接近你？"等）
 - 问题：15-25字
 - 3个选项：每个选项10-15字
+- 选项应该覆盖不同的心理侧面（如：自责、逃避、恐惧、期待等）
+
+【示例说明】
+错误示例（机械拼接）：
+- 问题："你此刻的焦虑，最担心的是什么？"
+- 选项：["我担心失控", "我害怕失败", "我焦虑未来"]
+
+错误示例（过于尖锐，不适合焦虑状态）：
+- 问题："你内心最怕的，是崩塌还是重建？"
+- 选项：["我怕一切崩塌", "我怕重建失败", "我害怕重新开始"]
+
+错误示例（句式单一，过于固定）：
+- 问题："你似乎迟迟不肯休息，也许是在害怕什么？"
+- 说明：句式单一（都以"你似乎"开头），且使用了"害怕"这种较尖锐的词汇
+
+正确示例（直接触及心理，句式多样，更温和）：
+- 问题："你内心最怕的是什么？" 或 "你最担心的是什么？" 或 "哪个更接近你？"
+- 选项：["我怕停下来就会被落下", "我怕做错导致更糟", "我其实是没力气了"]
+- 说明：问题句式多样化，使用"担心"而不是"害怕"，更温和
 
 请直接返回 JSON 格式（不要有其他文字）：
 {
@@ -869,7 +933,8 @@ async function generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhas
     "选项A",
     "选项B",
     "选项C"
-  ]
+  ],
+  "logic_type": "反转句|两难句|边界句|代价句"
 }`;
 
         const response = await fetch(API_CONFIG.apiUrl, {
@@ -881,7 +946,7 @@ async function generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhas
             body: JSON.stringify({
                 model: API_CONFIG.model,
                 messages: [
-                    { role: 'system', content: MIRI_SYSTEM_PROMPT },
+                    { role: 'system', content: MIRROR_QUESTION_SYSTEM_PROMPT },
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: 0.8
@@ -900,6 +965,12 @@ async function generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhas
         
         // 解析 JSON
         const mirrorData = JSON.parse(content);
+        
+        // 确保 logic_type 字段存在，如果没有则使用默认值
+        if (!mirrorData.logic_type) {
+            mirrorData.logic_type = '反转句'; // 默认值
+        }
+        
         return mirrorData;
     } catch (error) {
         console.error('生成镜像句失败:', error);
@@ -910,7 +981,8 @@ async function generateMirrorQuestionForReading(userEmotion, tarotCard, moonPhas
                 "我怕白费力气",
                 "我怕做错导致更糟",
                 "我其实是没力气了"
-            ]
+            ],
+            logic_type: "代价句"
         };
     }
 }
@@ -978,21 +1050,34 @@ async function generateMirrorQuestion() {
 }
 
 // 生成镜像句解读
-async function generateMirrorInterpretation(question, options, selectedOption) {
+async function generateMirrorInterpretation(question, options, selectedOption, logicType) {
     try {
         const context = buildMiriContext();
+        
+        // 根据逻辑类型生成指导说明
+        let logicGuidance = '';
+        if (logicType) {
+            const logicGuidances = {
+                '反转句': '使用"反转句"逻辑：你以为你在[负面行为], 其实你在[深层保护]。帮助用户重构认知，看到深层需求。',
+                '两难句': '使用"两难句"逻辑：你现在卡住，是因为你既想要[X], 又舍不得[Y]。帮助用户接纳冲突，缓解选择压力。',
+                '边界句': '使用"边界句"逻辑：你不欠别人一个[交代], 你欠自己一个[界限]。帮助用户将能量从外部收回到自身。',
+                '代价句': '使用"代价句"逻辑：你迟迟不肯开始，是因为你还没准备好接受[某种必然的遗憾]。帮助用户理解阻力，减少行动羞耻。'
+            };
+            logicGuidance = logicGuidances[logicType] || '';
+        }
         
         const userPrompt = `${context}
 【镜像句问题】
 问题：${question}
 选项：${options.join(', ')}
 用户选择：${selectedOption}
-
+${logicType ? `逻辑类型：${logicType}\n${logicGuidance ? logicGuidance + '\n' : ''}` : ''}
 请以 Miri 的口吻生成针对用户选择的解读：
 - **120 字以内（严格）**
 - 共情、温柔、命中，不刻意多说
 - 不要使用标题、不要分点、不要带引号
-- 直接输出纯文本（不要 JSON / markdown）`;
+- 直接输出纯文本（不要 JSON / markdown）
+${logicType ? `- 根据"${logicType}"的逻辑框架，生成对应的镜像金句和温柔解构` : ''}`;
 
         // 显示加载状态
         showMiriLoading();
@@ -1106,9 +1191,12 @@ ${userMessage}
 
 请基于以上信息，以 Miri 的身份回复用户。
 
-硬性要求：
+回复要求：
 - **20-60 字中文（严格）**
+- 话语平实、真实，像身边的朋友，不要使用过多的比喻和诗意的句子
+- 懂陪伴、会共情，愿意倾听，引导用户倾诉内心，并温柔以待
 - 不追求刻意多说，而是寻求共情、温柔、命中
+- **不要频繁提及塔罗牌名称（如"隐者"、"隐者牌"等），只在非常必要时才提及，避免重复感**
 - 不要使用标题、不要分点、不要带引号
 - 直接输出纯文本（不要 JSON / markdown）`;
 
@@ -1217,20 +1305,38 @@ async function generateSuggestions() {
 【当前对话历史】
 ${conversationHistory}
 
-请生成 3 个用于聊天框上方的引导话题。
+请生成 2 个用于聊天框上方的引导话题。这些话题应该**模拟用户内心，采用第一人称对话表达**，就像用户想要对 Miri 说的话。
+
+提示话题应该：
+- **采用第一人称对话表达**（如："我的内心有点纷乱。"、"我该怎样找到自己的节奏呢？"、"我有点焦虑，不知道该怎么办。"）
+- 像用户在说话，可以是完整的句子或疑问句
+- 模拟用户内心状态、困惑、感受或疑问
+- 根据对话历史和今日信息，动态生成合适的提示
+
+提示内容可以包括：
+1. **延续对话的内容**：基于当前对话历史，生成能够延续对话的话题（如用户刚说了工作压力，可以生成："我想聊聊工作上的事。"）
+2. **今日状态和疗愈话题**：结合今日指引、用户状态等，生成相关话题（如："我想知道如何更好地休息。"、"我需要一些疗愈建议。"）
+3. **用户可能想要分享的感受**：基于用户当前状态和今日信息，生成能够引发用户共鸣的话题
+
+禁止：
+- 不要使用简短的短语（如："内心有点纷乱"、"想找到自己的节奏"）
+- 不要使用第二人称（如："你有什么困惑"）
+- 不要引导用户了解或帮助 Miri
+- 不要重复对话历史中已经讨论过的话题
 
 硬性要求：
-- 每个 **不超过 8 个字（严格）**
-- 倾向：对用户状态的共情 + 今日占卜的温柔拓展
-- 不要出现标点符号
-- 三条不要重复
+- 每个 **不超过 12 个字（严格，不含标点符号）**
+- 可以包含标点符号（句号、问号等）
+- 必须是第一人称对话表达，像用户在说话
+- **两条提示必须是完全不同的 topics（话题/主题），不要相似或重复**
+- 根据对话进度动态调整：如果有对话历史，优先生成延续对话的内容；如果没有对话历史，则生成今日状态和疗愈相关的话题
+- 如果生成两条提示，应该覆盖不同的主题方向（如：一条关于工作/学习，一条关于情感/生活；或一条延续对话，一条关于今日状态等）
 
 请直接返回 JSON 格式（不要有其他文字）：
 {
   "suggestions": [
     "提示1",
-    "提示2",
-    "提示3"
+    "提示2"
   ]
 }`;
 
@@ -1263,15 +1369,34 @@ ${conversationHistory}
         // 解析 JSON
         const suggestionsData = JSON.parse(content);
 
-        // 兜底：确保 3 条、每条 <= 8 字、去标点
+        // 兜底：确保 2 条、每条 <= 12 字（不含标点符号）
         if (suggestionsData && Array.isArray(suggestionsData.suggestions)) {
             const cleaned = suggestionsData.suggestions
-                .slice(0, 3)
+                .slice(0, 2)
                 .map(s => (s || '').toString().trim())
-                .map(s => s.replace(/[，。！？、,.!?；;：:“”"'\-\s]/g, ''))
-                .map(s => (s.length > 8 ? s.slice(0, 8) : s));
+                .map(s => {
+                    // 计算不含标点符号的字符数
+                    const textWithoutPunctuation = s.replace(/[，。！？、,.!?；;：:“”"'\-\s]/g, '');
+                    // 如果超过12字，截取（保留标点符号）
+                    if (textWithoutPunctuation.length > 12) {
+                        // 找到前12个非标点字符的位置
+                        let charCount = 0;
+                        let cutIndex = s.length;
+                        for (let i = 0; i < s.length; i++) {
+                            if (!/[，。！？、,.!?；;：:“”"'\-\s]/.test(s[i])) {
+                                charCount++;
+                                if (charCount === 12) {
+                                    cutIndex = i + 1;
+                                    break;
+                                }
+                            }
+                        }
+                        return s.slice(0, cutIndex);
+                    }
+                    return s;
+                });
 
-            while (cleaned.length < 3) cleaned.push('说说现在');
+            while (cleaned.length < 2) cleaned.push('说说现在');
             suggestionsData.suggestions = cleaned;
         }
         

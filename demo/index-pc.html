@@ -232,7 +232,13 @@
     <div id="main-page" class="page" style="display: none;">
         <!-- 顶部头部区域 -->
         <div class="main-page-header">
-            <div class="main-page-date" id="main-page-date">January 11</div>
+            <div class="main-page-date-row">
+                <div class="main-page-date" id="main-page-date">January 11</div>
+                <div class="energy-points-display" id="energy-points-display">
+                    <span class="energy-icon">💧</span>
+                    <span id="energy-points-value">0</span>
+                </div>
+            </div>
             <div class="main-page-right">
                 <button id="add-profile-btn" class="add-profile-btn" style="display: none;">
                     补充个人信息
@@ -285,18 +291,20 @@
                 <div class="today-analysis-content" id="today-analysis-content"></div>
             </section>
 
-            <!-- 4. 疗愈任务 -->
-            <section class="healing-task-section">
-                <h3 class="section-title">疗愈 Boost</h3>
-                <div class="healing-task-card" id="healing-task-card">
-                    <p class="task-text" id="healing-task-text"></p>
-                    <button id="complete-task-btn" class="btn-complete" style="display: none;">
-                        <span>✓ 完成</span>
-                    </button>
-                    <div class="task-completed" id="task-completed" style="display: none;">
-                        <span class="checkmark">✓</span>
-                        <span>已完成</span>
-                    </div>
+            <!-- 4. 能量 Boost -->
+            <section class="energy-boost-section">
+                <div class="energy-boost-header">
+                    <h3 class="section-title">能量 Boost</h3>
+                    <button id="energy-boost-refresh-btn" class="energy-boost-refresh-btn" onclick="handleEnergyBoostRefreshClick()">换一个♻️</button>
+                </div>
+                <div class="energy-boost-list" id="energy-boost-list"></div>
+            </section>
+
+            <!-- 5. 今日正念冥想 -->
+            <section class="mindfulness-section">
+                <h3 class="section-title">今日正念冥想</h3>
+                <div class="mindfulness-image-container">
+                    <img src="20260116-183218.jpg" alt="今日正念冥想" class="mindfulness-image">
                 </div>
             </section>
 
@@ -343,31 +351,27 @@
                 <h3 class="section-title">今日幸运元素</h3>
                 <div class="lucky-elements">
                     <div class="lucky-item">
-                        <span class="lucky-icon">🎨</span>
                         <div>
                             <div class="lucky-label">幸运色</div>
                             <div class="lucky-value" id="lucky-color"></div>
                         </div>
                     </div>
                     <div class="lucky-item">
-                        <span class="lucky-icon">💎</span>
-                        <div>
-                            <div class="lucky-label">今日饰品</div>
-                            <div class="lucky-value" id="lucky-accessory"></div>
-                        </div>
-                    </div>
-                    <div class="lucky-item">
-                        <span class="lucky-icon">🔢</span>
                         <div>
                             <div class="lucky-label">幸运数字</div>
                             <div class="lucky-value" id="lucky-number"></div>
                         </div>
                     </div>
                     <div class="lucky-item">
-                        <span class="lucky-icon">🏺</span>
                         <div>
-                            <div class="lucky-label">今日摆件</div>
-                            <div class="lucky-value" id="lucky-decoration"></div>
+                            <div class="lucky-label">幸运植物</div>
+                            <div class="lucky-value" id="lucky-plant"></div>
+                        </div>
+                    </div>
+                    <div class="lucky-item">
+                        <div>
+                            <div class="lucky-label">幸运石</div>
+                            <div class="lucky-value" id="lucky-stone"></div>
                         </div>
                     </div>
                 </div>
@@ -449,30 +453,12 @@
         </div>
     </div>
 
-    <!-- 情绪选择弹板（完成任务后） -->
-    <div class="emotion-select-toast" id="emotion-select-toast" style="display: none;">
-        <div class="emotion-select-toast-card">
-            <div class="emotion-select-toast-title">情绪能量？</div>
-            <div class="emotion-select-options">
-                <button class="emotion-select-btn" data-value="-1" id="emotion-select-minus">
-                    <span class="emotion-select-icon">-1</span>
-                </button>
-                <button class="emotion-select-btn" data-value="0" id="emotion-select-zero">
-                    <span class="emotion-select-icon">0</span>
-                </button>
-                <button class="emotion-select-btn" data-value="1" id="emotion-select-plus">
-                    <span class="emotion-select-icon">+1</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- 今日签到完成弹板 -->
     <div class="checkin-toast" id="checkin-toast" style="display: none;">
         <div class="checkin-toast-card">
             <div class="checkin-toast-icon">🎉</div>
             <div class="checkin-toast-title">今日签到完成</div>
-            <div class="checkin-toast-subtitle">你完成了今日占卜与疗愈任务</div>
+            <div class="checkin-toast-subtitle">你完成了今日占卜</div>
             <div class="checkin-toast-streak" id="checkin-toast-streak"></div>
             <button class="checkin-toast-btn" id="checkin-toast-btn">太棒了！</button>
         </div>
@@ -522,8 +508,8 @@
             <span class="nav-label">今日</span>
         </div>
         <div class="nav-item" data-nav="healing">
-            <span class="nav-icon">💚</span>
-            <span class="nav-label">疗愈</span>
+            <span class="nav-icon">💧</span>
+            <span class="nav-label">能量</span>
         </div>
         <div class="nav-item" data-nav="profile">
             <span class="nav-icon">👤</span>
@@ -538,12 +524,16 @@
     <script src="js/user-profile.js"></script>
     <script src="js/profile-modal.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/lucky-elements-data.js"></script>
+    <script src="js/lucky-elements.js"></script>
+    <script src="js/energy-boost-tasks-data.js"></script>
+    <script src="js/energy-boost.js?v=20260116"></script>
     <script src="js/api.js"></script>
     <script src="js/tarot-storage.js"></script>
     <script src="js/tarot-spread.js"></script>
     <script src="js/tarot-chat.js"></script>
     <script src="js/tarot-module.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="js/ui.js?v=20260116"></script>
     <script src="js/main.js"></script>
             </div>
         </div>

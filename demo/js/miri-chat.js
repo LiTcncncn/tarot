@@ -19,29 +19,43 @@ let streamingMessageId = null;
 let isMiriPageInitialized = false;
 let isMiriEventsBound = false;
 
-// ===== 初始化 Miri 页面 =====
-function initMiriPage() {
-    // 允许多次进入页面，但避免重复绑定事件；渲染逻辑做成幂等
-    if (!isMiriEventsBound) {
-        bindMiriEvents();
-        isMiriEventsBound = true;
-    }
+// ===== 异步加载 Miri 页面内容 =====
+async function loadMiriContentAsync() {
+    const chatArea = document.getElementById('miri-chat-area');
+    if (!chatArea) return;
 
     // 清理：今天以前且未选择的镜像句不保留（用户未回应就不展示/不留存）
     purgeStaleUnselectedDailyMirrors();
 
-    // 每次进入都尝试加载并渲染最新历史（刷新/返回时保持一致）
+    // 加载聊天历史
     loadChatHistory();
-    renderMiriChatView();
 
-    // 仅在“本次会话”未初始化时，执行一次首屏逻辑（镜像句/提示）
+    // 渲染聊天历史（如果存在）
+    if (currentChatHistory.length > 0) {
+        currentChatHistory.forEach(message => {
+            if (message.role === 'user') {
+                appendUserMessage(message.content, false);
+            } else if (message.role === 'miri') {
+                appendMiriMessage(message.content, false);
+            }
+        });
+        scrollToBottom();
+    }
+
+    // 检查并显示镜像句
     if (!isMiriPageInitialized) {
         isMiriPageInitialized = true;
-        checkAndShowMirrorQuestion();
+        await checkAndShowMirrorQuestion();
     } else {
-        // 已有历史则无需重复生成；没有历史则补一次镜像句/提示
-        if (currentChatHistory.length === 0) {
-            checkAndShowMirrorQuestion();
+        // 渲染镜像句（如果存在）
+        const state = loadDailyMirrorState();
+        if (state && state.question) {
+            renderDailyMirrorBlock(false);
+        }
+        
+        // 如果没有任何内容，显示镜像句
+        if (currentChatHistory.length === 0 && (!state || !state.question)) {
+            await checkAndShowMirrorQuestion();
         } else {
             generateSuggestions().catch(() => {});
         }
@@ -134,10 +148,27 @@ function showMiriPage() {
     document.body.classList.add('show-nav');
     updateNavActive('miri');
 
-    // 进入时初始化/渲染
-    initMiriPage();
+    // 清除红点提示（用户已进入页面）
+    updateMiriBadge();
 
-    // 输入框聚焦（镜像句生成/渲染后仍可点击输入继续）
+    // 仅绑定事件（如果未绑定）- 同步但很快
+    if (!isMiriEventsBound) {
+        bindMiriEvents();
+        isMiriEventsBound = true;
+    }
+
+    // 清空聊天区（立即显示空白页面）
+    const chatArea = document.getElementById('miri-chat-area');
+    if (chatArea) {
+        chatArea.innerHTML = '';
+    }
+
+    // 延迟加载内容（异步，不阻塞页面显示）
+    requestAnimationFrame(() => {
+        loadMiriContentAsync();
+    });
+
+    // 输入框聚焦（延迟，等待内容加载）
     setTimeout(() => {
         const input = document.getElementById('miri-input');
         if (input) input.focus();
@@ -302,28 +333,29 @@ function renderDailyMirrorBlock(shouldScroll = true) {
 
 // 检查并显示镜像句
 async function checkAndShowMirrorQuestion() {
-    // 目标：镜像句作为“聊天样式的一问、一答、一解析”展示，但不计入聊天历史
+    // 目标：镜像句作为"聊天样式的一问、一答、一解析"展示，但不计入聊天历史
 
     // 1) 若本地已有今日镜像状态，直接渲染即可
     const existing = loadDailyMirrorState();
     if (existing && existing.question && Array.isArray(existing.options)) {
-        renderMiriChatView();
+        renderDailyMirrorBlock(false);
         generateSuggestions().catch(() => {});
         return;
     }
 
-    // 2) 读取“今日占卜”里预生成的镜像句
+    // 2) 读取"今日占卜"里预生成的镜像句
     const todayReading = getTodayReading();
     const preGenerated = todayReading?.reading?.mirrorQuestion;
     if (preGenerated?.question && Array.isArray(preGenerated.options)) {
         saveDailyMirrorState({
             question: preGenerated.question,
             options: preGenerated.options,
+            logic_type: preGenerated.logic_type || null,
             selectedOption: null,
             interpretation: null
         });
         markMirrorQuestionShown();
-        renderMiriChatView();
+        renderDailyMirrorBlock(false);
         generateSuggestions().catch(() => {});
         return;
     }
@@ -337,11 +369,12 @@ async function checkAndShowMirrorQuestion() {
             saveDailyMirrorState({
                 question: mirrorData.question,
                 options: mirrorData.options,
+                logic_type: mirrorData.logic_type || null,
                 selectedOption: null,
                 interpretation: null
             });
             markMirrorQuestionShown();
-            renderMiriChatView();
+            renderDailyMirrorBlock(false);
         }
     } catch (e) {
         hideMiriLoading();
@@ -391,7 +424,10 @@ function appendMirrorQuestionMessage(question, options, shouldScroll = true) {
             // 标记镜像句已显示（但不写入聊天历史）
             markMirrorQuestionShown();
 
-            // “一答”：显示用户选择（不写入聊天历史）
+            // 清除红点提示（用户已选择）
+            updateMiriBadge();
+
+            // "一答"：显示用户选择（不写入聊天历史）
             appendUserMessage(selectedOption);
 
             // 更新镜像状态（独立存储，不计入20组）
@@ -400,14 +436,25 @@ function appendMirrorQuestionMessage(question, options, shouldScroll = true) {
             state.options = options;
             state.selectedOption = selectedOption;
             saveDailyMirrorState(state);
+            
+            // 更新主界面的察觉模块状态
+            if (typeof updateAwarenessModuleState === 'function') {
+                updateAwarenessModuleState();
+            }
 
-            // “一解析”：生成并展示解读（不写入聊天历史）
+            // "一解析"：生成并展示解读（不写入聊天历史）
             try {
-                const interpretation = await generateMirrorInterpretation(question, options, selectedOption);
+                const logicType = state.logic_type || null;
+                const interpretation = await generateMirrorInterpretation(question, options, selectedOption, logicType);
                 const next = loadDailyMirrorState() || state;
                 next.selectedOption = selectedOption;
                 next.interpretation = interpretation;
                 saveDailyMirrorState(next);
+                
+                // 更新主界面的察觉模块状态
+                if (typeof updateAwarenessModuleState === 'function') {
+                    updateAwarenessModuleState();
+                }
             } catch (e) {
                 // ignore
             } finally {
@@ -583,15 +630,18 @@ function scrollToBottom() {
 
 // ===== 更新话语提示 =====
 function updateSuggestions(suggestions) {
-    if (!suggestions || suggestions.length !== 3) return;
+    if (!suggestions || suggestions.length !== 2) return;
     
     currentSuggestions = suggestions;
     
     const buttons = document.querySelectorAll('#miri-suggestions .suggestion-btn');
     buttons.forEach((btn, index) => {
-        if (suggestions[index]) {
+        if (index < suggestions.length && suggestions[index]) {
             btn.textContent = suggestions[index];
             btn.disabled = false;
+        } else {
+            // 隐藏多余的按钮（如果有）
+            btn.style.display = 'none';
         }
     });
 }
@@ -616,6 +666,32 @@ function updateNavActive(navType) {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.toggle('active', item.dataset.nav === navType);
     });
+}
+
+// ===== 红点提示功能 =====
+
+// 更新 Miri 导航按钮的红点提示
+function updateMiriBadge() {
+    const badge = document.getElementById('miri-nav-badge');
+    if (!badge) return;
+
+    // 检查今日是否已生成镜像句且用户未查看/未选择
+    const todayReading = getTodayReading();
+    const mirrorQuestion = todayReading?.reading?.mirrorQuestion;
+    
+    // 如果今日占卜已完成且生成了镜像句
+    if (mirrorQuestion?.question && Array.isArray(mirrorQuestion.options)) {
+        // 检查用户是否已查看/选择
+        const state = loadDailyMirrorState();
+        // 如果用户未选择，显示红点
+        if (!state || !state.selectedOption) {
+            badge.style.display = 'block';
+            return;
+        }
+    }
+    
+    // 其他情况隐藏红点
+    badge.style.display = 'none';
 }
 
 console.log('miri-chat.js 已加载');

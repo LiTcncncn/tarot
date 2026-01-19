@@ -25,6 +25,13 @@ function initApp() {
         showDailyReadingPage();
     }
     
+    // 更新 Miri 红点提示（初始化时检查状态）
+    if (typeof updateMiriBadge === 'function') {
+        setTimeout(() => {
+            updateMiriBadge();
+        }, 100);
+    }
+    
     // 绑定事件
     bindEvents();
 }
@@ -190,11 +197,15 @@ function bindEvents() {
                     intensity: card.intensity || getCardIntensity(card.name)  // 强度等级
                 },
                 moonPhase: moonPhase,
-                reading: readingData,
-                taskCompleted: false
+                reading: readingData
             };
             
             saveTodayReading(fullData);
+            
+            // 更新 Miri 红点提示（占卜完成后，镜像句已生成）
+            if (typeof updateMiriBadge === 'function') {
+                updateMiriBadge();
+            }
             
             // 延迟一下，让用户看到加载动画，然后切换到主界面
             setTimeout(() => {
@@ -214,10 +225,7 @@ function bindEvents() {
     // 初始化抽牌
     initCardDraw(getCardDrawCallback());
     
-    // 完成任务按钮
-    document.getElementById('complete-task-btn').addEventListener('click', () => {
-        completeTask();
-    });
+    // 能量 Boost 按钮由 renderMainPage 统一绑定
 }
 
 // 加载今日数据
@@ -236,6 +244,11 @@ function loadTodayData() {
         }
         
         renderMainPage(reading, card, moonPhase);
+        
+        // 更新 Miri 红点提示（加载数据后更新状态）
+        if (typeof updateMiriBadge === 'function') {
+            updateMiriBadge();
+        }
     } else {
         // 没有今日数据，显示开始占卜按钮
         document.getElementById('start-daily-btn').style.display = 'flex';

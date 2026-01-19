@@ -139,12 +139,12 @@ function getReadingByDate(dateString) {
     return readings[dateString] || null;
 }
 
-// 检查指定日期是否完成签到（完成占卜且完成任务）
+// 检查指定日期是否完成签到（完成占卜即可）
 function isDateCompleted(dateString) {
     const reading = getReadingByDate(dateString);
     if (!reading) return false;
-    // 完成占卜（有reading数据）且完成任务，或者补签完成
-    return (reading.reading && reading.taskCompleted === true) || (reading.isMakeup && reading.taskCompleted === true);
+    // 有完整占卜记录或补签记录即可视为完成
+    return Boolean(reading.reading) || Boolean(reading.isMakeup);
 }
 
 // 计算连续签到天数

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜像句生成测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .controls {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 20px;
+        }
+        .result-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .result-item h3 {
+            color: #4a90e2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logic-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .logic-type.反转句 { background: #fff3e0; color: #e65100; }
+        .logic-type.两难句 { background: #f3e5f5; color: #6a1b9a; }
+        .logic-type.边界句 { background: #e8f5e9; color: #2e7d32; }
+        .logic-type.代价句 { background: #fce4ec; color: #c2185b; }
+        .input-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .input-info strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .question {
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4a90e2;
+            border-radius: 4px;
+        }
+        .options {
+            margin-top: 15px;
+        }
+        .option {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: #f0f0f0;
+            border-radius: 6px;
+            border-left: 3px solid #4a90e2;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .progress {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 6px;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>镜像句生成测试</h1>
+        <div class="controls">
+            <button id="run-test">开始测试（10次）</button>
+            <button id="clear-results">清空结果</button>
+        </div>
+        <div id="progress" style="display: none;"></div>
+        <div id="results" class="results"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/moon-phase.js"></script>
+    <script src="js/tarot-cards.js"></script>
+
+    <script>
+        // 测试数据：10组不同的"今日状态"+"塔罗今日指引"组合
+        // 注意：这里的 guidance 应该模拟 guidance_one_line（25-30字）的真实格式
+        // guidance_one_line 要求：不能提及塔罗牌名称、月相名称、用户情绪状态，应该是纯疗愈性建议
+        const testCases = [
+            {
+                emotion: '疲惫',
+                tarotCard: { name: 'TheHermit', nameCn: '隐者' },
+                moonPhase: { name: 'Waning Crescent', nameCn: '下弦月渐亏' },
+                guidance: '暂时放下心中的事，让时间沉淀，给内心一个安静的角落'
+            },
+            {
+                emotion: '焦虑',
+                tarotCard: { name: 'TheTower', nameCn: '塔' },
+                moonPhase: { name: 'Full Moon', nameCn: '满月' },
+                guidance: '保持清醒的觉察，让内心的宁静沉淀你的智慧，用清晰的视角照亮前路'
+            },
+            {
+                emotion: '迷茫',
+                tarotCard: { name: 'TheFool', nameCn: '愚者' },
+                moonPhase: { name: 'New Moon', nameCn: '新月' },
+                guidance: '让时间沉淀答案，静待花开，相信内心的声音会指引你'
+            },
+            {
+                emotion: '愉悦',
+                tarotCard: { name: 'TheSun', nameCn: '太阳' },
+                moonPhase: { name: 'Waxing Gibbous', nameCn: '渐盈凸月' },
+                guidance: '用清晰的视角照亮前路，保持当下的美好，感受生活的温暖'
+            },
+            {
+                emotion: '平静',
+                tarotCard: { name: 'TheStar', nameCn: '星星' },
+                moonPhase: { name: 'Last Quarter', nameCn: '下弦月' },
+                guidance: '静待花开的声音，让心自然舒展，在宁静中找到平衡'
+            },
+            {
+                emotion: '焦虑',
+                tarotCard: { name: 'TheHangedMan', nameCn: '倒吊人' },
+                moonPhase: { name: 'First Quarter', nameCn: '上弦月' },
+                guidance: '试着收回一点关注，把它们放回自己身上，给自己一个能自由呼吸的空间'
+            },
+            {
+                emotion: '迷茫',
+                tarotCard: { name: 'TheMagician', nameCn: '魔术师' },
+                moonPhase: { name: 'Waxing Crescent', nameCn: '上弦月渐盈' },
+                guidance: '别逼自己在今天就给出答案，给内心一些时间，让它自然地指引你'
+            },
+            {
+                emotion: '疲惫',
+                tarotCard: { name: 'Strength', nameCn: '力量' },
+                moonPhase: { name: 'Waning Gibbous', nameCn: '渐亏凸月' },
+                guidance: '试着停下来，给身体一个休息的机会，让它慢慢恢复能量'
+            },
+            {
+                emotion: '焦虑',
+                tarotCard: { name: 'TheDevil', nameCn: '恶魔' },
+                moonPhase: { name: 'Full Moon', nameCn: '满月' },
+                guidance: '路上的风景本身就是收获的一部分，给自己一些时间，慢慢来'
+            },
+            {
+                emotion: '迷茫',
+                tarotCard: { name: 'WheelOfFortune', nameCn: '命运之轮' },
+                moonPhase: { name: 'New Moon', nameCn: '新月' },
+                guidance: '这两者之间有一条细细的裂缝，你正站在上面寻找平衡，慢慢来'
+            }
+        ];
+
+        const resultsContainer = document.getElementById('results');
+        const progressDiv = document.getElementById('progress');
+
+        document.getElementById('run-test').addEventListener('click', async () => {
+            const btn = document.getElementById('run-test');
+            btn.disabled = true;
+            resultsContainer.innerHTML = '';
+            progressDiv.style.display = 'block';
+            progressDiv.textContent = '准备开始测试...';
+
+            for (let i = 0; i < testCases.length; i++) {
+                const testCase = testCases[i];
+                progressDiv.textContent = `正在测试 ${i + 1}/${testCases.length}...`;
+                
+                try {
+                    const reading = {
+                        guidance_one_line: testCase.guidance
+                    };
+                    
+                    const result = await generateMirrorQuestionForReading(
+                        testCase.emotion,
+                        testCase.tarotCard,
+                        testCase.moonPhase,
+                        reading
+                    );
+                    
+                    displayResult(i + 1, testCase, result);
+                } catch (error) {
+                    displayError(i + 1, testCase, error);
+                }
+                
+                // 延迟一下，避免API请求过快
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            progressDiv.style.display = 'none';
+            progressDiv.textContent = '';
+            btn.disabled = false;
+        });
+
+        document.getElementById('clear-results').addEventListener('click', () => {
+            resultsContainer.innerHTML = '';
+        });
+
+        function displayResult(index, testCase, result) {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            
+            const logicType = result.logic_type || '未标注';
+            const logicTypeClass = logicType.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '');
+            
+            div.innerHTML = `
+                <h3>
+                    测试 ${index}
+                    <span class="logic-type ${logicTypeClass}">${logicType}</span>
+                </h3>
+                <div class="input-info">
+                    <strong>情绪状态：</strong>${testCase.emotion}
+                    <strong>塔罗牌：</strong>${testCase.tarotCard.nameCn} (${testCase.tarotCard.name})
+                    <strong>月相：</strong>${testCase.moonPhase.nameCn}
+                    <strong>今日指引：</strong>${testCase.guidance}
+                </div>
+                <div class="question">${result.question || '未生成'}</div>
+                <div class="options">
+                    ${(result.options || []).map((opt, idx) => 
+                        `<div class="option">${String.fromCharCode(65 + idx)}. ${opt}</div>`
+                    ).join('')}
+                </div>
+            `;
+            
+            resultsContainer.appendChild(div);
+        }
+
+        function displayError(index, testCase, error) {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `
+                <h3>测试 ${index} - 错误</h3>
+                <div class="input-info">
+                    <strong>情绪状态：</strong>${testCase.emotion}
+                    <strong>塔罗牌：</strong>${testCase.tarotCard.nameCn}
+                    <strong>今日指引：</strong>${testCase.guidance}
+                </div>
+                <div class="error">${error.message || '生成失败'}</div>
+            `;
+            resultsContainer.appendChild(div);
+        }
+    </script>
+</body>
+</html>

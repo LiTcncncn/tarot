@@ -486,28 +486,48 @@ function renderMainPage(readingData, card, moonPhase) {
         }
     }
     
-    // 疗愈任务
-    const taskText = document.getElementById('healing-task-text');
-    const completeBtn = document.getElementById('complete-task-btn');
-    const taskCompleted = document.getElementById('task-completed');
+    // 察觉模块
+    const awarenessCard = document.getElementById('awareness-task-card');
+    const awarenessText = document.getElementById('awareness-task-text');
+    const awarenessSelectBtn = document.getElementById('awareness-select-btn');
+    const awarenessCompleted = document.getElementById('awareness-task-completed');
     
-    taskText.textContent = readingData.healing_task;
-    
-    // 检查任务是否已完成
+    // 检查镜像问题是否存在（使用 todayReading，后面还会用到）
     const todayReading = getTodayReading();
-    if (todayReading && todayReading.taskCompleted) {
-        completeBtn.style.display = 'none';
-        taskCompleted.style.display = 'flex';
+    const mirrorQuestion = todayReading?.reading?.mirrorQuestion;
+    
+    if (mirrorQuestion && mirrorQuestion.question) {
+        // 显示察觉模块
+        awarenessCard.style.display = 'flex';
+        awarenessText.textContent = mirrorQuestion.question;
+        
+        // 检查是否已完成（检查 localStorage 中的镜像状态）
+        const mirrorState = checkMirrorQuestionCompleted();
+        if (mirrorState && mirrorState.selectedOption) {
+            // 已完成
+            awarenessSelectBtn.style.display = 'none';
+            awarenessCompleted.style.display = 'flex';
+        } else {
+            // 未完成
+            awarenessSelectBtn.style.display = 'block';
+            awarenessCompleted.style.display = 'none';
+        }
     } else {
-        completeBtn.style.display = 'block';
-        taskCompleted.style.display = 'none';
+        // 没有镜像问题，隐藏模块
+        awarenessCard.style.display = 'none';
     }
     
+    // 能量 Boost
+    renderEnergyBoostSection();
+    
     // 幸运元素
-    document.getElementById('lucky-color').textContent = readingData.lucky_elements.lucky_color;
-    document.getElementById('lucky-accessory').textContent = readingData.lucky_elements.lucky_accessory;
-    document.getElementById('lucky-number').textContent = readingData.lucky_elements.lucky_number;
-    document.getElementById('lucky-decoration').textContent = readingData.lucky_elements.lucky_decoration;
+    document.getElementById('lucky-color').textContent = readingData.lucky_elements.lucky_color || '';
+    document.getElementById('lucky-number').textContent = readingData.lucky_elements.lucky_number || '';
+    document.getElementById('lucky-plant').textContent = readingData.lucky_elements.lucky_plant || '';
+    document.getElementById('lucky-stone').textContent = readingData.lucky_elements.lucky_stone || '';
+    
+    // 绑定察觉模块按钮
+    bindAwarenessButton();
     
     // 绑定领域指引按钮
     bindCategoryButtons();
@@ -521,6 +541,240 @@ function renderMainPage(readingData, card, moonPhase) {
             bindZodiacHoroscopeButtons();
         }
     }, 100);
+
+    // 更新能量值显示
+    updateEnergyPointsDisplay();
+
+    // 完成占卜后首次进入主界面时显示签到弹板
+    maybeShowCheckInToast();
+}
+
+// 渲染能量 Boost 任务列表
+function renderEnergyBoostSection() {
+    const listEl = document.getElementById('energy-boost-list');
+    if (!listEl || typeof ensureEnergyBoostState !== 'function' || typeof ENERGY_BOOST_CONFIG === 'undefined') {
+        return;
+    }
+
+    const state = ensureEnergyBoostState();
+    const stats = getTodayTaskStats();
+    const completedCount = stats.totalCompleted || 0;
+    
+    // 如果已完成 5 个任务，显示完成提示
+    if (completedCount >= ENERGY_BOOST_CONFIG.MAX_TASKS_PER_DAY) {
+        listEl.innerHTML = '<div class="energy-boost-empty">🎉 今日已完成 5 个任务，获得 25 点能量值！</div>';
+        return;
+    }
+    
+    if (!state || !state.tasks || state.tasks.length === 0) {
+        listEl.innerHTML = '<div class="energy-boost-empty">暂无任务</div>';
+        return;
+    }
+
+    listEl.innerHTML = '';
+    state.tasks.forEach(task => {
+        const item = document.createElement('div');
+        item.className = 'energy-boost-item';
+        item.dataset.taskId = task.id;
+
+        const text = document.createElement('div');
+        text.className = 'energy-boost-text';
+        text.textContent = task.content;
+
+        const actions = document.createElement('div');
+        actions.className = 'energy-boost-actions';
+
+        if (task.status === 'completed') {
+            const completed = document.createElement('div');
+            completed.className = 'energy-boost-completed';
+            completed.innerHTML = '<span class="checkmark">✓</span><span>已完成</span>';
+            actions.appendChild(completed);
+        } else if (task.status === 'started') {
+            // 已开始任务，显示带进度条的完成按钮
+            const completeBtn = document.createElement('button');
+            completeBtn.className = 'energy-boost-complete-btn';
+            completeBtn.disabled = true;
+            
+            // 创建进度条容器
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'energy-boost-progress-container';
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'energy-boost-progress-bar';
+            
+            const progressFill = document.createElement('div');
+            progressFill.className = 'energy-boost-progress-fill';
+            progressFill.style.width = '0%';
+            
+            const btnText = document.createElement('span');
+            btnText.className = 'energy-boost-complete-text';
+            btnText.innerHTML = '完成 <span class="energy-reward">💧5</span>';
+            
+            progressBar.appendChild(progressFill);
+            progressContainer.appendChild(progressBar);
+            progressContainer.appendChild(btnText);
+            completeBtn.appendChild(progressContainer);
+            
+            // 计算剩余时间并开始进度条
+            const startTime = task.startTime ? new Date(task.startTime).getTime() : Date.now();
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const remaining = Math.max(0, ENERGY_BOOST_CONFIG.COUNTDOWN_SECONDS - elapsed);
+            
+            if (remaining <= 0) {
+                completeBtn.disabled = false;
+                progressFill.style.width = '100%';
+                completeBtn.classList.add('ready');
+            } else {
+                // 继续倒计时
+                startEnergyBoostCountdown(task.id, completeBtn, progressFill, remaining);
+            }
+
+            completeBtn.addEventListener('click', () => {
+                if (completeBtn.disabled) return;
+                const result = completeEnergyBoostTask(task.id);
+                if (result && result.success) {
+                    updateEnergyPointsDisplay();
+                    setTimeout(() => {
+                        renderEnergyBoostSection();
+                    }, 300);
+                }
+            });
+
+            actions.appendChild(completeBtn);
+        } else {
+            // 未开始任务，只显示开始按钮
+            const startBtn = document.createElement('button');
+            startBtn.className = 'energy-boost-start-btn';
+            startBtn.textContent = '开始';
+
+            startBtn.addEventListener('click', () => {
+                updateEnergyBoostTaskStatus(task.id, 'started');
+                
+                // 创建完成按钮
+                const completeBtn = document.createElement('button');
+                completeBtn.className = 'energy-boost-complete-btn';
+                completeBtn.disabled = true;
+                
+                // 创建进度条容器
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'energy-boost-progress-container';
+                
+                const progressBar = document.createElement('div');
+                progressBar.className = 'energy-boost-progress-bar';
+                
+                const progressFill = document.createElement('div');
+                progressFill.className = 'energy-boost-progress-fill';
+                progressFill.style.width = '0%';
+                
+                const btnText = document.createElement('span');
+                btnText.className = 'energy-boost-complete-text';
+                btnText.innerHTML = '完成 <span class="energy-reward">💧5</span>';
+                
+                progressBar.appendChild(progressFill);
+                progressContainer.appendChild(progressBar);
+                progressContainer.appendChild(btnText);
+                completeBtn.appendChild(progressContainer);
+                
+                // 替换按钮
+                startBtn.style.display = 'none';
+                actions.appendChild(completeBtn);
+                
+                // 开始倒计时
+                startEnergyBoostCountdown(task.id, completeBtn, progressFill, ENERGY_BOOST_CONFIG.COUNTDOWN_SECONDS);
+                
+                completeBtn.addEventListener('click', () => {
+                    if (completeBtn.disabled) return;
+                    const result = completeEnergyBoostTask(task.id);
+                    if (result && result.success) {
+                        updateEnergyPointsDisplay();
+                        setTimeout(() => {
+                            renderEnergyBoostSection();
+                        }, 300);
+                    }
+                });
+            });
+
+            actions.appendChild(startBtn);
+        }
+
+        item.appendChild(text);
+        item.appendChild(actions);
+        listEl.appendChild(item);
+    });
+
+    // 绑定换一个按钮
+    bindEnergyBoostRefreshButton();
+}
+
+function handleEnergyBoostRefreshClick() {
+    if (typeof refreshEnergyBoostTasks !== 'function') return;
+    const result = refreshEnergyBoostTasks();
+    if (result) {
+        renderEnergyBoostSection();
+    }
+}
+
+function bindEnergyBoostRefreshButton() {
+    const refreshBtn = document.getElementById('energy-boost-refresh-btn');
+    if (!refreshBtn || typeof refreshEnergyBoostTasks !== 'function') return;
+
+    // 检查是否已完成 5 个任务或任务池已空
+    const stats = getTodayTaskStats();
+    const completedCount = stats.totalCompleted || 0;
+    if (completedCount >= ENERGY_BOOST_CONFIG.MAX_TASKS_PER_DAY) {
+        refreshBtn.style.display = 'none';
+        return;
+    }
+    refreshBtn.style.display = 'inline-flex';
+    refreshBtn.onclick = handleEnergyBoostRefreshClick;
+}
+
+if (typeof window !== 'undefined') {
+    window.handleEnergyBoostRefreshClick = handleEnergyBoostRefreshClick;
+}
+
+function startEnergyBoostCountdown(taskId, completeBtn, progressFill, remainingSeconds) {
+    if (!completeBtn || !progressFill) return;
+    
+    const totalSeconds = ENERGY_BOOST_CONFIG.COUNTDOWN_SECONDS;
+    let remaining = remainingSeconds;
+    completeBtn.disabled = true;
+    completeBtn.classList.remove('ready');
+    
+    // 计算初始进度
+    const initialProgress = ((totalSeconds - remaining) / totalSeconds) * 100;
+    progressFill.style.width = initialProgress + '%';
+    
+    const timer = setInterval(() => {
+        remaining -= 1;
+        const progress = ((totalSeconds - remaining) / totalSeconds) * 100;
+        progressFill.style.width = progress + '%';
+        
+        if (remaining <= 0) {
+            clearInterval(timer);
+            progressFill.style.width = '100%';
+            completeBtn.disabled = false;
+            completeBtn.classList.add('ready');
+            return;
+        }
+    }, 1000);
+}
+
+function updateEnergyPointsDisplay() {
+    const energyValue = document.getElementById('energy-points-value');
+    if (!energyValue || typeof getEnergyPointsTotal !== 'function') return;
+    energyValue.textContent = getEnergyPointsTotal();
+}
+
+function maybeShowCheckInToast() {
+    const todayReading = getTodayReading();
+    if (!todayReading || !todayReading.reading) return;
+    if (typeof getCheckinToastKey !== 'function') return;
+
+    const toastKey = getCheckinToastKey(getTodayKey());
+    if (localStorage.getItem(toastKey)) return;
+    showCheckInCompleteModal();
+    localStorage.setItem(toastKey, '1');
 }
 
 // 绑定领域指引按钮（点击时生成并显示）
@@ -619,60 +873,65 @@ function bindCategoryButtons() {
     });
 }
 
-// 完成任务
-function completeTask() {
-    const todayReading = getTodayReading();
-    if (todayReading) {
-        // 更新 UI
-        document.getElementById('complete-task-btn').style.display = 'none';
-        document.getElementById('task-completed').style.display = 'flex';
-        
-        // 第一个任务完成时，弹出情绪选择弹板
-        // 注意：目前只有一个任务，所以总是第一个任务
-        showEmotionSelectToast();
+
+// 检查镜像问题是否已完成
+function checkMirrorQuestionCompleted() {
+    try {
+        const today = new Date();
+        const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const storageKey = `miri_daily_mirror_${todayKey}`;
+        const raw = localStorage.getItem(storageKey);
+        if (raw) {
+            return JSON.parse(raw);
+        }
+    } catch (e) {
+        // ignore
     }
+    return null;
 }
 
-// 显示情绪选择弹板
-function showEmotionSelectToast() {
-    const toast = document.getElementById('emotion-select-toast');
-    if (!toast) return;
+// 绑定察觉模块按钮
+function bindAwarenessButton() {
+    const awarenessSelectBtn = document.getElementById('awareness-select-btn');
+    if (!awarenessSelectBtn) return;
     
-    // 显示弹板
-    toast.style.display = 'flex';
+    // 移除旧的事件监听器
+    const newBtn = awarenessSelectBtn.cloneNode(true);
+    awarenessSelectBtn.parentNode.replaceChild(newBtn, awarenessSelectBtn);
     
-    // 绑定按钮事件
-    const buttons = toast.querySelectorAll('.emotion-select-btn');
-    buttons.forEach(btn => {
-        // 移除之前的事件监听器（如果存在）
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        
-        // 绑定新的事件
-        newBtn.addEventListener('click', () => {
-            const value = parseInt(newBtn.dataset.value);
-            handleEmotionSelect(value);
-        });
+    // 绑定新的事件
+    newBtn.addEventListener('click', () => {
+        // 跳转到 miri 聊天界面
+        if (typeof showMiriPage === 'function') {
+            showMiriPage();
+        } else {
+            // 如果 showMiriPage 不存在，通过导航栏跳转
+            const miriNavItem = document.querySelector('.nav-item[data-nav="miri"]');
+            if (miriNavItem) {
+                miriNavItem.click();
+            }
+        }
     });
 }
 
-// 处理情绪选择
-function handleEmotionSelect(value) {
-    // 隐藏情绪选择弹板
-    const toast = document.getElementById('emotion-select-toast');
-    if (toast) {
-        toast.style.display = 'none';
-    }
+// 更新察觉模块状态（供外部调用）
+function updateAwarenessModuleState() {
+    const awarenessCard = document.getElementById('awareness-task-card');
+    const awarenessSelectBtn = document.getElementById('awareness-select-btn');
+    const awarenessCompleted = document.getElementById('awareness-task-completed');
     
-    // 保存任务完成状态和情绪变化值
-    const todayReading = getTodayReading();
-    if (todayReading) {
-        todayReading.taskCompleted = true;
-        todayReading.emotionChange = value; // 保存情绪变化值（+1, 0, -1）
-        saveTodayReading(todayReading);
-        
-        // 显示签到完成弹板
-        showCheckInCompleteModal();
+    if (!awarenessCard) return;
+    
+    // 检查是否已完成
+    const mirrorState = checkMirrorQuestionCompleted();
+    if (mirrorState && mirrorState.selectedOption) {
+        // 已完成
+        if (awarenessSelectBtn) awarenessSelectBtn.style.display = 'none';
+        if (awarenessCompleted) awarenessCompleted.style.display = 'flex';
+    } else {
+        // 未完成
+        if (awarenessSelectBtn) awarenessSelectBtn.style.display = 'block';
+        if (awarenessCompleted) awarenessCompleted.style.display = 'none';
     }
 }
 
@@ -1190,7 +1449,7 @@ function showDateDetailModal(dateKey) {
             </div>
             <div class="detail-section">
                 <div class="detail-label">签到状态</div>
-                <div class="detail-value">${reading.taskCompleted ? '✓ 已完成' : '未完成'}</div>
+                <div class="detail-value">${isDateCompleted(dateKey) ? '✓ 已完成' : '未完成'}</div>
             </div>
         `;
         
@@ -1242,7 +1501,7 @@ function showDateDetailModal(dateKey) {
         const todayKey = getTodayKey();
         const makeUpBtn = document.getElementById('date-detail-makeup-btn');
         if (makeUpBtn) {
-            if (dateKey !== todayKey && !reading.taskCompleted) {
+            if (dateKey !== todayKey && !isDateCompleted(dateKey)) {
                 makeUpBtn.style.display = 'block';
                 makeUpBtn.onclick = () => {
                     makeUpCheckIn(dateKey);
@@ -1459,7 +1718,7 @@ function makeUpCheckIn(dateKey, emotion, emotionRecord = '') {
         date: dateKey,
         timestamp: new Date().toISOString(),
         isMakeup: true,
-        taskCompleted: true,  // 补签视为完成
+        // 补签仅记录情绪，不再依赖任务完成状态
         emotionRecord: emotionRecord || undefined  // 如果有记录才保存
     };
     
@@ -1494,7 +1753,7 @@ function showMakeupSuccessToast(emotion) {
             toast.style.display = 'none';
             // 恢复默认文案
             titleEl.textContent = '今日签到完成';
-            subtitleEl.textContent = '你完成了今日占卜与疗愈任务';
+            subtitleEl.textContent = '你完成了今日占卜';
         }, 2000);
     }
 }
@@ -1512,7 +1771,7 @@ function showCheckInCompleteModal() {
     if (modal) {
         // 设置标题和副标题
         if (titleEl) titleEl.textContent = '🎊 今日签到完成';
-        if (subtitleEl) subtitleEl.textContent = '你完成了今日占卜与疗愈任务';
+        if (subtitleEl) subtitleEl.textContent = '你完成了今日占卜';
         if (iconEl) iconEl.textContent = '🎉';
         
         // 显示连续签到天数

@@ -231,7 +231,6 @@ function displayTest2Results(results, card, isReversed) {
                             <strong>今日分析：</strong>${result.reading.today_analysis || '无'}
                         </div>
                         <div>
-                            <strong>疗愈任务：</strong>${result.reading.healing_task || '无'}
                         </div>
                         `
                     }
