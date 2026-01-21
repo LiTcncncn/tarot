@@ -507,11 +507,11 @@ function renderMainPage(readingData, card, moonPhase) {
             // 已完成
             awarenessSelectBtn.style.display = 'none';
             awarenessCompleted.style.display = 'flex';
-        } else {
+    } else {
             // 未完成
             awarenessSelectBtn.style.display = 'block';
             awarenessCompleted.style.display = 'none';
-        }
+    }
     } else {
         // 没有镜像问题，隐藏模块
         awarenessCard.style.display = 'none';
@@ -898,9 +898,9 @@ function bindAwarenessButton() {
     // 移除旧的事件监听器
     const newBtn = awarenessSelectBtn.cloneNode(true);
     awarenessSelectBtn.parentNode.replaceChild(newBtn, awarenessSelectBtn);
-    
-    // 绑定新的事件
-    newBtn.addEventListener('click', () => {
+        
+        // 绑定新的事件
+        newBtn.addEventListener('click', () => {
         // 跳转到 miri 聊天界面
         if (typeof showMiriPage === 'function') {
             showMiriPage();

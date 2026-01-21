@@ -1154,7 +1154,7 @@ section {
 /* 分类按钮 */
 .category-buttons {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(2, 1fr);
     justify-content: center;
     text-align: center;
@@ -1266,7 +1266,7 @@ section {
     /* 确保移动端按钮2行3列布局 */
     .category-buttons {
         display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-columns: repeat(4, 1fr) !important;
         grid-template-rows: repeat(2, 1fr) !important;
         gap: 8px;
         width: 100%;
@@ -1309,7 +1309,7 @@ section {
 @media (max-width: 480px) {
     .category-buttons {
         display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-columns: repeat(4, 1fr) !important;
         grid-template-rows: repeat(2, 1fr) !important;
         gap: 6px;
     }
@@ -1577,7 +1577,7 @@ section {
     }
     
     .category-buttons {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(2, 1fr);
     }
     
@@ -1658,7 +1658,7 @@ section {
     }
     
     .category-buttons {
-        grid-template-columns: repeat(3, 1fr); /* 3列布局 */
+        grid-template-columns: repeat(4, 1fr); /* 4列布局 */
         grid-template-rows: repeat(2, 1fr); /* 2行布局 */
         gap: 8px; /* 减小间距 */
         width: 100%;

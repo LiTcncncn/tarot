@@ -326,193 +326,6 @@ const TAROT_SPREAD_SYSTEM_PROMPT = `你是 Luna，一位智慧而温柔的塔罗
 - 提供疗愈性的建议和鼓励
 - 语言温暖如挚友，而非冷漠的预言者`;
 
-// 构建塔罗专项占卜提示词
-function buildTarotSpreadPrompt(question, spreadType, cards, allDailyReadings) {
-    let prompt = `请为以下塔罗占卜提供解读：
-
-【用户问题】
-${question}
-
-【牌阵类型】
-${spreadType}
-
-【抽取的牌】
-`;
-    
-    cards.forEach((item, index) => {
-        const card = item.card;
-        prompt += `${index + 1}. ${item.position.name}：${card.nameCn} ${card.reversed ? '(逆位)' : '(正位)'}\n`;
-    });
-    
-    // 添加用户背景信息（所有历史）
-    if (allDailyReadings && allDailyReadings.length > 0) {
-        prompt += `\n【用户背景信息】（所有历史数据）\n`;
-        allDailyReadings.slice(0, 30).forEach(reading => { // 限制数量避免token过多
-            if (reading.guidance_one_line || reading.today_analysis || reading.emotionRecord) {
-                prompt += `日期 ${reading.date}:\n`;
-                if (reading.emotion) prompt += `- 情绪状态：${reading.emotion}\n`;
-                if (reading.guidance_one_line) prompt += `- 指引：${reading.guidance_one_line}\n`;
-                if (reading.emotionRecord) prompt += `- 情绪记录：${reading.emotionRecord}\n`;
-            }
-        });
-    }
-    
-    prompt += `\n【输出要求】
-
-请以JSON格式输出，包含以下字段：
-
-{
-  "overall_reading": "整体解读，总体不超过200字，分为3-4段。每段50-70字左右。内容应温柔、中肯、治愈，包含占卜、疗愈、建议三个维度。",
-  "reading_paragraphs": [
-    "第一段（占卜维度，分析问题和牌阵的整体意义）",
-    "第二段（疗愈维度，提供情感支持和理解）",
-    "第三段（建议维度，给出具体可行的建议）",
-    "第四段（总结或鼓励，可选）"
-  ],
-  "card_readings": [
-    {
-      "position": "过去",
-      "card_name": "宝剑皇后",
-      "is_reversed": false,
-      "interpretation": "这张牌在这个位置的含义，简洁明了（30-50字）"
-    }
-  ]
-}
-
-【重要要求】
-1. overall_reading 总体不超过200字，分为3-4段
-2. 每段应该独立成段，表达完整的意思
-3. 整体解读要结合所有牌的含义，给出综合性的分析和建议
-4. 语言使用中文，温柔、治愈、鼓励
-5. 逐牌解读要简洁，重点说明牌在该位置的意义
-6. 只输出JSON，不要其他文字`;
-
-    return prompt;
-}
-
-// 生成塔罗专项占卜内容
-async function generateTarotSpreadReading(question, spreadType, cards, allDailyReadings) {
-    try {
-        const prompt = buildTarotSpreadPrompt(question, spreadType, cards, allDailyReadings);
-        
-        const response = await fetch(API_CONFIG.apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_CONFIG.apiKey}`
-            },
-            body: JSON.stringify({
-                model: API_CONFIG.model,
-                messages: [
-                    {
-                        role: 'system',
-                        content: TAROT_SPREAD_SYSTEM_PROMPT
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 2000
-            })
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API request failed: ${response.status} ${errorText}`);
-        }
-        
-        const data = await response.json();
-        const content = data.choices[0].message.content;
-        const readingData = parseJSONResponse(content);
-        
-        return readingData;
-    } catch (error) {
-        console.error('Tarot spread API call error:', error);
-        throw error;
-    }
-}
-
-// 生成塔罗聊天回复
-async function generateTarotChatResponse(message, readingContext, allDailyReadings) {
-    try {
-        let prompt = `用户在之前的占卜后提问，请给予温柔、治愈的回答。
-
-【用户问题】
-${readingContext.question}
-
-【之前的占卜结果】
-${readingContext.overall_reading || ''}
-
-【抽到的牌】
-`;
-        readingContext.cards.forEach((item, index) => {
-            const card = item.card;
-            prompt += `${index + 1}. ${item.position.name}：${card.nameCn} ${card.reversed ? '(逆位)' : '(正位)'}\n`;
-        });
-        
-        prompt += `\n【用户的当前提问】\n${message}\n\n`;
-        
-        // 添加用户背景（所有历史）
-        if (allDailyReadings && allDailyReadings.length > 0) {
-            prompt += `【用户背景信息】（所有历史数据）\n`;
-            allDailyReadings.slice(0, 30).forEach(reading => {
-                if (reading.guidance_one_line || reading.today_analysis || reading.emotionRecord) {
-                    prompt += `日期 ${reading.date}:\n`;
-                    if (reading.emotion) prompt += `- 情绪状态：${reading.emotion}\n`;
-                    if (reading.guidance_one_line) prompt += `- 指引：${reading.guidance_one_line}\n`;
-                    if (reading.emotionRecord) prompt += `- 情绪记录：${reading.emotionRecord}\n`;
-                }
-            });
-        }
-        
-        // 添加聊天历史
-        if (readingContext.chat_history && readingContext.chat_history.length > 0) {
-            prompt += `\n【之前的对话】\n`;
-            readingContext.chat_history.forEach(msg => {
-                prompt += `${msg.role === 'user' ? '用户' : 'Luna'}：${msg.content}\n`;
-            });
-        }
-        
-        prompt += `\n请以温柔、治愈、鼓励的语气回答用户的问题。结合占卜结果和用户背景，给予深入解答和延伸思考。回答要简洁（100-200字），避免重复已说内容。直接输出回答，不要JSON格式。`;
-        
-        const response = await fetch(API_CONFIG.apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_CONFIG.apiKey}`
-            },
-            body: JSON.stringify({
-                model: API_CONFIG.model,
-                messages: [
-                    {
-                        role: 'system',
-                        content: TAROT_SPREAD_SYSTEM_PROMPT
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 1000
-            })
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API request failed: ${response.status} ${errorText}`);
-        }
-        
-        const data = await response.json();
-        return data.choices[0].message.content.trim();
-    } catch (error) {
-        console.error('Tarot chat API call error:', error);
-        throw error;
-    }
-}
-
 // 生成单个领域的指引（200字）
 async function generateCategoryGuidance(category, todayReading) {
     try {
@@ -556,7 +369,9 @@ async function generateCategoryGuidance(category, todayReading) {
             '工作': 'work and career',
             '学习': 'study and learning',
             '家庭': 'family and home life',
-            '人际': 'social relationships, friends, and people around you'
+            '人际': 'social relationships, friends, and people around you',
+            '健康': 'health, wellbeing, sleep, and body care',
+            '亲子': 'parent-child relationship, parenting, and family bonding'
         };
 
         const categoryDescription = categoryDescriptions[category] || category;
@@ -1369,32 +1184,12 @@ ${conversationHistory}
         // 解析 JSON
         const suggestionsData = JSON.parse(content);
 
-        // 兜底：确保 2 条、每条 <= 12 字（不含标点符号）
+        // 兜底：确保 2 条
         if (suggestionsData && Array.isArray(suggestionsData.suggestions)) {
             const cleaned = suggestionsData.suggestions
                 .slice(0, 2)
                 .map(s => (s || '').toString().trim())
-                .map(s => {
-                    // 计算不含标点符号的字符数
-                    const textWithoutPunctuation = s.replace(/[，。！？、,.!?；;：:“”"'\-\s]/g, '');
-                    // 如果超过12字，截取（保留标点符号）
-                    if (textWithoutPunctuation.length > 12) {
-                        // 找到前12个非标点字符的位置
-                        let charCount = 0;
-                        let cutIndex = s.length;
-                        for (let i = 0; i < s.length; i++) {
-                            if (!/[，。！？、,.!?；;：:“”"'\-\s]/.test(s[i])) {
-                                charCount++;
-                                if (charCount === 12) {
-                                    cutIndex = i + 1;
-                                    break;
-                                }
-                            }
-                        }
-                        return s.slice(0, cutIndex);
-                    }
-                    return s;
-                });
+                .filter(s => s.length > 0);
 
             while (cleaned.length < 2) cleaned.push('说说现在');
             suggestionsData.suggestions = cleaned;
@@ -1413,3 +1208,411 @@ ${conversationHistory}
     }
 }
 
+
+// ===== 塔罗模块专项占卜 API =====
+
+// 生成塔罗专项占卜解读
+async function generateTarotSpreadReading(question, spreadType, cards) {
+    try {
+        // 获取用户背景信息（所有历史数据）
+        const allDailyReadings = typeof getAllDailyReadingsForTarot === 'function' 
+            ? getAllDailyReadingsForTarot() 
+            : [];
+        
+        // 构建提示词
+        const prompt = buildTarotSpreadPrompt(question, spreadType, cards, allDailyReadings);
+        
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: `你是 Luna，一位智慧而温柔的塔罗占卜师。你擅长通过塔罗牌帮助人们进行自我洞察，提供心理投射和情绪支持。你的回答总是温柔、中肯、充满疗愈感，同时给出具体可行的建议。`
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 2000
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+        const readingData = parseJSONResponse(content);
+        
+        return readingData;
+    } catch (error) {
+        console.error('生成塔罗占卜失败:', error);
+        throw error;
+    }
+}
+
+// 构建塔罗牌阵提示词
+function buildTarotSpreadPrompt(question, spreadType, cards, allDailyReadings) {
+    const spreadConfig = {
+        '3张': '三张牌阵（时间流）',
+        '4张': '四张牌阵（决策流）',
+        '6张': '六张牌阵（关系流）'
+    }
+    
+    // 安全检查：确保 cards 是数组
+    if (!cards || !Array.isArray(cards) || cards.length === 0) {
+        throw new Error('cards 参数无效：必须是包含至少一张牌的数组');
+    }
+    
+    const cardsInfo = cards.map(cardData => {
+        if (!cardData || !cardData.card || !cardData.position) {
+            throw new Error('牌数据格式错误：缺少 card 或 position 属性');
+        }
+        const card = cardData.card;
+        return `- ${cardData.position.name}: ${card.nameCn}${card.reversed ? ' (逆位)' : ' (正位)'}`;
+    }).join('\n');
+    
+    
+    // 构建历史数据上下文
+    let historyContext = '';
+    if (allDailyReadings && allDailyReadings.length > 0) {
+        const recentReadings = allDailyReadings.slice(0, 10); // 取最近10条
+        historyContext = recentReadings.map(r => {
+            return `日期: ${r.date}\n情绪: ${r.emotion || '未记录'}\n指引: ${r.guidance_one_line || ''}\n分析: ${r.today_analysis || ''}`;
+        }).join('\n\n');
+    }
+    
+    return `请基于以下信息生成塔罗占卜解读：
+
+【用户问题】
+${question}
+
+【牌阵类型】
+${spreadConfig[spreadType] || spreadType}
+
+【抽取的牌】
+${cardsInfo}
+
+${historyContext ? '【用户历史占卜数据（用于记忆和共情）】' + historyContext + '' : ''}
+
+请生成占卜解读，要求：
+1. 整体解读：总体不超过200字，分为3-4段，每段50-70字左右
+2. 语言风格：温柔、中肯、治愈、鼓励
+3. 内容包含：占卜维度、疗愈维度、建议维度
+
+请返回JSON格式：
+{
+  "overall_reading": "整体解读（200字以内，3-4段）",
+  "reading_paragraphs": ["段落1", "段落2", "段落3", "段落4"]
+}`;
+}
+
+// 生成补牌解读
+async function generateAdditionalCardReading(readingId, card, userInput) {
+    try {
+        const reading = typeof getTarotReading === 'function' 
+            ? getTarotReading(readingId) 
+            : null;
+        
+        if (!reading) {
+            throw new Error('占卜记录不存在');
+        }
+        
+        const prompt = buildAdditionalCardPrompt(reading, card, userInput);
+        
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: `你是 Luna，一位智慧而温柔的塔罗占卜师。`
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 1000
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const content = data.choices[0].message.content.trim();
+        
+        // 补牌解读是纯文本，150-200字，分为两段
+        return content;
+    } catch (error) {
+        console.error('生成补牌解读失败:', error);
+        throw error;
+    }
+}
+
+// 构建补牌提示词
+function buildAdditionalCardPrompt(reading, card, userInput) {
+    const cardsInfo = reading.cards.map(c => 
+        `${c.position.name}: ${c.card.nameCn}${c.card.reversed ? ' (逆位)' : ' (正位)'}`
+    ).join('\n');
+    
+    return `基于以下占卜信息，生成补牌解读：
+
+【原始问题】
+${reading.question}
+
+【原始牌阵】
+${cardsInfo}
+
+【原始解读】
+${reading.reading?.overall_reading || ''}
+
+【补抽的牌】
+${card.nameCn}${card.reversed ? ' (逆位)' : ' (正位)'}
+
+${userInput ? `【用户补充信息】\n${userInput}\n` : ''}
+
+请生成补牌解读，要求：
+1. 字数：150-200字，分为两段
+2. 第一段：走势预测
+3. 第二段：指引建议
+4. 语言风格：温柔、中肯、治愈
+
+直接返回文本内容，不需要JSON格式。`;
+}
+
+// 生成复盘报告
+async function generateReviewReport(readingId, scores, userComment) {
+    try {
+        const reading = typeof getTarotReading === 'function' 
+            ? getTarotReading(readingId) 
+            : null;
+        
+        if (!reading) {
+            throw new Error('占卜记录不存在');
+        }
+        
+        const prompt = buildReviewPrompt(reading, scores, userComment);
+        
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: `你是 Luna，一位智慧而温柔的塔罗占卜师。`
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 1500
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const content = data.choices[0].message.content.trim();
+        
+        return content;
+    } catch (error) {
+        console.error('生成复盘报告失败:', error);
+        throw error;
+    }
+}
+
+// 构建复盘提示词
+function buildReviewPrompt(reading, scores, userComment) {
+    const cardsInfo = reading.cards.map(c => 
+        `${c.position.name}: ${c.card.nameCn}`
+    ).join('\n');
+    
+    const additionalCardsInfo = reading.additional_cards && reading.additional_cards.length > 0
+        ? reading.additional_cards.map(ac => `${ac.card.nameCn}`).join('\n')
+        : '无';
+    
+    const chatHistory = reading.chat_history && reading.chat_history.length > 0
+        ? reading.chat_history.map(msg => `${msg.role}: ${msg.content}`).join('\n')
+        : '无';
+    
+    return `基于以下占卜过程和用户反馈，生成复盘报告：
+
+【原始问题】
+${reading.question}
+
+【原始牌阵】
+${cardsInfo}
+
+【原始解读】
+${reading.reading?.overall_reading || ''}
+
+【补牌记录】
+${additionalCardsInfo}
+
+【聊天记录】
+${chatHistory}
+
+【用户评分】
+命中指数: ${scores.accuracy}/5
+指引指数: ${scores.guidance}/5
+温暖指数: ${scores.warmth}/5
+
+${userComment ? `【用户评价】\n${userComment}\n` : ''}
+
+请生成复盘报告，要求：
+1. 字数：200-300字
+2. 内容必须包含：走势分析、用户输入信息反馈、综合总结、指引疗愈
+3. 自然分段（根据内容自然划分段落）
+4. 语言风格：温柔、中肯、治愈
+
+直接返回文本内容，不需要JSON格式。`;
+}
+
+// 生成塔罗聊天回复（塔罗模块：readingId + userMessage）
+async function generateTarotChatResponse(readingId, userMessage) {
+    try {
+        const reading = typeof getTarotReading === 'function'
+            ? getTarotReading(readingId)
+            : (typeof getTarotReadingById === 'function' ? getTarotReadingById(readingId) : null);
+
+        if (!reading) {
+            throw new Error('占卜记录不存在');
+        }
+
+        const allDailyReadings = typeof getAllDailyReadingsForTarot === 'function'
+            ? getAllDailyReadingsForTarot()
+            : [];
+
+        const prompt = buildTarotChatPrompt(reading, userMessage, allDailyReadings);
+
+        const response = await fetch(API_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`
+            },
+            body: JSON.stringify({
+                model: API_CONFIG.model,
+                messages: [
+                    { role: 'system', content: '你是 Luna，一位智慧而温柔的塔罗占卜师。' },
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.8,
+                max_tokens: 500
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return (data?.choices?.[0]?.message?.content || '').trim();
+    } catch (error) {
+        console.error('生成聊天回复失败:', error);
+        throw error;
+    }
+}
+
+// 构建塔罗聊天提示词
+function buildTarotChatPrompt(reading, userMessage, allDailyReadings) {
+    const cardsInfo = Array.isArray(reading.cards)
+        ? reading.cards.map(c => `${c.position?.name || ''}: ${c.card?.nameCn || ''}`).join('\\n')
+        : '无';
+
+    const chatHistory = Array.isArray(reading.chat_history) && reading.chat_history.length > 0
+        ? reading.chat_history.map(msg => `${msg.role}: ${msg.content}`).join('\\n')
+        : '无';
+
+    const historyContext = Array.isArray(allDailyReadings) && allDailyReadings.length > 0
+        ? allDailyReadings.slice(0, 10).map(r => `日期: ${r.date}, 情绪: ${r.emotion || '未记录'}, 指引: ${r.guidance_one_line || ''}`).join('\\n')
+        : '无';
+
+    return `基于以下占卜信息和用户消息，生成回复：
+
+【原始问题】
+${reading.question || ''}
+
+【原始牌阵】
+${cardsInfo}
+
+【原始解读】
+${reading.reading?.overall_reading || ''}
+
+【历史占卜数据（用于记忆和共情）】
+${historyContext}
+
+【当前聊天历史】
+${chatHistory}
+
+【用户当前消息】
+${userMessage}
+
+请生成回复，要求：
+1. 字数：20-60字
+2. 话语平实、真实，像身边的朋友
+3. 懂陪伴、会共情，愿意倾听
+4. 结合占卜信息和用户背景
+5. 直接输出纯文本，不要JSON格式`;
+}
+
+// 抽取随机牌（用于补牌）
+function drawRandomCard() {
+    let allCards = [];
+    
+    if (typeof getAllTarotCards === 'function') {
+        allCards = getAllTarotCards();
+    } else if (typeof TAROT_CARDS !== 'undefined') {
+        allCards = [...TAROT_CARDS.major];
+        if (TAROT_CARDS.minor) {
+            Object.values(TAROT_CARDS.minor).forEach(suit => {
+                if (Array.isArray(suit)) {
+                    allCards.push(...suit);
+                }
+            });
+        }
+    }
+    
+    if (allCards.length === 0) {
+        return null;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * allCards.length);
+    const selectedCard = allCards[randomIndex];
+    const reversed = Math.random() < 0.5;
+    
+    return {
+        id: selectedCard.id,
+        name: selectedCard.name,
+        nameCn: selectedCard.nameCn,
+        file: selectedCard.file,
+        reversed: reversed
+    };
+}

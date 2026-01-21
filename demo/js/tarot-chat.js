@@ -1,10 +1,9 @@
 // 塔罗聊天交互逻辑
-
-let currentReadingId = null;
+// 注意：window.currentReadingId 在 tarot-module.js 中已声明，这里不再重复声明
 
 // 为指定占卜初始化聊天
 function initChatForReading(readingId) {
-    currentReadingId = readingId;
+    window.currentReadingId = readingId;
     const reading = getTarotReadingById(readingId);
     if (!reading) return;
     
@@ -46,7 +45,7 @@ function renderChatHistory(chatHistory) {
 
 // 发送聊天消息
 async function sendChatMessage() {
-    if (!currentReadingId) return;
+    if (!window.currentReadingId) return;
     
     const input = document.getElementById('tarot-chat-input');
     const message = input?.value.trim();
@@ -54,7 +53,7 @@ async function sendChatMessage() {
     if (!message) return;
     
     // 检查是否可以继续聊天
-    if (!canContinueChat(currentReadingId)) {
+    if (!canContinueChat(window.currentReadingId)) {
         alert('今日聊天次数已用完');
         return;
     }
@@ -69,7 +68,7 @@ async function sendChatMessage() {
     
     try {
         // 获取占卜记录
-        const reading = getTarotReadingById(currentReadingId);
+        const reading = getTarotReadingById(window.currentReadingId);
         if (!reading) throw new Error('Reading not found');
         
         // 准备聊天上下文
@@ -83,8 +82,8 @@ async function sendChatMessage() {
         // 获取所有历史数据
         const allDailyReadings = getAllDailyReadingsForTarot();
         
-        // 调用AI生成回复
-        const aiResponse = await generateTarotChatResponse(message, chatContext, allDailyReadings);
+        // 调用AI生成回复（使用新的API签名）
+        const aiResponse = await generateTarotChatResponse(window.currentReadingId, message);
         
         // 显示AI回复
         appendChatMessage('assistant', aiResponse);
@@ -103,12 +102,12 @@ async function sendChatMessage() {
         });
         
         // 增加聊天轮数
-        incrementChatCount(currentReadingId);
+        incrementChatCount(window.currentReadingId);
         reading.chat_count = (reading.chat_count || 0) + 1;
         saveTarotReading(reading);
         
         // 检查是否达到限制
-        if (!canContinueChat(currentReadingId)) {
+        if (!canContinueChat(window.currentReadingId)) {
             disableChatInput();
             showChatLimitNotice();
         } else {
@@ -225,9 +224,9 @@ function hideChatLimitNotice() {
 
 // 更新聊天轮数显示
 function updateChatRoundDisplay() {
-    if (!currentReadingId) return;
+    if (!window.currentReadingId) return;
     
-    const reading = getTarotReadingById(currentReadingId);
+    const reading = getTarotReadingById(window.currentReadingId);
     if (!reading) return;
     
     const display = document.getElementById('tarot-chat-rounds-display');

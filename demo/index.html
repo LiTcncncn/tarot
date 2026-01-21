@@ -136,71 +136,189 @@
     </div>
 
     <!-- 页面3: 塔罗专项占卜 -->
+    <!-- 塔罗模块 - 三个界面 -->
     <div id="tarot-page" class="page" style="display: none;">
-        <div class="tarot-module-container">
-            <!-- 每日限制提示 -->
-            <div id="tarot-daily-limit-notice" class="tarot-limit-notice" style="display: none;"></div>
-            
-            <!-- 问题输入区 -->
-            <div class="tarot-question-section">
-                <label class="section-label">你的问题</label>
-                <textarea 
-                    id="tarot-question-input" 
-                    class="tarot-question-input" 
-                    placeholder="请输入你想要占卜的问题...（例如：我该不该换工作？我们的关系会如何发展？）"
-                    rows="3"
-                    maxlength="200"
-                ></textarea>
-            </div>
-            
-            <!-- 牌阵切换区 -->
-            <div class="tarot-spread-selector">
-                <label class="section-label">选择牌阵</label>
-                <div class="spread-buttons">
-                    <button class="spread-type-btn active" data-spread="3张">3张</button>
-                    <button class="spread-type-btn" data-spread="4张">4张</button>
-                    <button class="spread-type-btn" data-spread="6张">6张</button>
+        <!-- 界面a：提问界面 -->
+        <div id="tarot-question-view" class="tarot-view active">
+            <div class="tarot-module-container">
+                <!-- 特色文字 -->
+                <div class="tarot-slogan">
+                    <h2 class="tarot-slogan-text">一次塔罗，持续解读，全程跟进。</h2>
                 </div>
-            </div>
-            
-            <!-- 牌阵展示区 -->
-            <div id="tarot-spread-container" class="tarot-spread-container spread-grid-3"></div>
-            
-            <!-- 抽牌区 -->
-            <div class="tarot-draw-area">
-                <div id="tarot-card-pile" class="tarot-card-pile" style="display: block;">
-                    <img src="Cards-png/CardBacks.png" alt="牌堆" class="pile-image">
-                    <div class="pile-hint">点击抽牌</div>
-                </div>
-                <button id="tarot-reading-btn" class="tarot-reading-btn" style="display: none;">
-                    🔮 开始占卜
-                </button>
-            </div>
-            
-            <!-- 占卜结果显示区 -->
-            <div id="tarot-result-area" class="tarot-result-area" style="display: none;"></div>
-            
-            <!-- 补充聊天区 -->
-            <div id="tarot-chat-area" class="tarot-chat-area" style="display: none;">
-                <div class="chat-header">
-                    <div class="chat-title">与 Luna 对话</div>
-                    <div id="tarot-chat-rounds-display" class="chat-rounds-display"></div>
-                </div>
-                <div id="tarot-chat-limit-notice" class="chat-limit-notice" style="display: none;"></div>
-                <div id="tarot-chat-messages" class="chat-messages"></div>
-                <div class="chat-input-area">
+                
+                <!-- 问题输入区 -->
+                <div class="tarot-question-section">
                     <textarea 
-                        id="tarot-chat-input" 
-                        class="chat-input" 
-                        placeholder="想深入了解哪个方面？或有其他疑问？"
-                        rows="2"
+                        id="tarot-question-input" 
+                        class="tarot-question-input" 
+                        placeholder="我该不该换工作？我们的关系会如何发展？"
+                        rows="4"
+                        maxlength="200"
                     ></textarea>
-                    <button id="tarot-chat-send" class="chat-send-btn">发送</button>
+                    <div class="tarot-question-actions">
+                        <button id="tarot-start-btn" class="tarot-start-btn" disabled>开始占卜</button>
+                    </div>
+                </div>
+                
+                <!-- 历史占卜结果列表 -->
+                <div id="tarot-history-container" class="tarot-history-container">
+                    <h3 class="tarot-history-title">历史占卜</h3>
+                    <div id="tarot-history-list" class="tarot-history-list"></div>
                 </div>
             </div>
-            
-            <!-- 历史占卜结果 -->
-            <div id="tarot-history-container" class="tarot-history-container"></div>
+        </div>
+        
+        <!-- 界面b：抽牌界面 -->
+        <div id="tarot-draw-view" class="tarot-view" style="display: none;">
+            <div class="tarot-module-container">
+                <!-- 牌阵切换区 -->
+                <div class="tarot-spread-selector">
+                    <div class="spread-buttons">
+                        <button class="spread-type-btn active" data-spread="3张">3张</button>
+                        <button class="spread-type-btn" data-spread="4张">4张</button>
+                        <button class="spread-type-btn" data-spread="6张">6张</button>
+                    </div>
+                </div>
+                
+                <!-- 牌阵展示区 -->
+                <div id="tarot-spread-container" class="tarot-spread-container spread-grid-3"></div>
+                
+                <!-- 抽牌区 -->
+                <div class="tarot-draw-area">
+                    <div id="tarot-card-pile" class="tarot-card-pile" style="display: block;">
+                        <img src="Cards-png/CardBacks.png" alt="牌堆" class="pile-image">
+                        <div class="pile-hint">点击抽牌</div>
+                    </div>
+                    <button id="tarot-reading-btn" class="tarot-reading-btn" style="display: none;">
+                        🔮 占卜解读
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 界面c：解读界面 -->
+        <div id="tarot-reading-view" class="tarot-view" style="display: none;">
+            <div class="tarot-module-container">
+                <!-- 返回按钮 -->
+                <button id="tarot-back-btn" class="tarot-back-btn">← 返回</button>
+                
+                <!-- 占卜结果显示区 -->
+                <div id="tarot-result-area" class="tarot-result-area"></div>
+                
+                <!-- 复盘内容显示区（复盘后显示） -->
+                <div id="tarot-review-display" class="tarot-review-display" style="display: none;"></div>
+                
+                <!-- 补充聊天区 -->
+                <div id="tarot-chat-area" class="tarot-chat-area">
+                    <div class="chat-header">
+                        <div class="chat-title">与 Luna 对话</div>
+                        <div id="tarot-chat-rounds-display" class="chat-rounds-display"></div>
+                    </div>
+                    <div id="tarot-chat-limit-notice" class="chat-limit-notice" style="display: none;"></div>
+                    <div id="tarot-chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <textarea 
+                            id="tarot-chat-input" 
+                            class="chat-input" 
+                            placeholder="想深入了解哪个方面？或有其他疑问？"
+                            rows="2"
+                        ></textarea>
+                        <button id="tarot-chat-send" class="chat-send-btn">发送</button>
+                    </div>
+                </div>
+                
+                <!-- 补牌和复盘按钮 -->
+                <div class="tarot-action-buttons">
+                    <button id="tarot-additional-card-btn" class="tarot-action-btn tarot-additional-card-btn">
+                        <span class="btn-text">补牌</span>
+                        <span id="tarot-additional-card-cooldown" class="btn-cooldown" style="display: none;"></span>
+                    </button>
+                    <button id="tarot-review-btn" class="tarot-action-btn tarot-review-btn">
+                        <span class="btn-text">复盘</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 补牌弹窗 -->
+        <div id="tarot-additional-card-modal" class="tarot-modal" style="display: none;">
+            <div class="tarot-modal-backdrop"></div>
+            <div class="tarot-modal-content">
+                <div class="tarot-modal-header">
+                    <h3 class="tarot-modal-title">补牌</h3>
+                    <button class="tarot-modal-close" id="tarot-additional-card-close">✕</button>
+                </div>
+                <div class="tarot-modal-body">
+                    <textarea 
+                        id="tarot-additional-card-input" 
+                        class="tarot-additional-card-input" 
+                        placeholder="可选：描述当前情况变化、转机或聚焦点..."
+                        rows="3"
+                    ></textarea>
+                    <div class="tarot-additional-card-draw-area">
+                        <div id="tarot-additional-card-pile" class="tarot-card-pile-small">
+                            <img src="Cards-png/CardBacks.png" alt="牌堆" class="pile-image-small">
+                            <div class="pile-hint-small">点击抽牌</div>
+                        </div>
+                    </div>
+                    <div id="tarot-additional-card-result" class="tarot-additional-card-result" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 复盘弹窗 -->
+        <div id="tarot-review-modal" class="tarot-modal" style="display: none;">
+            <div class="tarot-modal-backdrop"></div>
+            <div class="tarot-modal-content tarot-review-modal-content">
+                <div class="tarot-modal-header">
+                    <h3 class="tarot-modal-title">复盘</h3>
+                    <button class="tarot-modal-close" id="tarot-review-close">✕</button>
+                </div>
+                <div class="tarot-modal-body">
+                    <div class="tarot-review-scores">
+                        <div class="tarot-review-score-item">
+                            <label class="tarot-review-score-label">命中指数</label>
+                            <div class="tarot-review-stars" data-score="accuracy">
+                                <span class="star" data-value="1">⭐</span>
+                                <span class="star" data-value="2">⭐</span>
+                                <span class="star active" data-value="3">⭐</span>
+                                <span class="star" data-value="4">⭐</span>
+                                <span class="star" data-value="5">⭐</span>
+                            </div>
+                        </div>
+                        <div class="tarot-review-score-item">
+                            <label class="tarot-review-score-label">指引指数</label>
+                            <div class="tarot-review-stars" data-score="guidance">
+                                <span class="star" data-value="1">⭐</span>
+                                <span class="star" data-value="2">⭐</span>
+                                <span class="star active" data-value="3">⭐</span>
+                                <span class="star" data-value="4">⭐</span>
+                                <span class="star" data-value="5">⭐</span>
+                            </div>
+                        </div>
+                        <div class="tarot-review-score-item">
+                            <label class="tarot-review-score-label">温暖指数</label>
+                            <div class="tarot-review-stars" data-score="warmth">
+                                <span class="star" data-value="1">⭐</span>
+                                <span class="star" data-value="2">⭐</span>
+                                <span class="star active" data-value="3">⭐</span>
+                                <span class="star" data-value="4">⭐</span>
+                                <span class="star" data-value="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tarot-review-comment">
+                        <textarea 
+                            id="tarot-review-comment-input" 
+                            class="tarot-review-comment-input" 
+                            placeholder="可选：记录你的评价和感触..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+                    <button id="tarot-review-submit-btn" class="tarot-review-submit-btn">提交复盘</button>
+                    <div id="tarot-review-report" class="tarot-review-report" style="display: none;"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -228,7 +346,7 @@
         <!-- 顶部头部区域 -->
         <div class="main-page-header">
             <div class="main-page-date-row">
-                <div class="main-page-date" id="main-page-date">January 11</div>
+            <div class="main-page-date" id="main-page-date">January 11</div>
                 <div class="energy-points-display" id="energy-points-display">
                     <span class="energy-icon">💧</span>
                     <span id="energy-points-value">0</span>
@@ -335,6 +453,8 @@
                     <button class="category-btn" data-category="学习">学习</button>
                     <button class="category-btn" data-category="家庭">家庭</button>
                     <button class="category-btn" data-category="人际">人际</button>
+                    <button class="category-btn" data-category="健康">健康</button>
+                    <button class="category-btn" data-category="亲子">亲子</button>
                 </div>
             </section>
             

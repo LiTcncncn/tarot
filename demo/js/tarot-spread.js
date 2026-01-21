@@ -135,3 +135,95 @@ function resetSpread() {
     drawnCardIds = [];
 }
 
+// 获取下一个空位置
+function getNextEmptyPosition() {
+    const config = getCurrentSpreadConfig();
+    if (!config) return null;
+    
+    for (const position of config.positions) {
+        const hasCard = drawnCards.some(cardData => cardData.position.id === position.id);
+        if (!hasCard) {
+            return position;
+        }
+    }
+    
+    return null;
+}
+
+// 渲染牌阵
+function renderSpread() {
+    const container = document.getElementById('tarot-spread-container');
+    if (!container) return;
+    
+    const config = getCurrentSpreadConfig();
+    if (!config) return;
+    
+    // 更新容器类名
+    container.className = `tarot-spread-container spread-grid-${config.positions.length === 3 ? '3' : config.positions.length === 4 ? '4' : '6'}`;
+    
+    container.innerHTML = '';
+    
+    config.positions.forEach(position => {
+        const slot = document.createElement('div');
+        slot.className = 'tarot-card-slot';
+        slot.dataset.positionId = position.id;
+        
+        const cardData = drawnCards.find(c => c.position.id === position.id);
+        
+        if (cardData) {
+            slot.classList.add('has-card');
+            const card = cardData.card;
+            
+            slot.innerHTML = `
+                <div class="card-image-wrapper">
+                    <img src="Cards-png/${card.file}" alt="${card.nameCn}" class="card-image ${card.reversed ? 'reversed' : ''}">
+                </div>
+                <div class="card-name-orientation">
+                    <div class="card-name">${card.nameCn}</div>
+                    <div class="card-orientation">${card.reversed ? '逆位' : '正位'}</div>
+                </div>
+            `;
+        } else {
+            slot.innerHTML = `
+                <div class="empty-card-placeholder">
+                    <div class="placeholder-text">${position.name}<br>点击牌堆抽取</div>
+                </div>
+            `;
+        }
+        
+        container.appendChild(slot);
+    });
+}
+
+// 播放卡片翻转动画
+function animateCardFlip(position, cardData) {
+    const container = document.getElementById('tarot-spread-container');
+    if (!container) return;
+    
+    const slot = container.querySelector(`[data-position-id="${position.id}"]`);
+    if (!slot) return;
+    
+    // 简单的翻转动画
+    slot.style.opacity = '0';
+    slot.style.transform = 'rotateY(90deg)';
+    slot.style.transition = 'all 0.3s';
+    
+    setTimeout(() => {
+        slot.classList.add('has-card');
+        const card = cardData.card;
+        
+        slot.innerHTML = `
+            <div class="card-image-wrapper">
+                <img src="Cards-png/${card.file}" alt="${card.nameCn}" class="card-image ${card.reversed ? 'reversed' : ''}">
+            </div>
+            <div class="card-name-orientation">
+                <div class="card-name">${card.nameCn}</div>
+                <div class="card-orientation">${card.reversed ? '逆位' : '正位'}</div>
+            </div>
+        `;
+        
+        slot.style.opacity = '1';
+        slot.style.transform = 'rotateY(0deg)';
+    }, 300);
+}
+
